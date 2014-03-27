@@ -1,0 +1,181 @@
+UM2NETCDF
+
+   Mark Cheeseman
+   National Institute of Water & Atmospsheric Research Ltd (NIWA)
+   m.cheeseman@niwa.co.nz
+
+
+-------------------------------------------------------------------------------
+
+TABLE OF CONTENTS
+
+   1.  Overview 
+   2.  How to build the um2netcdf executable
+   3.  How to run
+   4.  Important notes
+
+
+1.  OVERVIEW
+-------------------------------------------------------------------------------
+
+UM2NetCDF is an utility program that can convert a binary fieldsfile from the
+UK MetOffice's Unified Model into a NetCDF file.  Effort has been made to 
+ensure that the output NetCDF file is [almost fully** ] compliant with the current 
+CF rules (as of January 24, 2014).
+
+UM2NetCDF offers the following features:
+
+ -> users can output the entire contents of a UM fields file or select a 
+    sub-set of files by entering a list of UM stash codes on the commandline
+
+ -> users can select the output UM fields by written with 32 or 64 bit 
+    precision
+
+ -> ZLIB compression is utilized in the output NetCDF offering substantial
+    storage savings
+
+ -> 'generic' variables (Eg. UM variables possessing data slices undergoing 
+    postprocessing) are automatically split into separate datafields that
+    are appropriately named based on the post-processing performed.
+
+UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
+
+
+2.  BUILDING UM2NETCDF
+-------------------------------------------------------------------------------
+
+2.1 Prerequisites
+
+    To build UM2NetCDF, one needs the following available:
+
+    - a C compiler (GNU, PGI and IBM XLC compilers have been tested)
+    - XML2 library (versions 2.9.0 and 2.9.1 have been tested and are 
+                    recommended)
+    - NetCDF with the netcdf-4 option selected during its build (this means 
+      that it was build with a version of HDF5) (Versions 3.4.0 and 3.4.1
+      have been tested and are recommended) Note that this should be a serial
+      NetCDF implementation (eg. no MPI-IO support).
+
+
+2.2 Configuration
+
+    The subdirectory 'config' contains text files describing site and machine-
+    specific information required for a build.  Currently, there are files
+    describing information related to x86 and IBM Power6 architecture-based
+    platforms at NIWA.  GNU and PGI-based configurations for the x86 platforms
+    at NIWA are also available.
+
+    It is suggested that you modify one of these exisiting files with the 
+    specifics of your particular site and/or platform.
+
+
+2.3 Building the executable
+
+    The build process contains only 2 simple steps:
+
+        cd src
+        make ARCH=XXXX CC=YYYY
+
+    XXXX represents the platform on which you are building UM2NetCDF. This
+    can only be set to 'x86' or 'pwr6' currently.  YYYY represents the compiler
+    you wish to use for the compliation and linking of the binary.  Currently,
+    this can be set to 'gcc', 'pgcc' or 'xlc'.
+
+    Notes:
+    A) The Makefile will try to include/read the appropriate machine file
+       located in the 'config' subdirectory based on your ARCH and CC values.
+       They must be the same as those specified in the machine file you wish
+       to use.  For example, if you want to build the UM2Netcdf binary on a
+       x86 machine with the GNU C compiler, you would use the make command:
+
+         make ARCH=x86 CC=gcc
+
+       The Makefile would look for the machine file called make.inc.x86_gcc
+       in the 'config' subdirectory.
+
+    B) It is assumed that you are assuming GNU make for the build.  The IBM
+       make that comes by default with AIX will not work.
+
+ 
+3.  RUNNING UM2NETCDF 
+-------------------------------------------------------------------------------
+
+3.1 Run directory
+
+    By default, the um2netcdf.x binary will be built in the 'run' subdirectory. 
+    You can change this setting in the Makefile located in the 'src' 
+    subdirectory.
+
+
+3.2 Environment setup
+
+    You may need to manually set the environment so that the NetCDF library you
+    are using is found.  This setting procedure depends on the OS of the 
+    platform in which you are building.  For Linux, you would use the command:
+
+       export LD_LIBRARY_PATH=<path_to_NetCDF_lib_directory>:${LD_LIBRARY_PATH}
+
+    For AIX, you would use the command:
+
+       export LIBPATH=<path_to_NetCDF_lib_directory>:${LIBPATH}
+
+
+3.3 Running
+
+    UM2NetCDF is an interactive command will the following structure:
+
+       ./um2netcdf.x [FLAGS] [Input UM fields file] [XML Field Definitions File]
+
+    where
+
+       FLAGS There are 3 flags that users can specify in an um2netcdf run:
+
+             -i  all fields (found in the input UM fields file or specified by
+                 the user) are written on the thermodynamic grid (eg. P-points on 
+                 an Arakawa-C grid) 
+
+             -r  all fields written in the NetCDF file are written with 32-bit
+                 precision. (Eg floats instead of doubles, integers instead of
+                 longs)
+
+             -s  STASH_CODE1 STASH_CODE2 ...
+                 
+                 Flag allows users to specifiy a space delimited list of UM
+                 variables to be extracted from the input UM fields file and
+                 written into the NetCDF file.  STASH codes provided must exist
+                 in the XML field definition file used in the call to um2netcdf.x
+
+             Note that multiple flags may be used. However the '-s' flag must be
+             the last flag used.
+  
+       The Input UM fields file must contain unpacked data.  It can be of little
+       or big endian format.  Note that the name of the output NetCDF file will
+       be the same as the input UM fields file with the '.nc' suffix appended.
+
+       The XML field definitions file contains all the necessary CF metadata 
+       required for any output NetCDF file to be CF-compliant.  A copy of this
+       file can be found in 'run' subdirectory.  Be careful to follow the XML
+       structure of the file when adding/modifying fields.
+
+
+4.  IMPORTANT NOTES
+-------------------------------------------------------------------------------
+
+ -> UM2NetCDF only works on UM fields files.  PP and other files are not
+    supported.
+
+ -> No support for WGDOS-packed UM field files. The Unified Model comes with an
+    utility called IEEE that can convert a WGDOS-packed fields field into an
+    unpacked fields file.  On the IBM Power6 platform at NIWA, the appropriate
+    command would be:
+
+          ./ieee -64e <packed_UM_fields_filename> <unpacked_UM_fields_filename>
+
+ -> UM2NetCDF uses a NetCDF-4 standard/version of that library. The resulting
+    output NetCDF file may be compatible for some existing post-processing
+    tools.  XCONV will not recognize the output NetCDF files.  NCVIEW and NCL
+    will recognize the output NetCDF files.
+
+ -> The ZLIB compression can lead to longer execution times particularly on
+    larger input UM fields files.  
+
