@@ -31,12 +31,16 @@ UM2NetCDF offers the following features:
  -> users can select the output UM fields by written with 32 or 64 bit 
     precision
 
- -> ZLIB compression is utilized in the output NetCDF offering substantial
+ -> ZLIB compression is utilized in the output NetCDF file offering substantial
     storage savings
 
  -> 'generic' variables (Eg. UM variables possessing data slices undergoing 
     postprocessing) are automatically split into separate datafields that
     are appropriately named based on the post-processing performed.
+
+ -> UM variables that have undergone post-processing (eg. their LBPROC value
+    is non-zero) with have an appropriate prefix added to the variable name.
+    For example, a field collecting maximum wind gusts would be named 'max_wind_gust'.
 
 UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
 
