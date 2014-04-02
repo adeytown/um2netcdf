@@ -334,6 +334,7 @@ int check_um_file( char *filename, int rflag ) {
          stored_um_fields[j].validity.tm_hour = (int ) lookup[i][3];
          stored_um_fields[j].validity.tm_min  = (int ) lookup[i][4];
          stored_um_fields[j].validity.tm_sec  = (int ) lookup[i][5];
+         stored_um_fields[j].lbproc           =        lookup[i][24]; 
          if ( rflag==0 ) {
             if ( lookup[i][38]==1 ) { stored_um_fields[j].vartype = NC_DOUBLE; }
             else                    { stored_um_fields[j].vartype = NC_LONG; }
@@ -420,6 +421,9 @@ int check_um_file( char *filename, int rflag ) {
                 stored_um_fields[i+cnt].validity.tm_min  = stored_um_fields[k].validity.tm_min;
                 stored_um_fields[i+cnt].validity.tm_sec  = stored_um_fields[k].validity.tm_sec;
 
+            /* Set the name of the newly added UM variable */
+                strcpy( stored_um_fields[i+cnt].name, stored_um_fields[k].name );
+
             /* Set the # of slices for this new UM variable */
                 stored_um_fields[i+cnt].num_slices = stored_um_fields[k].num_slices / (num_lbproc+1);
                 stored_um_fields[i+cnt].slices     = (um_dataslice * ) malloc( stored_um_fields[i+cnt].num_slices*sizeof(um_dataslice) );
@@ -436,27 +440,28 @@ int check_um_file( char *filename, int rflag ) {
                     stored_um_fields[i+cnt].slices[kk].lbpack   = stored_um_fields[k].slices[ind].lbpack; 
                     stored_um_fields[i+cnt].slices[kk].mdi      = stored_um_fields[k].slices[ind].mdi; 
                 }
+                stored_um_fields[i+cnt].lbproc  = stored_um_fields[i+cnt].slices[0].lbproc;
 
             /* Set the name of the newly added UM variable */
-                 kk = stored_um_fields[i+cnt].slices[0].lbproc; 
-                 if ( kk==0 )    { strcpy( varname, "inst_" ); }
-                 if ( kk==64 )   { strcpy( varname, "mean_" ); }
-                 if ( kk==4096 ) { strcpy( varname, "min_" ); }
-                 if ( kk==8192 ) { strcpy( varname, "max_" ); }
+        /*        kk = stored_um_fields[i+cnt].slices[0].lbproc; 
+                if ( kk==0 )    { strcpy( varname, "inst_" ); }
+                if ( kk==64 )   { strcpy( varname, "mean_" ); }
+                if ( kk==4096 ) { strcpy( varname, "min_" ); }
+                if ( kk==8192 ) { strcpy( varname, "max_" ); }
 
-                 if ( kk==128 ) {
-                    if (stored_um_fields[i+cnt].accum==0 ) { strcpy( varname, "mean_" ); }
-                    else                                   { strcpy( varname, "sum_" ); }
-                 }
-                 strcat( varname, stored_um_fields[k].name );
-                 strcpy( stored_um_fields[i+cnt].name, varname );
+                if ( kk==128 ) {
+                   if (stored_um_fields[i+cnt].accum==0 ) { strcpy( varname, "mean_" ); }
+                   else                                   { strcpy( varname, "sum_" ); }
+                }
+                strcat( varname, stored_um_fields[k].name );
+                strcpy( stored_um_fields[i+cnt].name, varname ); */
 
             } 
 
             /* Rename the original UM variable that was split */
-            stored_um_fields[k].lbproc = stored_um_fields[k].slices[0].lbproc;
+     //       stored_um_fields[k].lbproc = stored_um_fields[k].slices[0].lbproc;
 
-            kk = stored_um_fields[k].slices[0].lbproc; 
+      /*      kk = stored_um_fields[k].slices[0].lbproc; 
             if ( kk==0 )    { strcpy( varname, "inst_" ); }
             if ( kk==64 )   { strcpy( varname, "mean_" ); }
             if ( kk==4096 ) { strcpy( varname, "min_" ); }
@@ -467,7 +472,7 @@ int check_um_file( char *filename, int rflag ) {
                else                               { strcpy( varname, "sum_" ); }
             }
             strcat( varname, stored_um_fields[k].name );
-            strcpy( stored_um_fields[k].name, varname );
+            strcpy( stored_um_fields[k].name, varname ); */
 
             /* Resize the # of slices */
             stored_um_fields[k].num_slices = stored_um_fields[k].num_slices / (num_lbproc+1);
@@ -487,11 +492,28 @@ int check_um_file( char *filename, int rflag ) {
      }
 
 /**
+ ** Add an appropriate prefix to the UM variable's name if post-processing was
+ ** performed on the field. 
+ **---------------------------------------------------------------------------*/
+     for ( i=0; i<num_stored_um_fields; i++ ) {
+         kk = stored_um_fields[i].lbproc;
+         if ( kk!=0 ) { 
+            if ( kk==64 )   { strcpy( varname, "mean_" ); }
+            if ( kk==4096 ) { strcpy( varname, "min_"  ); }
+            if ( kk==8192 ) { strcpy( varname, "max_"  ); }
+            if ( kk==128 ) {
+               if (stored_um_fields[i].accum==0 ) { strcpy( varname, "mean_" ); }
+               else                               { strcpy( varname, "sum_" ); }
+            }
+            strcat( varname, stored_um_fields[i].name );
+            strcpy( stored_um_fields[i].name, varname ); 
+         }
+     } 
+
+/**
  ** Compute the time difference in hours for each successive timestep after 
  ** the first recorded one. 
  **---------------------------------------------------------------------------*/
-
-
      for ( i=0; i<num_stored_um_fields; i++ ) {
          stored_um_fields[i].time_offsets = (float * ) calloc( num_timesteps,sizeof(float) );
          for ( j=0; j<num_timesteps; j++ ) {

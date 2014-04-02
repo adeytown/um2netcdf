@@ -38,11 +38,11 @@ int wordsize;             /* wordsize of the architecture on which the input UM 
 int num_timesteps;        /* # of timesteps present in the UM fields file */
 int num_stored_um_fields; /* # of UM variables found & processed in input UM fields file */
 
-long   header[256];        /* input UM fields file's header */
-long   int_constants[46];  /* input UM fields file's integer_constants array */
-double real_constants[6];  /* input UM fields files's real_constants array */
+long header[256];        /* input UM fields file's header */
+long int_constants[46];  /* input UM fields file's integer_constants array */
 
-double **level_constants; /* input UM fields file's 2d level-dependent constants array */
+double **level_constants;   /* input UM fields file's 2d level-dependent constants array */
+double   real_constants[6]; /* input UM fields files's real_constants array */
 
 
 /*---------------------------------------------------------------------------*
@@ -95,12 +95,14 @@ um_field_metadata *um_vars;
 typedef struct um_dataslice {
         unsigned short id;
         unsigned short level;  /* Depth or z-level on which the data slice resides */
+        unsigned short lbpack; /* Code used to denote the packing method used */ 
         long location;         /* Starting address of dataslice in UM fields file lookup[n][28] */
+        long reclength;        /* Size of the storec dataslice in records */
         long size;             /* Size of the slice in words */
         long lbproc;           /* denotes whether post-processing has been performed on variable.  0 if not */
+        double mdi;            /* value used to denote a missing data point */
 } um_dataslice;
 
-   //     unsigned short lbpack; /* Code used to denote the packing method used */ 
 
 /**
  ** UM_variable - Struct that contains essential attributes for a variable 
