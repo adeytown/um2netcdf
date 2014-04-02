@@ -37,6 +37,8 @@ double *interp_do_nothing( double *val, int nx, int ny );
 double *u_to_p_point_interp_c_grid( double *val, int nx, int ny );
 double *v_to_p_point_interp_c_grid( double *val, int nx, int ny );
 double *b_to_c_grid_interp_u_points( double *val, int nx, int ny );
+void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *unpacked_data, double mdi );
+void   endian_swap_4bytes( void *ptr, int nchunk );
 
 /***
  *** FILL_VARIABLES
@@ -111,9 +113,14 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
              
        /** Read in a 2D raw data array **/
              fseek( fid, stored_um_fields[n].slices[j].location*wordsize, SEEK_SET );
-             fread( buf, wordsize, cnt, fid );
-             endian_swap( buf, cnt );
-
+             if ( (stored_um_fields[n].slices[j].lbpack==0)||(stored_um_fields[n].slices[j].lbpack==3000) ) { 
+                fread( buf, wordsize, cnt, fid ); 
+                endian_swap( buf, cnt );
+             } else if ( stored_um_fields[n].slices[j].lbpack==1 ) { 
+                wgdos_unpack( fid, stored_um_fields[n].nx, stored_um_fields[n].ny, buf, 
+                              stored_um_fields[n].slices[j].mdi );
+             }
+             
        /** Perform interpolation if requested **/
              buf = field_interpolation( buf, stored_um_fields[n].nx, stored_um_fields[n].ny );            
 

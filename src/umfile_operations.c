@@ -306,8 +306,11 @@ int check_um_file( char *filename, int rflag ) {
                    stored_um_fields[j].slices[k].size     = lookup[i][14]; 
                    stored_um_fields[j].coordinates        = (unsigned short ) lookup[i][15]; 
                    stored_um_fields[j].slices[k].location = lookup[i][28]; 
+                   stored_um_fields[j].slices[k].reclength= lookup[i][29]; 
                    stored_um_fields[j].slices[k].level    = (unsigned short ) lookup[i][32]; 
                    stored_um_fields[j].slices[k].lbproc   = lookup[i][24]; 
+                   stored_um_fields[j].slices[k].lbpack   = (unsigned short ) lookup[i][20]; 
+                   stored_um_fields[j].slices[k].mdi      = (double ) lookup[i][62]; 
                    break; 
                 }
                 if ( stored_um_fields[j].slices[k].id==(unsigned short ) i ) {  break; }
@@ -427,8 +430,11 @@ int check_um_file( char *filename, int rflag ) {
                     stored_um_fields[i+cnt].slices[kk].id       = stored_um_fields[k].slices[ind].id;
                     stored_um_fields[i+cnt].slices[kk].size     = stored_um_fields[k].slices[ind].size;
                     stored_um_fields[i+cnt].slices[kk].location = stored_um_fields[k].slices[ind].location;
+                    stored_um_fields[i+cnt].slices[kk].reclength= stored_um_fields[k].slices[ind].reclength;
                     stored_um_fields[i+cnt].slices[kk].level    = stored_um_fields[k].slices[ind].level;
                     stored_um_fields[i+cnt].slices[kk].lbproc   = stored_um_fields[k].slices[ind].lbproc; 
+                    stored_um_fields[i+cnt].slices[kk].lbpack   = stored_um_fields[k].slices[ind].lbpack; 
+                    stored_um_fields[i+cnt].slices[kk].mdi      = stored_um_fields[k].slices[ind].mdi; 
                 }
 
             /* Set the name of the newly added UM variable */

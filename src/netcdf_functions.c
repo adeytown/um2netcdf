@@ -150,8 +150,8 @@ void construct_um_variables2( int ncid, int iflag ) {
 
 int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      
-     int   ncid, ierr;
-     char  forecast_ref_time[18], netcdf_filename[50], *str;
+     int   ncid, ierr, pos;
+     char  forecast_ref_time[18], netcdf_filename[50], *str, *dest;
      char  *nzlam = "nzlam";
      char  *nzcsm = "nzcsm";
      char  mth_str[2], day_str[2], min_str[2], hr_str[2], sec_str[2];
@@ -166,14 +166,17 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      if ( fid==NULL ) { return 999; }
 
  /* 
-  * 0a) Remove the '_unpacked' suffix from the filename string 
+  * 0a) Create an appropriate name for the NetCDF file 
   *---------------------------------------------------------------------------*/
+     dest = strstr( um_file, ".um" );
+     pos = dest - um_file;
+
      str = malloc( 1 + strlen(um_file));
      if ( str ) { strcpy( str, um_file ); }
      else       { return 999; }
-     str[strlen(um_file)-11] = '\0';
+     str[pos] = '\0';
 
-     snprintf( netcdf_filename, sizeof netcdf_filename, "%snc", str ); 
+     snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
      free( str );
 
      ierr = nc_set_chunk_cache( 129600000, 101, 0.75 );
