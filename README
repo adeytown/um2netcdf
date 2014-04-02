@@ -38,8 +38,8 @@ UM2NetCDF offers the following features:
     postprocessing) are automatically split into separate datafields that
     are appropriately named based on the post-processing performed.
 
- -> UM variables that have undergone post-processing (eg. their LBPROC value
-    is non-zero) with have an appropriate prefix added to the variable name.
+ -> An UM variable that has undergone post-processing (eg. their LBPROC value
+    is non-zero) will have an appropriate prefix added to its name.
     For example, a field collecting maximum wind gusts would be named 'max_wind_gust'.
 
 UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
