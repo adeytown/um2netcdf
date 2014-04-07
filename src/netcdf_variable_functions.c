@@ -29,16 +29,15 @@
 #include <math.h>
 #include <stdint.h>
 
-#define CHECK_BIT(val,pos) ((val) & (1<<(pos)))
-
 /** Function prototypes **/
 
 double *interp_do_nothing( double *val, int nx, int ny );
 double *u_to_p_point_interp_c_grid( double *val, int nx, int ny );
 double *v_to_p_point_interp_c_grid( double *val, int nx, int ny );
 double *b_to_c_grid_interp_u_points( double *val, int nx, int ny );
-void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *unpacked_data, double mdi );
 void   endian_swap_4bytes( void *ptr, int nchunk );
+void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf,
+                     double mdi );
 
 /***
  *** FILL_VARIABLES
@@ -61,11 +60,11 @@ void   endian_swap_4bytes( void *ptr, int nchunk );
 
 int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
-     int    ierr, cnt, n, j, ndim, varid, i, num_z_levels;
-     size_t *offset, *count;
-     double *buf;
-     float  *fbuf;
-     char   name[45];
+     int      ierr, cnt, n, j, ndim, varid, i, num_z_levels;
+     size_t   *offset, *count;
+     double   *buf;
+     float    *fbuf;
+     char     name[45];
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
 
@@ -74,11 +73,13 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
        /** Determine ID & # of dimensions of variable **/
          ierr = nc_inq_varid( ncid, name, &varid );
-         printf( "  %13d      %s\n", stored_um_fields[n].stash_code, stored_um_fields[n].name ); 
+         printf( "     %5d     %s        [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
+                                                      stored_um_fields[n].nx, stored_um_fields[n].ny ); 
  
          num_z_levels = stored_um_fields[n].num_slices/num_timesteps;
-         if ( num_z_levels==1 ) { ndim = 3; }
-         else                   { ndim = 4; }
+         if ( num_z_levels==1 ) { ndim = 3; } 
+         else                   { ndim = 4; printf( " x %2d", num_z_levels ); }
+         printf( "]\n" ); 
 
          offset = (size_t *) calloc( ndim,sizeof(size_t) );
          count = (size_t *) malloc( ndim*sizeof(size_t) );
@@ -116,7 +117,7 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
              if ( (stored_um_fields[n].slices[j].lbpack==0)||(stored_um_fields[n].slices[j].lbpack==3000) ) { 
                 fread( buf, wordsize, cnt, fid ); 
                 endian_swap( buf, cnt );
-             } else if ( stored_um_fields[n].slices[j].lbpack==1 ) { 
+             } else if ( stored_um_fields[n].slices[j].lbpack==1 ) {
                 wgdos_unpack( fid, stored_um_fields[n].nx, stored_um_fields[n].ny, buf, 
                               stored_um_fields[n].slices[j].mdi );
              }
@@ -149,7 +150,8 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
          free( count );
          free( offset );  
 
-     } 
+     }
+     printf( "\n" ); 
      return 1;
 }
 

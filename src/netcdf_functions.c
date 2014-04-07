@@ -174,7 +174,8 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      str = malloc( 1 + strlen(um_file));
      if ( str ) { strcpy( str, um_file ); }
      else       { return 999; }
-     str[pos] = '\0';
+
+     if ( (pos>=strlen(um_file))&&(pos<=strlen(um_file)) ) { str[pos] = '\0'; }
 
      snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
      free( str );
@@ -288,9 +289,9 @@ int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag ) {
   *-------------------------------------------------------------------------*/
      construct_lat_lon_arrays( ncid, rflag, iflag );
 
-     printf( "---------------------------------------------------\n" );
-     printf( "   UM_Stash_Code     Variable_Name\n" );
-     printf( "---------------------------------------------------\n" );
+     printf( "-----------------------------------------------------------\n" );
+     printf( "  Stash_Code        Variable_Name             Dimensions\n" );
+     printf( "-----------------------------------------------------------\n" );
 
      i = fill_variables( ncid, fid, iflag, rflag );
      if ( i==-1 ) { 
