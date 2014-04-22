@@ -1,0 +1,42 @@
+## MAKE SETTINGS
+##
+##  Makefile settings for the Power6 architecture and the IBM XL compiler suite.
+##
+##  Mark Cheeseman, NIWA
+##  January 23, 2014
+##=============================================================================
+
+##-----------------------------------------------------------------------------
+## Compiler definitions
+##-----------------------------------------------------------------------------
+
+CC = xlc 
+RANLIB = ranlib 
+OPT_FLAGS = -O3 -g -q64 -qarch=pwr6 -qtune=pwr6
+
+
+##-----------------------------------------------------------------------------
+## Application definitions
+##-----------------------------------------------------------------------------
+
+CPPFLAGS = 
+
+##-----------------------------------------------------------------------------
+## External library definitions
+##-----------------------------------------------------------------------------
+
+NETCDF_ROOT=/opt/niwa/netcdf/AIX/4.3.1/serial
+NETCDF_INC=-I$(NETCDF_ROOT)/include
+NETCDF_LIB=-L$(NETCDF_ROOT)/lib -lnetcdf
+
+XML2_ROOT=/opt/niwa/xml/AIX/2.9.0
+XML2_INC=-I$(XML2_ROOT)/include/libxml2
+XML2_LIB=-L$(XML2_ROOT)/lib -lxml2
+
+ZLIB_ROOT=/opt/niwa/zlib/AIX/1.2.8
+ZLIB_INC=-I$(ZLIB_ROOT)/include
+ZLIB_LIB=-L$(ZLIB_ROOT)/lib -lz
+
+INCS = ${NETCDF_INC} ${XML2_INC} ${ZLIB_INC} 
+LIBS = ${NETCDF_LIB} ${XML2_LIB} ${ZLIB_LIB} -lm
+

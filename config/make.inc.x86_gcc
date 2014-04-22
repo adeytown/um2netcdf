@@ -1,0 +1,42 @@
+## MAKE SETTINGS
+##
+##  Makefile settings for the x86 architecture and the GNU compiler suite.
+##
+##  Mark Cheeseman, NIWA
+##  December 9, 2013
+##=============================================================================
+
+##-----------------------------------------------------------------------------
+## Compiler definitions
+##-----------------------------------------------------------------------------
+
+CC = gcc 
+RANLIB = ranlib 
+OPT_FLAGS = -O3 -g -Wall
+
+
+##-----------------------------------------------------------------------------
+## Application definitions
+##-----------------------------------------------------------------------------
+
+CPPFLAGS = 
+
+##-----------------------------------------------------------------------------
+## External library definitions
+##-----------------------------------------------------------------------------
+
+NETCDF_ROOT=/opt/niwa/netcdf/Linux/GNU/4.3.1/serial
+NETCDF_INC=-I$(NETCDF_ROOT)/include
+NETCDF_LIB=-L$(NETCDF_ROOT)/lib -lnetcdf
+
+XML2_ROOT=/opt/niwa/xml/Linux/GNU/2.9.1
+XML2_INC=-I$(XML2_ROOT)/include/libxml2
+XML2_LIB=-L$(XML2_ROOT)/lib -lxml2
+
+ZLIB_ROOT=/opt/niwa/zlib/Linux/GNU/1.2.8
+ZLIB_INC=-I$(ZLIB_ROOT)/include
+ZLIB_LIB=-L$(ZLIB_ROOT)/lib -lz
+
+INCS = ${NETCDF_INC} ${XML2_INC} ${ZLIB_INC} 
+LIBS = ${NETCDF_LIB} ${XML2_LIB} ${ZLIB_LIB}
+
