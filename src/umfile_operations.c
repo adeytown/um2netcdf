@@ -181,7 +181,7 @@ int check_um_file( char *filename, int rflag ) {
      for ( nrec=0; nrec<header[111]; nrec++ ) {
          level_constants[nrec] = (double *) malloc( header[110]*sizeof(long) );
          n = fread( level_constants[nrec], wordsize, header[110], fid );
-         endian_swap( level_constants[nrec],header[110] ); 
+         endian_swap( level_constants[nrec],header[110] );
      }
 
 /**

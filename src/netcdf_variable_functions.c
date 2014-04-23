@@ -61,7 +61,7 @@ void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf
 int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
      int      ierr, cnt, n, j, ndim, varid, i, num_z_levels;
-     size_t   *offset, *count;
+     size_t   *offset, *count, dimlen;
      double   *buf;
      float    *fbuf;
      char     name[45];
@@ -73,8 +73,8 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
        /** Determine ID & # of dimensions of variable **/
          ierr = nc_inq_varid( ncid, name, &varid );
-         printf( "     %5d     %s        [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
-                                                      stored_um_fields[n].nx, stored_um_fields[n].ny ); 
+         printf( "     %5d   %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
+                                                   stored_um_fields[n].nx, stored_um_fields[n].ny ); 
  
          num_z_levels = stored_um_fields[n].num_slices/num_timesteps;
          if ( num_z_levels==1 ) { ndim = 3; } 
@@ -152,6 +152,22 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
      }
      printf( "\n" ); 
+
+    /*** Output the coefficients for the ETA arrays ***/
+
+     dimlen = (size_t ) header[110];
+
+     fbuf = (float *) malloc( dimlen*sizeof(float) );
+     for ( j=0; j<dimlen; j++ ) { fbuf[j] = level_constants[0][j]; } 
+     ierr = nc_inq_varid( ncid, "eta_theta", &varid );   
+     ierr = nc_put_var_float( ncid, varid, fbuf );
+     free( fbuf ); 
+
+     fbuf = (float *) malloc( (dimlen-1)*sizeof(float) );
+     for ( j=0; j<dimlen-1; j++ ) { fbuf[j] = level_constants[1][j]; } 
+     ierr = nc_inq_varid( ncid, "eta_rho", &varid );   
+     ierr = nc_put_var_float( ncid, varid, fbuf );
+
      return 1;
 }
 

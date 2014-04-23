@@ -134,6 +134,19 @@ void construct_um_variables2( int ncid, int iflag ) {
          
      }
 
+   /*** Create the ETA arrays -used to store the coefficients needed to determine ***
+    *** model depth on hybrid levels.                                             ***/
+
+     ndim = 1;
+     dim_ids = (int *) malloc( ndim*sizeof(int) );
+
+     ierr = nc_inq_dimid( ncid, "num_etaT_levels", &dim_ids[0] );
+     ierr = nc_def_var( ncid, "eta_theta", NC_FLOAT, ndim, dim_ids, &varID );
+
+     ierr = nc_inq_dimid( ncid, "num_etaR_levels", &dim_ids[0] );
+     ierr = nc_def_var( ncid, "eta_rho",   NC_FLOAT, ndim, dim_ids, &varID );
+
+     free( dim_ids );
      return;
 }
 
@@ -175,12 +188,6 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      if ( str ) { strncpy( str, um_file, pos ); }
      else       { return 999; }
      str[pos] = '\0';
-
-/*     str = malloc( 1 + strlen(um_file));
-     if ( str ) { strcpy( str, um_file ); }
-     else       { return 999; }
-*/
-   //  if ( (pos>=strlen(um_file))&&(pos<=strlen(um_file)) ) { str[12] = '\0'; }
 
      snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
      free( str );

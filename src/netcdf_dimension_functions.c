@@ -521,6 +521,12 @@ void set_vertical_dimensions( int ncid, int rflag ) {
 
      }
 
+    /*** Define dimensions to hold length of ETA arrays ***/
+     i = nc_def_dim( ncid, "num_etaT_levels", (size_t ) header[110], 
+                    &num_instances );
+     i = nc_def_dim( ncid, "num_etaR_levels", (size_t ) (header[110]-1), 
+                    &num_instances );
+
      return;
 }
 

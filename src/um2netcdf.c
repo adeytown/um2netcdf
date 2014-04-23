@@ -103,15 +103,15 @@ int main( int argc, char *argv[] ) {
      status = check_um_file( argv[argc-2], rflag ); 
      status_check( status, "ERROR: could not determine UM filetype" );
 
-     printf( "\n=================================================\n" );
-     printf( "                    UM2NetCDF\n" );
-     printf( "=================================================\n\n" );
+     printf( "\n===========================================================\n" );
+     printf( "                          UM2NetCDF\n" );
+     printf( "===========================================================\n\n" );
      printf( "Input UM Fields File\n" );
-     printf( "-------------------------------------------------\n" );
+     printf( "-----------------------------------------------------------\n" );
      printf( "   Filename  : %s\n", argv[argc-2] );
      printf( "   Wordsize  : %1d\n\n", wordsize );
      printf( "UM Stash Codes->CF Metadata XML File\n" );
-     printf( "-------------------------------------------------\n" );
+     printf( "-----------------------------------------------------------\n" );
      printf( "   Filename  : %s\n\n", argv[argc-1] );
      
  /*
