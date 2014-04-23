@@ -171,11 +171,16 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      dest = strstr( um_file, ".um" );
      pos = dest - um_file;
 
-     str = malloc( 1 + strlen(um_file));
+     str = malloc( 1 + strlen(um_file) );
+     if ( str ) { strncpy( str, um_file, pos ); }
+     else       { return 999; }
+     str[pos] = '\0';
+
+/*     str = malloc( 1 + strlen(um_file));
      if ( str ) { strcpy( str, um_file ); }
      else       { return 999; }
-
-     if ( (pos>=strlen(um_file))&&(pos<=strlen(um_file)) ) { str[pos] = '\0'; }
+*/
+   //  if ( (pos>=strlen(um_file))&&(pos<=strlen(um_file)) ) { str[12] = '\0'; }
 
      snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
      free( str );
