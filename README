@@ -1,7 +1,7 @@
 UM2NETCDF
 
    Mark Cheeseman
-   National Institute of Water & Atmospsheric Research Ltd (NIWA)
+   National Institute of Water & Atmospheric Research Ltd (NIWA)
    m.cheeseman@niwa.co.nz
 
 
@@ -98,7 +98,8 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
        in the 'config' subdirectory.
 
     B) It is assumed that you are assuming GNU make for the build.  The IBM
-       make that comes by default with AIX will not work.
+       make that comes by default with AIX will not work. Use the 'gmake'
+       command instead of 'make' in the above instructions.
 
  
 3.  RUNNING UM2NETCDF 

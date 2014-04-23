@@ -157,61 +157,62 @@ void construct_rotated_lat_lon_arrays_float( int ncid, float *flon, float *flat 
 
 void construct_lat_lon_arrays( int ncid, int rflag, int iflag ) {
 
-     int    n, var_ids[2];
-     double *lon, *lat;
-     float  *flon, *flat;
+     int     varID, i, j, ind;
+     double *buf;
+     float  *fbuf;
 
-  /*** Determine the  IDs of the lat and lon NetCDF variables ***/
-     n = nc_inq_varid( ncid, "lon", &var_ids[0] );
-     n = nc_inq_varid( ncid, "lat", &var_ids[1] );
+     if ( rflag==1 ) {
 
-  /*** Construct the lon/lat values ***/
-     lon = (double *) malloc( int_constants[5]*sizeof(double) );
-     lat = (double *) malloc( int_constants[6]*sizeof(double) );
-
-     for ( n=0; n<int_constants[6]; n++ )
-         lat[n] = real_constants[2] + n*real_constants[1];
-      
-     for ( n=0; n<int_constants[5]; n++ )
-         lon[n] = real_constants[3] + n*real_constants[0];
-
-  /*** Write the values into the appropriate NetCDF variables ***/
-     if ( rflag==0 ) {
-        n = nc_put_var_double( ncid, var_ids[0], lon );
-        n = nc_put_var_double( ncid, var_ids[1], lat );
-        if ( header[3]>99 ) { construct_rotated_lat_lon_arrays( ncid, lon, lat ); }
-     } else {
-        flon = (float *) malloc( int_constants[5]*sizeof(float) );
-        for ( n=0; n<int_constants[5]; n++) { flon[n] = (float ) lon[n]; }
-        n = nc_put_var_float( ncid, var_ids[0], flon );
-
-        flat = (float *) malloc( int_constants[6]*sizeof(float) );
-        for ( n=0; n<int_constants[6]; n++) { flat[n] = (float ) lat[n]; }
-        n = nc_put_var_float( ncid, var_ids[1], flat );
-        if ( header[3]>99 ) { construct_rotated_lat_lon_arrays_float( ncid, flon, flat ); }
-        free( flat );
-        free( flon );
-     }
-     free( lon );
-
-  /*** Fill the second Lat variable if interpolation is not being used ***/
-     if ( iflag==0 ) {
-        n = nc_inq_varid( ncid, "rlat2", &var_ids[1] );
-
-        if ( rflag==0 ) { 
-           lon = (double *) malloc( (int_constants[6]-1)*sizeof(double) );
-           for ( n=0; n<int_constants[6]-1; n++ )
-               lon[n] = lat[n];
-           n = nc_put_var_double( ncid, var_ids[1], lon ); 
-           free( lon );
-        } else { 
-           flat = (float *) malloc( (int_constants[6]-1)*sizeof(float) );
-           for ( n=0; n<int_constants[6]-1; n++) { flat[n] = (float ) lat[n]; }
-           n = nc_put_var_float( ncid, var_ids[1], flat ); 
-           free( flat );
+        fbuf = (float *) malloc( int_constants[5]*int_constants[6]*sizeof(float) );
+        
+        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( i=0; i<int_constants[5]; i++ ) {
+            ind = j*int_constants[5] + i;
+            fbuf[ind] = (float ) (real_constants[2] + j*real_constants[1]); 
         }
-     }
+        }
      
-     free( lat );
+        i = nc_inq_varid( ncid, "latitude", &varID );
+        i = nc_put_var_float( ncid, varID, fbuf );
+
+        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( i=0; i<int_constants[5]; i++ ) {
+            ind = j*int_constants[5] + i;
+            fbuf[ind] = (float ) (real_constants[3] + j*real_constants[0]); 
+        }
+        }
+     
+        i = nc_inq_varid( ncid, "longitude", &varID );
+        i = nc_put_var_float( ncid, varID, fbuf );
+
+        free( fbuf );
+
+     } else {
+
+        buf = (double *) malloc( int_constants[5]*int_constants[6]*sizeof(double) );
+        
+        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( i=0; i<int_constants[5]; i++ ) {
+            ind = j*int_constants[5] + i;
+            buf[ind] = real_constants[2] + j*real_constants[1]; 
+        }
+        }
+     
+        i = nc_inq_varid( ncid, "latitude", &varID );
+        i = nc_put_var_double( ncid, varID, buf );
+
+        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( i=0; i<int_constants[5]; i++ ) {
+            ind = j*int_constants[5] + i;
+            buf[ind] = real_constants[3] + j*real_constants[0]; 
+        }
+        }
+     
+        i = nc_inq_varid( ncid, "longitude", &varID );
+        i = nc_put_var_double( ncid, varID, buf );
+
+        free( buf );
+     }
+
      return;
 }

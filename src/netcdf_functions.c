@@ -222,6 +222,10 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
 
      construct_um_variables2( ncid, iflag );
 
+ /**=========================================================================**
+  ** STEP 3:  GLOBAL ATTRIBUTES                                              **
+  **=========================================================================**/ 
+
  /*
   * Construct a properly formatted forecast reference string 
   *--------------------------------------------------------------------------*/

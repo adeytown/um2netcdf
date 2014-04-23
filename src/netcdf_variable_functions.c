@@ -73,7 +73,7 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
        /** Determine ID & # of dimensions of variable **/
          ierr = nc_inq_varid( ncid, name, &varid );
-         printf( "     %5d   %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
+         printf( "     %5d %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
                                                    stored_um_fields[n].nx, stored_um_fields[n].ny ); 
  
          num_z_levels = stored_um_fields[n].num_slices/num_timesteps;
