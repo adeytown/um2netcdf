@@ -109,7 +109,7 @@ int main( int argc, char *argv[] ) {
      printf( "Input UM Fields File\n" );
      printf( "-----------------------------------------------------------\n" );
      printf( "   Filename  : %s\n", argv[argc-2] );
-     printf( "   Wordsize  : %1d\n\n", wordsize );
+     printf( "   Wordsize  : %d\n\n", wordsize );
      printf( "UM Stash Codes->CF Metadata XML File\n" );
      printf( "-----------------------------------------------------------\n" );
      printf( "   Filename  : %s\n\n", argv[argc-1] );

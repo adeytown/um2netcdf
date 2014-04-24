@@ -101,12 +101,57 @@ int get_file_endianness_wordsize( FILE *fh ) {
 
     int word_size;
 
-    for ( word_size=4; word_size<9; word_size+=4 ) {
+  /*
+   * Check first if file was created on a big endian 8-byte word platform
+   * like the IBM Power system
+   *----------------------------------------------------------------------*/
+    fseek( fh, 0, SEEK_SET );
+
+    word_size = 8;
+    fread( header, word_size, 256, fh );
+
+    if ( (header[1]==1)&&(header[150]==64) ) {
+       endian_swap = &no_endian_swap;
+       return word_size;
+    } else {
+       endian_swap = &endian_swap_8bytes;
+       endian_swap( header, 256 );
+       if ( (header[1]==1)&&(header[150]==64) ) {
+          return word_size;
+       }
+    }
+
+  /*
+   * Then check if file was created on a little endian 8-byte word platform
+   * like the IBM Power system
+   *----------------------------------------------------------------------*/
+    word_size = 4;
+
+    fseek( fh, 0, SEEK_SET );
+    fread( header, word_size, 256, fh );
+
+    if ( (header[1]==1)&&(header[150]==64) ) {
+       endian_swap = &no_endian_swap;
+       printf( "wordsize: %d   no endian swap", word_size );
+       return word_size;
+    } else {
+       endian_swap = &endian_swap_4bytes;
+       endian_swap( header, 256 );
+       if ( (header[1]==1)&&(header[150]==64) ) {
+          printf( "wordsize: %d   endian swap", word_size );
+          return word_size;
+       }
+    }
+
+    word_size = -1;
+    return word_size;
+
+ /*   for ( word_size=4; word_size<9; word_size+=4 ) {
 
         fseek( fh, 0, SEEK_SET );
         fread( header, word_size, 256, fh );
 
-        if ( (header[1]==1)&&(header[4]==3)&&(header[8]==3)&&(header[150]==64) ) {
+        if ( (header[1]==1)&&(header[8]==3)&&(header[150]==64) ) {
            printf( "No swapping needed\n" );
            endian_swap = &no_endian_swap;
            return word_size;
@@ -116,14 +161,14 @@ int get_file_endianness_wordsize( FILE *fh ) {
         else                { endian_swap = &endian_swap_8bytes; }
 
         endian_swap( header, 256 );
-        if ( (header[1]==1)&&(header[4]==3)&&(header[8]==3)&&(header[150]==64) ) {
-//           printf( "Swapping needed\n" );
+        if ( (header[1]==1)&&(header[8]==3)&&(header[150]==64) ) {
            return word_size;
         }
  
     }
+
     word_size = -1; 
-    return wordsize;
+    return wordsize; */
 }
 
 
@@ -157,6 +202,10 @@ int check_um_file( char *filename, int rflag ) {
  ** Initialize the word size of the input UM fields file 
  **---------------------------------------------------------------------------*/
      wordsize = get_file_endianness_wordsize( fid );
+     if ( wordsize==-1 ) {
+        printf( "ERROR: incorrect wordsize detected!\n" );
+        exit(1);  
+     }
 
 /**
  ** Read in the REAL CONSTANTS array 
@@ -172,6 +221,7 @@ int check_um_file( char *filename, int rflag ) {
      fread( int_constants, wordsize, 46, fid );
      endian_swap( int_constants,46 );
 
+
 /**
  ** Read in the LEVEL DEPENDENT CONSTANTS array 
  **---------------------------------------------------------------------------*/
@@ -181,7 +231,7 @@ int check_um_file( char *filename, int rflag ) {
      for ( nrec=0; nrec<header[111]; nrec++ ) {
          level_constants[nrec] = (double *) malloc( header[110]*sizeof(long) );
          n = fread( level_constants[nrec], wordsize, header[110], fid );
-         endian_swap( level_constants[nrec],header[110] );
+         endian_swap( level_constants[nrec],header[110] ); 
      }
 
 /**

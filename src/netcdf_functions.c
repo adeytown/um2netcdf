@@ -182,15 +182,19 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
   * 0a) Create an appropriate name for the NetCDF file 
   *---------------------------------------------------------------------------*/
      dest = strstr( um_file, ".um" );
-     pos = dest - um_file;
+     if ( dest!=NULL ) { 
+        pos = dest - um_file;
 
-     str = malloc( 1 + strlen(um_file) );
-     if ( str ) { strncpy( str, um_file, pos ); }
-     else       { return 999; }
-     str[pos] = '\0';
+        str = malloc( 1 + strlen(um_file) );
+        if ( str ) { strncpy( str, um_file, pos ); }
+        else       { return 999; }
+        str[pos] = '\0';
 
-     snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
-     free( str );
+        snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
+        free( str );
+     } else {
+        snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", um_file );
+     }
 
      ierr = nc_set_chunk_cache( 129600000, 101, 0.75 );
      ierr = nc_create( netcdf_filename, NC_NETCDF4, &ncid ); 
