@@ -112,7 +112,8 @@ void are_time_bnd_required( int ncid, int cnt, int *unique_times ) {
  void set_temporal_dimensions( int ncid ) {
 
     int    *p, *dimID, i, j, k, flag, cnt, unique_times[30], dim_id[1];
-    char   time_des[31], dim_name[6], calendar[9];
+    char   time_des[40], dim_name[6], calendar[9], mth_str[3], day_str[3],
+           hr_str[3], min_str[3], sec_str[3];
     double tdiff, tdiff2;
 
   /** Generate a list of the indices of the stored UM variables that possess **/
@@ -163,163 +164,30 @@ void are_time_bnd_required( int ncid, int cnt, int *unique_times ) {
         j = nc_def_var( ncid, dim_name, NC_FLOAT, 1, dim_id, &k );
         j = nc_put_att_text( ncid, k, "calendar", 9, calendar ); 
 
-        if ( stored_um_fields[unique_times[i]].validity.tm_mon<10 ) {
-           if ( stored_um_fields[unique_times[i]].validity.tm_mday<10 ) {
-              if ( stored_um_fields[unique_times[i]].validity.tm_hour<10 ) {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-0%d-0%d 0%d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-0%d-0%d 0%d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              } else {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-0%d-0%d %d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-0%d-0%d %d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              }
-           } else {
-              if ( stored_um_fields[unique_times[i]].validity.tm_hour<10 ) {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-0%d-%d 0%d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-0%d-%d 0%d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              } else {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-0%d-%d %d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-0%d-%d %d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              }
-           }
-        } else {
-           if ( stored_um_fields[unique_times[i]].validity.tm_mday<10 ) {
-              if ( stored_um_fields[unique_times[i]].validity.tm_hour<10 ) {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-%d-0%d 0%d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-%d-0%d 0%d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              } else {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-%d-0%d %d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-%d-0%d %d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              }
-           } else {
-              if ( stored_um_fields[unique_times[i]].validity.tm_hour<10 ) {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-%d-%d 0%d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-%d-%d 0%d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              } else {
-                 if ( stored_um_fields[unique_times[i]].validity.tm_min<10 ) {
-                    sprintf( time_des, "hours since %d-%d-%d %d:0%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 } else {
-                    sprintf( time_des, "hours since %d-%d-%d %d:%d:%d", 
-                             stored_um_fields[unique_times[i]].validity.tm_year,
-                             stored_um_fields[unique_times[i]].validity.tm_mon,
-                             stored_um_fields[unique_times[i]].validity.tm_mday,
-                             stored_um_fields[unique_times[i]].validity.tm_hour,
-                             stored_um_fields[unique_times[i]].validity.tm_min,
-                             stored_um_fields[unique_times[i]].validity.tm_sec );
-                 }
-              }
-           }
-        }
+        j = stored_um_fields[unique_times[i]].validity.tm_mon;
+        if ( j<10 ) { snprintf( mth_str, sizeof mth_str, "0%d", j ); }
+        else        { snprintf( mth_str, sizeof mth_str,  "%d", j ); }
+
+        j = stored_um_fields[unique_times[i]].validity.tm_mday;
+        if ( j<10 ) { snprintf( day_str, sizeof day_str, "0%d", j ); }
+        else        { snprintf( day_str, sizeof day_str,  "%d", j ); }
+
+        j = stored_um_fields[unique_times[i]].validity.tm_hour;
+        if ( j<10 ) { snprintf( hr_str, sizeof hr_str, "0%d", j ); }
+        else        { snprintf( hr_str, sizeof hr_str,  "%d", j ); }
+
+        j = stored_um_fields[unique_times[i]].validity.tm_min;
+        if ( j<10 ) { snprintf( min_str, sizeof min_str, "0%d", j ); }
+        else        { snprintf( min_str, sizeof min_str,  "%d", j ); }
+
+        j = stored_um_fields[unique_times[i]].validity.tm_sec;
+        if ( j<10 ) { snprintf( sec_str, sizeof sec_str, "0%d", j ); }
+        else        { snprintf( sec_str, sizeof sec_str,  "%d", j ); }
+
+        sprintf( time_des, "hours since %d-%s-%s %s:%s:%s", 
+                 stored_um_fields[unique_times[i]].validity.tm_year,
+                 mth_str, day_str, hr_str, min_str, sec_str );
+        time_des[31] = '\0';
 
         j = nc_put_att_text( ncid, k,    "units", 31, time_des );
         j = nc_put_att_text( ncid, k,     "axis", 1, "T" );

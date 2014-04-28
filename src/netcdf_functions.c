@@ -163,11 +163,11 @@ void construct_um_variables2( int ncid, int iflag ) {
 
 int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      
-     int   ncid, ierr, pos;
-     char  forecast_ref_time[18], netcdf_filename[50], *str, *dest;
+     int   ncid, ierr, pos, val;
+     char  forecast_ref_time[40], netcdf_filename[50], *str, *dest;
      char  *nzlam = "nzlam";
      char  *nzcsm = "nzcsm";
-     char  mth_str[2], day_str[2], min_str[2], hr_str[2], sec_str[2];
+     char  mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
      FILE *fid;
 
 
@@ -233,19 +233,20 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
  /*
   * Construct a properly formatted forecast reference string 
   *--------------------------------------------------------------------------*/
-     if ( header[28]>10 ) { sprintf( mth_str, "%ld", header[28] ); }
-     else                 { sprintf( mth_str, "0%ld", header[28] ); }
-     if ( header[29]>10 ) { sprintf( day_str, "%ld", header[29] ); }
-     else                 { sprintf( day_str, "0%ld", header[29] ); }
-     if ( header[30]>10 ) { sprintf(  hr_str, "%ld", header[30] ); }
-     else                 { sprintf(  hr_str, "0%ld", header[30] ); }
-     if ( header[31]>10 ) { sprintf( min_str, "%ld", header[31] ); }
-     else                 { sprintf( min_str, "0%ld", header[31] ); }
-     if ( header[32]>10 ) { sprintf( sec_str, "%ld", header[32] ); }
-     else                 { sprintf( sec_str, "0%ld", header[32] ); }
-     sprintf( forecast_ref_time, "%ld-%s-%s %s:%s:%s", header[27], mth_str, day_str, hr_str,
-                                                       min_str, sec_str );
-     ierr = nc_put_att_text( ncid, NC_GLOBAL, "forecast_reference_time", strlen(forecast_ref_time), 
+     if ( header[28]>10 ) { snprintf( mth_str, sizeof mth_str,  "%ld", header[28] ); }
+     else                 { snprintf( mth_str, sizeof mth_str, "0%ld", header[28] ); }
+     if ( header[29]>10 ) { snprintf( day_str, sizeof day_str,  "%ld", header[29] ); }
+     else                 { snprintf( day_str, sizeof day_str, "0%ld", header[29] ); }
+     if ( header[30]>10 ) { snprintf(  hr_str, sizeof hr_str,   "%ld", header[30] ); }
+     else                 { snprintf(  hr_str, sizeof hr_str,  "0%ld", header[30] ); }
+     if ( header[31]>10 ) { snprintf( min_str, sizeof min_str,  "%ld", header[31] ); }
+     else                 { snprintf( min_str, sizeof min_str, "0%ld", header[31] ); }
+     if ( header[32]>10 ) { snprintf( sec_str, sizeof sec_str,  "%ld", header[32] ); }
+     else                 { snprintf( sec_str, sizeof sec_str, "0%ld", header[32] ); }
+     snprintf( forecast_ref_time, sizeof forecast_ref_time, "%ld-%s-%s %s:%s:%s", 
+               header[27], mth_str, day_str, hr_str, min_str, sec_str );
+     forecast_ref_time[21] = '\0'; 
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "forecast_reference_time", 20, 
                              forecast_ref_time ); 
 
  /*
