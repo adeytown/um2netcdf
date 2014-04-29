@@ -256,24 +256,63 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      ierr = nc_put_att_double( ncid, NC_GLOBAL, "grid_north_pole_longitude", NC_DOUBLE, 1, &real_constants[5] ); 
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "history", 39, "UM fields file reformatted by um2netcdf" ); 
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "input_uri", strlen(um_file), um_file ); 
-     ierr = nc_put_att_text( ncid, NC_GLOBAL, "institution", 4, "NIWA" ); 
-     ierr = nc_put_att_text( ncid, NC_GLOBAL, "conventions", 6, "CF-1.5" ); 
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "conventions", 6, "CF-v25" ); 
      ierr = nc_put_att_long( ncid, NC_GLOBAL, "um_version_number", NC_LONG, 1, &header[11] );
      ierr = nc_put_att_int( ncid, NC_GLOBAL, "met_office_ps", NC_INT, 1, 0 ); 
-     ierr = nc_put_att_int( ncid, NC_GLOBAL,      "niwa_eps", NC_INT, 1, 0 ); 
-     ierr = nc_put_att_int( ncid, NC_GLOBAL,       "rose_id", NC_INT, 1, 0 ); 
-
-     if ( strstr( um_file, nzlam )!=NULL ) { 
-        ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 5, "nzlam" ); 
-        ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", 6, "pseudo" ); 
-     }else {
-        if ( strstr( um_file, nzcsm )!=NULL ) { 
-           ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 5, "nzcsm" ); 
-        } else { ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 7, "unknown" ); }
-     }          
      if ( header[3]>100 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 26, "rotated_latitude_longitude" ); } 
      if ( header[11]<=804 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core", 12, "new_dynamics" ); }
      else                   { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core",  8, "end_game" ); }
+
+ /*
+  * Set global attributes specific to NIWA 
+  *--------------------------------------------------------------------------*/
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "institution", 4, "NIWA" ); 
+     ierr = nc_put_att_int( ncid, NC_GLOBAL, "niwa_eps", NC_INT, 1, 0 ); 
+     ierr = nc_put_att_int( ncid, NC_GLOBAL,  "rose_id", NC_INT, 1, 0 ); 
+
+ /*
+  * Set global attributes specific to NZ 12km resolution Limited Area Model 
+  *--------------------------------------------------------------------------*/
+     if ( strstr( um_file, nzlam )!=NULL ) { 
+        ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name",  8, "nzlam-12" ); 
+        ierr = nc_put_att_text( ncid, NC_GLOBAL, "references", 60, "http://matiu/~ecoconnect_admin/eco-docs/DataSet_Definitions/" );
+        ierr = nc_put_att_text( ncid, NC_GLOBAL, "comment",    58, "Ecoconnect operational implementation: Sept 2010 (FitzRoy)" );
+        if ( strstr( um_file, sls )!=NULL ) { 
+           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 67, 
+                                   "Model: nzlam-12 output for Sea-Level and Sea state models (sls*.nc)" ); 
+        } 
+        if ( strstr( um_file, met )!=NULL ) { 
+           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 48, 
+                                   "Model: nzlam-12 output for meteorology (met*.nc)" ); 
+        } 
+        if ( strstr( um_file, tn_ )!=NULL ) { 
+           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 50, 
+                                   "Model: nzlam-12 sub-set output for topnet (tn*.nc)" ); 
+        } 
+        if ( strstr( um_file, escape )!=NULL ) { 
+           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 51, 
+                                   "Model: nzlam-12 output for energyscape (escape*.nc)" ); 
+        } 
+     } 
+
+ /*
+  * Set global attributes specific to NZ 2km Convective Scale resolution Model 
+  *---------------------------------------------------------------------------*/
+     else if ( strstr( um_file, nzcsm )!=NULL ) {
+          ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 43, 
+                                 "Model: NZCSM output for Weather Forecasting" ); 
+          ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 5, "nzcsm" ); 
+          ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", 24, 
+                                 "pseudo analysis of NZLAM" );
+     }          
+
+     else {
+        if ( strstr( um_file, sls )!=NULL ) { 
+           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 59,
+                                   "Model: n320150 output for Sea-Level and Sea state (sls*.nc)" );
+           ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 7, "n320150" ); 
+        }
+     }
 
  /*
   * Close the input UM fields file. 
