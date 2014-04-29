@@ -73,9 +73,14 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
        /** Determine ID & # of dimensions of variable **/
          ierr = nc_inq_varid( ncid, name, &varid );
-         printf( "     %5d %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
-                                                   stored_um_fields[n].nx, stored_um_fields[n].ny ); 
- 
+         if ( stored_um_fields[n].slices[0].lbpack==1 ) {
+            printf( "%s is WGDOS packed.  Its values won't be read\n", stored_um_fields[n].name );
+            continue;
+         } else { 
+            printf( "     %5d %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
+                                                    stored_um_fields[n].nx, stored_um_fields[n].ny ); 
+         }
+
          num_z_levels = stored_um_fields[n].num_slices/num_timesteps;
          if ( num_z_levels==1 ) { ndim = 3; } 
          else                   { ndim = 4; printf( " x %2d", num_z_levels ); }
@@ -114,13 +119,15 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
              
        /** Read in a 2D raw data array **/
              fseek( fid, stored_um_fields[n].slices[j].location*wordsize, SEEK_SET );
-             if ( (stored_um_fields[n].slices[j].lbpack==0)||(stored_um_fields[n].slices[j].lbpack==3000) ) { 
+//             if ( (stored_um_fields[n].slices[j].lbpack==0)||(stored_um_fields[n].slices[j].lbpack==3000) ) { 
                 fread( buf, wordsize, cnt, fid ); 
                 endian_swap( buf, cnt );
-             } else if ( stored_um_fields[n].slices[j].lbpack==1 ) {
+//             } else if ( stored_um_fields[n].slices[j].lbpack==1 ) {
+/* MPCH: April 29, 2014:  Not yet functional!!
                 wgdos_unpack( fid, stored_um_fields[n].nx, stored_um_fields[n].ny, buf, 
                               stored_um_fields[n].slices[j].mdi );
-             }
+ */
+//             }
              
        /** Perform interpolation if requested **/
              buf = field_interpolation( buf, stored_um_fields[n].nx, stored_um_fields[n].ny );            

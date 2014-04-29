@@ -167,6 +167,10 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      char  forecast_ref_time[40], netcdf_filename[50], *str, *dest;
      char  *nzlam = "nzlam";
      char  *nzcsm = "nzcsm";
+     char  *escape = "escape";
+     char  *tn_ = "tn_";
+     char  *met = "met";
+     char  *sls = "sls";
      char  mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
      FILE *fid;
 
