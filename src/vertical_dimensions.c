@@ -26,19 +26,6 @@
 #include <string.h>
 #include "field_def.h"
 
-/*     const float model_heights[71] = {0.0, 5.0, 21.67, 45.0, 75.0, 111.67, 155.0, 205.0,
-                                 261.67, 325.0, 395.0, 471.67, 555.0, 645.0, 741.67,
-                                 845.0, 955.0, 1071.67, 1195.0, 1325.0, 1461.67, 1605.0,
-                                 1755.0, 1911.67, 2075.0, 2245.0, 2421.67, 2605.0, 2795.0,
-                                 2991.67, 3195.0, 3405.0, 3621.67, 3845.0, 4075.0, 4311.67,
-                                 4555.0, 4805.0, 5061.67, 5325.0, 5595.0, 5871.67, 6155.0,
-                                 6445.15, 6742.49, 7047.82, 7362.36, 7687.92, 8026.93,
-                                 8382.58, 8758.92, 9160.94, 9594.76, 10067.67, 10588.31,
-                                 11166.80, 11814.87, 12546.02, 13375.68, 14321.32, 15402.7,
-                                 16641.98, 18063.91, 19696.03, 21568.85, 23716.06,
-                                 26174.72, 28985.46, 32192.73, 35845.0, 40000.0}; */
-/* Define the heights of the different model levels used in NZCSM */
-
 /***
  *** SET_SOIL_LEVELS
  ***
@@ -209,16 +196,17 @@ void set_altitude( int ncid, int n, int id ) {
  ***               n -> number of hybrid levels to be filled
  ***              id -> index of the stored UM variable requiring this vertical
  ***                    dimension.
+ ***            grid -> type of Arakawa Grid on which variable is defined
  ***
  ***   Mark Cheeseman, NIWA
- ***   December 29, 2012
+ ***   April 29, 2014
  ***/
 
-void set_hybrid_levels( int ncid, int n, int id ) {
+void set_hybrid_levels( int ncid, int n, int id, unsigned short grid ) {
 
      int    i, ierr, var_id, dim_id[1], ind;
      char   dim_name[8];
-     float  height;
+     float  *height;
      size_t nc_index[1];
 
      sprintf( dim_name, "hybrid%d", n );
@@ -243,15 +231,17 @@ void set_hybrid_levels( int ncid, int n, int id ) {
   /** Fill the new NetCDF variable **/
      ierr = nc_enddef( ncid );
 
-  /** NOTE: need to write axis values individually.  Compiler optimizer ignores loop **/
-  /**       if fill array write attempted.                                           **/
-     for ( i=0; i<n; i++ ) {
-         ind = (int ) stored_um_fields[id].slices[i].level;
-         height = (float ) level_constants[4][ind];
-         nc_index[0] = (size_t) i;
-         ierr = nc_put_var1_float( ncid, var_id, nc_index, &height );
-     }
- 
+     height = (float *) malloc( n*sizeof(float) );
+     //printf( "Grid type: %i\n", grid );
+
+     ind = 4;
+     if ( (grid==11)||(grid==18)||(grid==19) ) { ind = 6; }
+     for ( i=0; i<n; i++ ) 
+         height[i] = (float ) level_constants[ind][stored_um_fields[id].slices[i].level];
+
+     ierr = nc_put_var_float( ncid, var_id, height );
+     free( height );
+
   /** Need to set the ID of this vertical dimension for the stored UM variable **/
      stored_um_fields[id].z_dim = dim_id[0];
 

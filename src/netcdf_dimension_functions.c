@@ -29,7 +29,7 @@
 void set_soil_levels( int ncid, int n, int id );
 void set_pressure_levels( int ncid, int n, int id );
 void set_altitude( int ncid, int n, int id );
-void set_hybrid_levels( int ncid, int n, int id );
+void set_hybrid_levels( int ncid, int n, int id, unsigned short grid );
 void set_surface_levels( int ncid, int n, int id );
 void set_sea_surface_levels( int ncid, int n, int id );
 
@@ -375,7 +375,7 @@ void set_vertical_dimensions( int ncid, int rflag ) {
                       set_pressure_levels( ncid, num_instances, i );
                       break;
                  case 65:
-                      set_hybrid_levels( ncid, num_instances, i );
+                      set_hybrid_levels( ncid, num_instances, i, stored_um_fields[i].grid_type );
                       break;
                  case 128:
                       set_sea_surface_levels( ncid, num_instances, i );
