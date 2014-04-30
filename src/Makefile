@@ -45,9 +45,9 @@ include ../config/make.inc.$(ARCH)_$(CC)
 ##-----------------------------------------------------------------------------
 
 OBJS =	util.o stashfile_operations.o umfile_operations.o interp.o \
-	vertical_dimensions.o grid_operations.o netcdf_dimension_functions.o \
-	wgdos_unpack.o netcdf_variable_functions.o convert_float_ibm_to_ieee32.o \
-	netcdf_functions.o um2netcdf.o 
+	vertical_dimensions.o grid_operations.o temporal_dimension_functions.o \
+	spatial_dimension_functions.o wgdos_unpack.o netcdf_variable_functions.o \
+        convert_float_ibm_to_ieee32.o netcdf_functions.o um2netcdf.o
 
 ##-----------------------------------------------------------------------------
 ## Define the name and location of the um2netcdf binary 
@@ -91,7 +91,8 @@ grid_operations.o:
 vertical_dimensions.o:
 convert_float_ibm_to_ieee32.o:
 wgdos.o:
-netcdf_dimension_functions.o: vertical_dimensions.o
+temporal_dimension_functions.o: 
+spatial_dimension_functions.o: vertical_dimensions.o
 netcdf_variable_functions.o: interp.o umfile_operations.o wgdos.o 
 netcdf_functions.o: interp.o grid_operations.o netcdf_dimension_functions.o netcdf_variable_functions.o
 um2netcdf.o: util.o stashfile_operations.o umfile_operations.o netcdf_functions.o

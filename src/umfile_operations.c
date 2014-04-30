@@ -146,29 +146,6 @@ int get_file_endianness_wordsize( FILE *fh ) {
     word_size = -1;
     return word_size;
 
- /*   for ( word_size=4; word_size<9; word_size+=4 ) {
-
-        fseek( fh, 0, SEEK_SET );
-        fread( header, word_size, 256, fh );
-
-        if ( (header[1]==1)&&(header[8]==3)&&(header[150]==64) ) {
-           printf( "No swapping needed\n" );
-           endian_swap = &no_endian_swap;
-           return word_size;
-        }
-  
-        if ( word_size==4 ) { endian_swap = &endian_swap_4bytes; }
-        else                { endian_swap = &endian_swap_8bytes; }
-
-        endian_swap( header, 256 );
-        if ( (header[1]==1)&&(header[8]==3)&&(header[150]==64) ) {
-           return word_size;
-        }
- 
-    }
-
-    word_size = -1; 
-    return wordsize; */
 }
 
 
@@ -259,6 +236,8 @@ int check_um_file( char *filename, int rflag ) {
 
 /**
  ** Gather all the valid lookup entries into a condensed array (called LOOKUP)) 
+ ** Only take the first 45 entires per UM field as there is a variable change
+ ** from long to double at that point.
  **---------------------------------------------------------------------------*/
      lookup = (long **) malloc( cnt*sizeof(long *) );
 
@@ -266,8 +245,10 @@ int check_um_file( char *filename, int rflag ) {
      for ( nrec=0; nrec<header[151]; nrec++ ) {
          if ( tmp[nrec][28]!=-99 ) {
             cnt++;
-            lookup[cnt] = (long *) malloc( header[150]*sizeof(long) );
-            for ( n=0; n<header[150]; n++ ) {
+   //MPCH         lookup[cnt] = (long *) malloc( header[150]*sizeof(long) );
+            lookup[cnt] = (long *) malloc( 45*sizeof(long) );
+    //MPCH        for ( n=0; n<header[150]; n++ ) {
+            for ( n=0; n<45; n++ ) {
                 lookup[cnt][n] = tmp[nrec][n]; 
             } 
          }

@@ -207,7 +207,6 @@ void set_hybrid_levels( int ncid, int n, int id, unsigned short grid ) {
      int    i, ierr, var_id, dim_id[1], ind;
      char   dim_name[8];
      float  *height;
-     size_t nc_index[1];
 
      sprintf( dim_name, "hybrid%d", n );
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
@@ -232,12 +231,11 @@ void set_hybrid_levels( int ncid, int n, int id, unsigned short grid ) {
      ierr = nc_enddef( ncid );
 
      height = (float *) malloc( n*sizeof(float) );
-     //printf( "Grid type: %i\n", grid );
 
      ind = 4;
-     if ( (grid==11)||(grid==18)||(grid==19) ) { ind = 6; }
+     if ( (grid==11)||(grid==18)||(grid==19) ) { ind = 6; } 
      for ( i=0; i<n; i++ ) 
-         height[i] = (float ) level_constants[ind][stored_um_fields[id].slices[i].level];
+         height[i] = (float ) level_constants[ind][stored_um_fields[id].slices[i].level]; 
 
      ierr = nc_put_var_float( ncid, var_id, height );
      free( height );
