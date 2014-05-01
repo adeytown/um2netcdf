@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <time.h>
 #include "field_def.h"
 
 /** Function prototypes **/
@@ -32,7 +33,7 @@ void set_vertical_dimensions( int ncid, int rflag );
 void set_horizontal_dimensions( int ncid, int rflag );
 void set_lon_lat_dimensions( int ncid, int iflag, int rflag );
 void set_temporal_dimensions( int ncid );
-void construct_lat_lon_arrays( int ncid, int rflag, int iflag );
+void construct_lat_lon_arrays( int ncid );
 int fill_variables( int ncid, FILE *fid, int iflag, int rflag );
 
 /***
@@ -164,7 +165,7 @@ void construct_um_variables2( int ncid, int iflag ) {
 int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      
      int   ncid, ierr, pos, val;
-     char  forecast_ref_time[40], netcdf_filename[50], *str, *dest;
+     char  forecast_ref_time[40], netcdf_filename[50], *str, *dest, creation_time[25];
      char  *nzlam = "nzlam";
      char  *nzcsm = "nzcsm";
      char  *escape = "escape";
@@ -173,6 +174,8 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      char  *sls = "sls";
      char  mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
      FILE *fid;
+     time_t rawtime;
+     struct tm * timeinfo;
 
 
  /**=========================================================================**
@@ -262,7 +265,8 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "input_uri", strlen(um_file), um_file ); 
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "conventions", 6, "CF-v25" ); 
      ierr = nc_put_att_long( ncid, NC_GLOBAL, "um_version_number", NC_LONG, 1, &header[11] );
-     ierr = nc_put_att_int( ncid, NC_GLOBAL, "met_office_ps", NC_INT, 1, 0 ); 
+     val = 33;
+     ierr = nc_put_att_int( ncid, NC_GLOBAL, "met_office_ps", NC_INT, 1, &val ); 
      if ( header[3]>100 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 26, "rotated_latitude_longitude" ); } 
      if ( header[11]<=804 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core", 12, "new_dynamics" ); }
      else                   { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core",  8, "end_game" ); }
@@ -270,9 +274,11 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
  /*
   * Set global attributes specific to NIWA 
   *--------------------------------------------------------------------------*/
-     ierr = nc_put_att_text( ncid, NC_GLOBAL, "institution", 4, "NIWA" ); 
-     ierr = nc_put_att_int( ncid, NC_GLOBAL, "niwa_eps", NC_INT, 1, 0 ); 
-     ierr = nc_put_att_int( ncid, NC_GLOBAL,  "rose_id", NC_INT, 1, 0 ); 
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "institution", 4, "NIWA" );
+     val = 2; 
+     ierr = nc_put_att_int( ncid, NC_GLOBAL, "niwa_eps", NC_INT, 1, &val ); 
+     val = 0; 
+     ierr = nc_put_att_int( ncid, NC_GLOBAL,  "rose_id", NC_INT, 1, &val ); 
 
  /*
   * Set global attributes specific to NZ 12km resolution Limited Area Model 
@@ -319,6 +325,14 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      }
 
  /*
+  * Add date & time at which the NetCDF file was created 
+  *---------------------------------------------------------------------------*/
+     time( &rawtime );
+     timeinfo = localtime( &rawtime );
+     strftime( creation_time, 25, "%Y-%m-%d %H:%M:%S", timeinfo );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "file_creation_date", 18, creation_time ); 
+
+ /*
   * Close the input UM fields file. 
   *--------------------------------------------------------------------------*/
      ierr = nc_enddef( ncid );
@@ -351,7 +365,7 @@ int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag ) {
  /*
   * Output the lon/lat data values 
   *-------------------------------------------------------------------------*/
-     construct_lat_lon_arrays( ncid, rflag, iflag );
+     construct_lat_lon_arrays( ncid );
 
      printf( "-----------------------------------------------------------\n" );
      printf( "  Stash_Code        Variable_Name             Dimensions\n" );

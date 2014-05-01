@@ -40,12 +40,12 @@
  ***    May 1, 2014
  ***/
 
-void are_time_bnd_required( int ncid, float dt ) {
+void are_time_bnd_required( int ncid, float dt, int num_times ) {
 
-    int    i, j, ierr, dim_ids[2], varID, flag;
+    int    i, j, k, ierr, dim_ids[2], varID, flag;
     size_t count[2], offset[2];
     float  val[2];
-    char   varname[9];
+    char   time_bnd_str[9];
 
  /** Do any of the UM variables present contain post-processing that requires **
   ** temporal boundaries?                                                     **/
@@ -62,33 +62,40 @@ void are_time_bnd_required( int ncid, float dt ) {
   *************************************************************************
   *************************************************************************/  
 
- /** Set dimensions for a new NetCDF variable describing the temporal bounds **/
-
-    dim_ids[0] = num_timesteps;
-    ierr = nc_def_dim( ncid, "nv", 2, &dim_ids[1] );
-
  /** Create the new NetCDF time bounds variable **/
 
-    ierr = nc_def_var( ncid, "time_bnd", NC_FLOAT, 2, dim_ids, &varID );
-    ierr = nc_put_att_text( ncid, varID, "long_name", 37, "start & end times for the cell method" );
-    ierr = nc_put_att_text( ncid, varID,     "units",  5, "hours" );
+    ierr = nc_def_dim( ncid, "nv", 2, &dim_ids[1] );
 
+    for ( i=0; i<num_times; i++ ) {
+        dim_ids[0] = i;
+
+        sprintf( time_bnd_str, "time_bnd%i", i );
+        ierr = nc_def_var( ncid, time_bnd_str, NC_FLOAT, 2, dim_ids, &varID );
+        ierr = nc_put_att_text( ncid, varID, "long_name", 37, "start & end times for the cell method" );
+        ierr = nc_put_att_text( ncid, varID,     "units",  5, "hours" );
+
+    }
     ierr = nc_enddef( ncid );
 
  /** Write the temporal bound values to hard disk **/
 
-    val[0] = 0.0;
-    val[1] = dt;
-    count[0] = 1;
-    count[1] = 2;
-    offset[1] = 0;
-     
-    for ( i=0; i<num_timesteps; i++ ) {
-        offset[0] = i;
-        ierr = nc_put_vara_float( ncid, varID, offset, count, val );
-        for ( j=0; j<2; j++ ) { val[j] += dt; }
-    }
+    for ( k=0; k<num_times; k++ ) {
 
+        sprintf( time_bnd_str, "time_bnd%d", k );
+        ierr = nc_inq_varid( ncid, time_bnd_str, &varID );
+        val[0] = 0.0;
+        val[1] = dt;
+        count[0] = 1;
+        count[1] = 2;
+        offset[1] = 0;
+     
+        for ( i=0; i<num_timesteps; i++ ) {
+            offset[0] = i;
+            ierr = nc_put_vara_float( ncid, varID, offset, count, val );
+            for ( j=0; j<2; j++ ) { val[j] += dt; }
+        }
+
+    }
     ierr = nc_redef( ncid );
     return;
 }
@@ -98,7 +105,7 @@ float create_time_dim( int ncid, int num_times, int *vars ) {
      int  *dimID, dim_id[2], i, j ,k;
      char time_des[40], dim_name[6], calendar[9], mth_str[3], day_str[3],
           hr_str[3], min_str[3], sec_str[3];
-     float dt;
+     float dt =0.0;
 
      dimID = (int *) malloc( num_times*sizeof(int) );
 
@@ -172,7 +179,7 @@ float create_time_dim( int ncid, int num_times, int *vars ) {
 
  void set_temporal_dimensions( int ncid ) {
 
-    int    i, j, k, cnt;
+    int    i, j, k;
     int    num_validity_times, *field_ids;
     double tdiff; 
     float  dt;
@@ -231,7 +238,7 @@ float create_time_dim( int ncid, int num_times, int *vars ) {
     }
 
   /*** Set temporal bounds for any UM accummulation variables ***/
-    are_time_bnd_required( ncid, dt );
+    are_time_bnd_required( ncid, dt, num_validity_times );
 
     free( field_ids );
     return;
