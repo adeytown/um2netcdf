@@ -112,7 +112,7 @@ void set_lon_lat_dimensions( int ncid, int iflag, int rflag ) {
         ierr = nc_put_att_text( ncid, varID, "grid_mapping_name", 26, "rotated_latitude_longitude" );
         ierr = nc_put_att_double( ncid, varID, "grid_north_pole_latitude", NC_DOUBLE, 1, &real_constants[4] );
         ierr = nc_put_att_double( ncid, varID, "grid_north_pole_longitude", NC_DOUBLE, 1, &real_constants[5] );
-
+     }
         free( dimID );
 
         dimID = (int *)malloc( 3*sizeof(int) );
@@ -134,14 +134,14 @@ void set_lon_lat_dimensions( int ncid, int iflag, int rflag ) {
         dimID[0] = dim_ids[0];
         dimID[1] = dim_ids[1];
 
-        ierr = nc_def_var( ncid,  "longitude", vartype, 2, dimID, &varID );
+        ierr = nc_def_var( ncid,  "longitude", NC_FLOAT, 2, dimID, &varID );
         ierr = nc_put_att_text( ncid, varID, "standard_name", 9, "longitude" );
         ierr = nc_put_att_text( ncid, varID,     "long_name",18, "longitude on earth" );
         ierr = nc_put_att_text( ncid, varID,         "units",12, "degrees_east" );
         ierr = nc_put_att_text( ncid, varID,          "axis", 1, "X" );
         ierr = nc_put_att_text( ncid, varID,        "bounds",18, "longitude_cell_bnd" );
 
-        ierr = nc_def_var( ncid,  "latitude", vartype, 2, dimID, &varID );
+        ierr = nc_def_var( ncid,  "latitude", NC_FLOAT, 2, dimID, &varID );
         ierr = nc_put_att_text(  ncid, varID, "standard_name", 8, "latitude" );
         ierr = nc_put_att_text(  ncid, varID,     "long_name",17, "latitude on earth" );
         ierr = nc_put_att_text(  ncid, varID,         "units",13, "degrees_north" );
@@ -151,7 +151,7 @@ void set_lon_lat_dimensions( int ncid, int iflag, int rflag ) {
         ierr = nc_put_att_float( ncid, varID, "valid_max", NC_FLOAT, 1, &tmp );
         tmp = -90.0;
         ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &tmp );
-     }
+      
      free( dimID );    
 
      return;

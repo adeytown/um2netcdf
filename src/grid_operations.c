@@ -31,23 +31,24 @@
 /***
  *** CONSTRUCT ROTATED LAT LON ARRAYS
  ***
- *** Subroutine where the true longitude and latitude values for each UM field datapoint 
- *** are determined.  It is assumed that the data is located on the P-points of an
- *** Arakawa-C grid.
+ *** Subroutine where the longitude and latitutde arrays are constructed for the
+ *** rotated lon/lat grid used in the UM model.  
+ ***
+ *** INPUT: 
+ ***      lon -> 2D longitude array
+ ***      lat -> 2D latitude array
  ***
  ***   Mark Cheeseman, NIWA
- ***   December 17, 2013
+ ***   May 1, 2014
  ***/
 
-void construct_rotated_lat_lon_arrays( int ncid, double *lon, double *lat ) {
+void construct_rotated_lat_lon_arrays( float *lon, float *lat ) {
 
      int    i, j;
      double tlat, tlon, degtorad, radtodeg, sock, cpart, t1, t2, longitude, latitude;
-     double PI, *lat_rotated, *lon_rotated;
+     double PI;
 
      PI = 3.1415926535898;
-     lon_rotated = (double *) malloc( int_constants[5]*int_constants[6]*sizeof(double) );
-     lat_rotated = (double *) malloc( int_constants[5]*int_constants[6]*sizeof(double) );
 
      degtorad = PI / 180.0;
      radtodeg = 180.0 / PI;
@@ -59,7 +60,7 @@ void construct_rotated_lat_lon_arrays( int ncid, double *lon, double *lat ) {
          tlat = lat[j]*degtorad;
          t1   = -cos(real_constants[4])*sin(tlat);
          for ( i=0; i<int_constants[5]; i++ ) {
-         
+
             tlon = lon[i]*degtorad;
             cpart = cos(tlon) * cos(tlat);
             t2    = sin(real_constants[4])*cpart;
@@ -72,73 +73,38 @@ void construct_rotated_lat_lon_arrays( int ncid, double *lon, double *lat ) {
             longitude += sock;
             if ( longitude<0.0 ) { longitude += 2.0*PI; }
 
-            lat_rotated[i+int_constants[5]*j] = latitude * radtodeg;
-            lon_rotated[i+int_constants[5]*j] = longitude * radtodeg;
+            lat[i+int_constants[5]*j] = (float )(latitude * radtodeg);
+            lon[i+int_constants[5]*j] = (float )(longitude * radtodeg);
 
          }
-     } 
+     }
 
-  /** Output the lon/lat arrays into the NetCDF file **/
-     i = nc_inq_varid( ncid, "longitude", &j );
-     i = nc_put_var_double( ncid, j, lon_rotated );
-
-     i = nc_inq_varid( ncid, "latitude", &j );
-     i = nc_put_var_double( ncid, j, lat_rotated );
-
-     free( lat_rotated );
-     free( lon_rotated );
      return;
 }
 
-void construct_rotated_lat_lon_arrays_float( int ncid, float *flon, float *flat ) {
+void construct_reg_lat_lon_arrays( float *lon, float *lat ) {
 
-     int    i, j;
-     float tlat, tlon, degtorad, radtodeg, sock, cpart, t1, t2, longitude, 
-           latitude, *flon_rotated, *flat_rotated;
-     const float PI = 3.1415926535898;
+     int    i, j, ind;
+     double val;
 
-     flon_rotated = (float *) malloc( int_constants[5]*int_constants[6]*sizeof(float) );
-     flat_rotated = (float *) malloc( int_constants[5]*int_constants[6]*sizeof(float) );
+  /** Construct the "model" latitude values **/
+     for ( j=0; j<int_constants[6]; j++ ) {
+         val = real_constants[2] + real_constants[1]*((double ) j);
+         for ( i=0; i<int_constants[5]; i++ ) {
+             ind = j*int_constants[5] + i;
+             lat[ind] = (float ) val;
+         }
+     }
 
-     degtorad = PI / 180.0;
-     radtodeg = 180.0 / PI;
-     if ( real_constants[4]==0 ) { sock = 0; }
-     else                        { sock = (float) real_constants[5] - PI; }
-
+  /** Construct the "model" longitude values **/
      for ( j=0; j<int_constants[6]; j++ ) {
      for ( i=0; i<int_constants[5]; i++ ) {
-
-   /** Convert from degrees to radians **/
-         tlat = flat[j]*degtorad;
-         tlon = flon[i]*degtorad;
-
-         cpart = cos(tlon) * cos(tlat);
-         t1    = (float ) (-cos(real_constants[4])*sin(tlat));
-         t2    = (float ) (sin(real_constants[4])*cpart);
-
-         latitude = (float ) (asin((cos(real_constants[4])*cpart)+(sin(real_constants[4])*sin(tlat))));
-         if ( fabs(cos(latitude)+(t1+t2))<=1.0e-8 ) { longitude = PI; }
-         else                                       { longitude = -acos((t1+t2)/cos(latitude)); }
-
-         if ( tlon>=0.0 && tlon<=PI ) longitude = -1.0*longitude;
-         longitude += sock;
-         if ( longitude<0.0 ) { longitude += 2.0*PI; }
-
-         flat_rotated[i+int_constants[5]*j] = latitude * radtodeg;
-         flon_rotated[i+int_constants[5]*j] = longitude * radtodeg;
-
+         val = real_constants[3] + real_constants[0]*((double ) i);
+         ind = j*int_constants[5] + i;
+         lon[ind] = (float ) val;
      }
      }
 
-  /** Output the lon/lat arrays into the NetCDF file **/
-     i = nc_inq_varid( ncid, "longitude", &j );
-     i = nc_put_var_float( ncid, j, flon_rotated );
-
-     i = nc_inq_varid( ncid, "latitude", &j );
-     i = nc_put_var_float( ncid, j, flat_rotated );
-
-     free( flat_rotated );
-     free( flon_rotated );
      return;
 }
 
@@ -146,73 +112,39 @@ void construct_rotated_lat_lon_arrays_float( int ncid, float *flon, float *flat 
 /***
  *** CONSTRUCT LAT LON ARRAYS 
  ***
- *** Subroutine where the model longitude and latitude of the UM datapoints 
- *** are determined.
+ *** Subroutine where the 2D longitude and latitude arrays are determined
+ *** and written to hard disk.  These are the values from the model grid
+ *** in curvilinear coordinates. 
  ***
- ***   INPUT:  rflag -> denotes whether reduced precision is being used 
+ ***   INPUT: 
+ ***           ncid -> file handler for the newly created NetCDF file 
  ***
  ***   Mark Cheeseman, NIWA
  ***   December 17, 2013
  ***/ 
 
-void construct_lat_lon_arrays( int ncid, int rflag, int iflag ) {
+void construct_lat_lon_arrays( int ncid ) {
 
-     int     varID, i, j, ind;
-     double *buf;
-     float  *fbuf;
+     int    varID, ierr;
+     float *lat, *lon, val;
 
-     if ( rflag==1 ) {
+     lat = (float *) malloc( int_constants[5]*int_constants[6]*sizeof(float) );
+     lon = (float *) malloc( int_constants[5]*int_constants[6]*sizeof(float) );
 
-        fbuf = (float *) malloc( int_constants[5]*int_constants[6]*sizeof(float) );
-        
-        for ( j=0; j<int_constants[6]; j++ ) {
-        for ( i=0; i<int_constants[5]; i++ ) {
-            ind = j*int_constants[5] + i;
-            fbuf[ind] = (float ) (real_constants[2] + j*real_constants[1]); 
-        }
-        }
-     
-        i = nc_inq_varid( ncid, "latitude", &varID );
-        i = nc_put_var_float( ncid, varID, fbuf );
+  /** Check if a rotated coordinate system is being used **/
+     if ( header[3]<99 ) { construct_reg_lat_lon_arrays( lon, lat ); }
+     else                { construct_rotated_lat_lon_arrays( lon, lat ); }
 
-        for ( j=0; j<int_constants[6]; j++ ) {
-        for ( i=0; i<int_constants[5]; i++ ) {
-            ind = j*int_constants[5] + i;
-            fbuf[ind] = (float ) (real_constants[3] + j*real_constants[0]); 
-        }
-        }
-     
-        i = nc_inq_varid( ncid, "longitude", &varID );
-        i = nc_put_var_float( ncid, varID, fbuf );
+  /** Output latitude values to hard disk **/
+     ierr = nc_inq_varid( ncid, "latitude", &varID );
+     ierr = nc_put_var_float( ncid, varID, lon );
 
-        free( fbuf );
+  /** Output longitude values to hard disk **/
+     ierr = nc_inq_varid( ncid, "longitude", &varID );
+     ierr = nc_put_var_float( ncid, varID, lat );
 
-     } else {
-
-        buf = (double *) malloc( int_constants[5]*int_constants[6]*sizeof(double) );
-        
-        for ( j=0; j<int_constants[6]; j++ ) {
-        for ( i=0; i<int_constants[5]; i++ ) {
-            ind = j*int_constants[5] + i;
-            buf[ind] = real_constants[2] + j*real_constants[1]; 
-        }
-        }
-     
-        i = nc_inq_varid( ncid, "latitude", &varID );
-        i = nc_put_var_double( ncid, varID, buf );
-
-        for ( j=0; j<int_constants[6]; j++ ) {
-        for ( i=0; i<int_constants[5]; i++ ) {
-            ind = j*int_constants[5] + i;
-            buf[ind] = real_constants[3] + j*real_constants[0]; 
-        }
-        }
-     
-        i = nc_inq_varid( ncid, "longitude", &varID );
-        i = nc_put_var_double( ncid, varID, buf );
-
-        free( buf );
-     }
+     free( lat );
+     free( lon );
 
      return;
 }
