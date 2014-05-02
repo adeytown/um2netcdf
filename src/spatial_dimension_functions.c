@@ -26,13 +26,6 @@
 #include <string.h>
 #include "field_def.h"
 
-void set_soil_levels( int ncid, int n, int id );
-void set_pressure_levels( int ncid, int n, int id );
-void set_altitude( int ncid, int n, int id );
-void set_hybrid_levels( int ncid, int n, int id, unsigned short grid );
-void set_surface_levels( int ncid, int n, int id );
-void set_sea_surface_levels( int ncid, int n, int id );
-
 /***
  *** SET_LON_LAT_DIMENSIONS
  ***
@@ -113,111 +106,50 @@ void set_lon_lat_dimensions( int ncid, int iflag, int rflag ) {
         ierr = nc_put_att_double( ncid, varID, "grid_north_pole_latitude", NC_DOUBLE, 1, &real_constants[4] );
         ierr = nc_put_att_double( ncid, varID, "grid_north_pole_longitude", NC_DOUBLE, 1, &real_constants[5] );
      }
-        free( dimID );
+     free( dimID );
 
-        dimID = (int *)malloc( 3*sizeof(int) );
-        dimID[0] = dim_ids[2];
-        dimID[1] = dim_ids[0];
-        dimID[2] = dim_ids[1];
+     dimID = (int *)malloc( 3*sizeof(int) );
+     dimID[0] = dim_ids[2];
+     dimID[1] = dim_ids[0];
+     dimID[2] = dim_ids[1];
 
-        ierr = nc_def_var( ncid, "longitude_cell_bnd", vartype, 3, dimID, &varID );
-        ierr = nc_put_att_text( ncid, varID,  "long_name", 33, "longitude of cell bounds on earth" );
-        ierr = nc_put_att_text(  ncid, varID,     "units", 13, "degrees_north" );
+     ierr = nc_def_var( ncid, "longitude_cell_bnd", vartype, 3, dimID, &varID );
+     ierr = nc_put_att_text( ncid, varID,  "long_name", 33, "longitude of cell bounds on earth" );
+     ierr = nc_put_att_text(  ncid, varID,     "units", 13, "degrees_north" );
 
-        dimID[0] = dim_ids[3];
-        ierr = nc_def_var( ncid, "latitude_cell_bnd", vartype, 3, dimID, &varID );
-        ierr = nc_put_att_text( ncid, varID, "long_name", 32, "latitude of cell bounds on earth" );
-        ierr = nc_put_att_text( ncid, varID,     "units", 12, "degrees_east" );
-        free( dimID );
+     dimID[0] = dim_ids[3];
+     ierr = nc_def_var( ncid, "latitude_cell_bnd", vartype, 3, dimID, &varID );
+     ierr = nc_put_att_text( ncid, varID, "long_name", 32, "latitude of cell bounds on earth" );
+     ierr = nc_put_att_text( ncid, varID,     "units", 12, "degrees_east" );
+     free( dimID );
 
-        dimID = (int *)malloc( 2*sizeof(int) );
-        dimID[0] = dim_ids[0];
-        dimID[1] = dim_ids[1];
+     dimID = (int *)malloc( 2*sizeof(int) );
+     dimID[0] = dim_ids[0];
+     dimID[1] = dim_ids[1];
 
-        ierr = nc_def_var( ncid,  "longitude", NC_FLOAT, 2, dimID, &varID );
-        ierr = nc_put_att_text( ncid, varID, "standard_name", 9, "longitude" );
-        ierr = nc_put_att_text( ncid, varID,     "long_name",18, "longitude on earth" );
-        ierr = nc_put_att_text( ncid, varID,         "units",12, "degrees_east" );
-        ierr = nc_put_att_text( ncid, varID,          "axis", 1, "X" );
-        ierr = nc_put_att_text( ncid, varID,        "bounds",18, "longitude_cell_bnd" );
+     ierr = nc_def_var( ncid,  "longitude", NC_FLOAT, 2, dimID, &varID );
+     ierr = nc_put_att_text( ncid, varID, "standard_name", 9, "longitude" );
+     ierr = nc_put_att_text( ncid, varID,     "long_name",18, "longitude on earth" );
+     ierr = nc_put_att_text( ncid, varID,         "units",12, "degrees_east" );
+     ierr = nc_put_att_text( ncid, varID,          "axis", 1, "X" );
+     ierr = nc_put_att_text( ncid, varID,        "bounds",18, "longitude_cell_bnd" );
 
-        ierr = nc_def_var( ncid,  "latitude", NC_FLOAT, 2, dimID, &varID );
-        ierr = nc_put_att_text(  ncid, varID, "standard_name", 8, "latitude" );
-        ierr = nc_put_att_text(  ncid, varID,     "long_name",17, "latitude on earth" );
-        ierr = nc_put_att_text(  ncid, varID,         "units",13, "degrees_north" );
-        ierr = nc_put_att_text(  ncid, varID,          "axis", 1, "Y" );
-        ierr = nc_put_att_text( ncid, varID,         "bounds",17, "latitude_cell_bnd" );
-        tmp = 90.0;
-        ierr = nc_put_att_float( ncid, varID, "valid_max", NC_FLOAT, 1, &tmp );
-        tmp = -90.0;
-        ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &tmp );
+     ierr = nc_def_var( ncid,  "latitude", NC_FLOAT, 2, dimID, &varID );
+     ierr = nc_put_att_text(  ncid, varID, "standard_name", 8, "latitude" );
+     ierr = nc_put_att_text(  ncid, varID,     "long_name",17, "latitude on earth" );
+     ierr = nc_put_att_text(  ncid, varID,         "units",13, "degrees_north" );
+     ierr = nc_put_att_text(  ncid, varID,          "axis", 1, "Y" );
+     ierr = nc_put_att_text( ncid, varID,         "bounds",17, "latitude_cell_bnd" );
+     tmp = 90.0;
+     ierr = nc_put_att_float( ncid, varID, "valid_max", NC_FLOAT, 1, &tmp );
+     tmp = -90.0;
+     ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &tmp );
       
      free( dimID );    
 
      return;
 }
 
-/***
- *** SET_VERTICAL_DIMENSIONS
- ***
- *** Function that determines how many vertical dimensions are required to
- *** describe the datafields in the UM fields file.  The dimensions are created
- *** in the new NetCDF file.
- ***
- *** INPUT:  ncid    -> id of the newly created NetCDF file
- ***         dim_ids -> array containing the NetCDF dimension IDs
- ***         ndim    -> # of previously defined NetCDF dimensions
- ***         rflag   -> equal to 1 if 32-bit output precision requested by user
- ***
- ***    Mark Cheeseman, NIWA
- ***    December 19, 2013
- ***/
-
-void set_vertical_dimensions( int ncid, int rflag ) {
-
-     int    i, num_instances;
-
-    /*** Check each stored UM variable its 'z-coordinate' ***/
-     for ( i=0; i<num_stored_um_fields; i++ ) {
-
-       /** determine # of 'z-levels' for this variable */
-         num_instances = stored_um_fields[i].num_slices / num_timesteps;
-
-       /** Create new dimension if variable is 4D **/
-         if ( num_instances>1 ) {
-            switch ( stored_um_fields[i].lbvc ) {
-                 case 1:
-                      set_altitude( ncid, num_instances, i );
-                      break;
-                 case 6:
-                      set_soil_levels( ncid, num_instances, i );
-                      break;
-                 case 8:
-                      set_pressure_levels( ncid, num_instances, i );
-                      break;
-                 case 65:
-                      set_hybrid_levels( ncid, num_instances, i, stored_um_fields[i].grid_type );
-                      break;
-                 case 128:
-                      set_sea_surface_levels( ncid, num_instances, i );
-                      break;
-                 case 129:
-                      set_surface_levels( ncid, num_instances, i );
-                      break;
-            }
-
-         }
-
-     }
-
-    /*** Define dimensions to hold length of ETA arrays ***/
-     i = nc_def_dim( ncid, "num_etaT_levels", (size_t ) header[110], 
-                    &num_instances );
-     i = nc_def_dim( ncid, "num_etaR_levels", (size_t ) (header[110]-1), 
-                    &num_instances );
-
-     return;
-}
 
 void set_horizontal_dimensions( int ncid ) {
 

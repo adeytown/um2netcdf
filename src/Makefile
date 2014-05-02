@@ -45,7 +45,7 @@ include ../config/make.inc.$(ARCH)_$(CC)
 ##-----------------------------------------------------------------------------
 
 OBJS =	util.o stashfile_operations.o umfile_operations.o interp.o \
-	vertical_dimensions.o grid_operations.o temporal_dimension_functions.o \
+	vertical_dimensions.o lat_lon_coordinates.o temporal_dimension_functions.o \
 	spatial_dimension_functions.o wgdos_unpack.o netcdf_variable_functions.o \
         convert_float_ibm_to_ieee32.o netcdf_functions.o um2netcdf.o
 
@@ -53,7 +53,8 @@ OBJS =	util.o stashfile_operations.o umfile_operations.o interp.o \
 ## Define the name and location of the um2netcdf binary 
 ##-----------------------------------------------------------------------------
 
-BINARY=/hpcf/working/cheesemanmp/um2netcdf/NZCSM_CHECK/surface/um2netcdf.x
+#BINARY=/hpcf/working/cheesemanmp/um2netcdf/NZCSM_CHECK/surface/um2netcdf.x
+BINARY=../test/um2netcdf.x
 
 ##-----------------------------------------------------------------------------
 ## Global Compile Rules
@@ -87,12 +88,12 @@ util.o:
 umfile_operations.o:
 interp.o:
 stashfile_operations.o:  
-grid_operations.o:  
+lat_lon_coordinates.o:  
 vertical_dimensions.o:
 convert_float_ibm_to_ieee32.o:
 wgdos.o:
 temporal_dimension_functions.o: 
 spatial_dimension_functions.o: vertical_dimensions.o
 netcdf_variable_functions.o: interp.o umfile_operations.o wgdos.o 
-netcdf_functions.o: interp.o grid_operations.o spatial_dimension_functions.o temporal_dimension_functions.o netcdf_variable_functions.o
+netcdf_functions.o: interp.o lat_lon_coordinates.o spatial_dimension_functions.o vertical_dimensions.o temporal_dimension_functions.o netcdf_variable_functions.o
 um2netcdf.o: util.o stashfile_operations.o umfile_operations.o netcdf_functions.o
