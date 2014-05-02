@@ -110,17 +110,17 @@ void set_lon_lat_dimensions( int ncid, int iflag, int rflag ) {
 
      dimID = (int *)malloc( 3*sizeof(int) );
      dimID[0] = dim_ids[2];
-     dimID[1] = dim_ids[0];
-     dimID[2] = dim_ids[1];
+     dimID[1] = dim_ids[1];
+     dimID[2] = dim_ids[0];
 
      ierr = nc_def_var( ncid, "longitude_cell_bnd", vartype, 3, dimID, &varID );
      ierr = nc_put_att_text( ncid, varID,  "long_name", 33, "longitude of cell bounds on earth" );
-     ierr = nc_put_att_text(  ncid, varID,     "units", 13, "degrees_north" );
+     ierr = nc_put_att_text(  ncid, varID,     "units", 13, "degrees_east" );
 
      dimID[0] = dim_ids[3];
      ierr = nc_def_var( ncid, "latitude_cell_bnd", vartype, 3, dimID, &varID );
      ierr = nc_put_att_text( ncid, varID, "long_name", 32, "latitude of cell bounds on earth" );
-     ierr = nc_put_att_text( ncid, varID,     "units", 12, "degrees_east" );
+     ierr = nc_put_att_text( ncid, varID,     "units", 12, "degrees_north" );
      free( dimID );
 
      dimID = (int *)malloc( 2*sizeof(int) );
