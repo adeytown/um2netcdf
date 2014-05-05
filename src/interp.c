@@ -26,6 +26,7 @@
 #include <string.h>
 #include "field_def.h"
 
+
 /***
  *** INTERP_DO_NOTHING
  ***
@@ -174,3 +175,4 @@ double *b_to_c_grid_interp_u_points( double *val, int nx, int ny ) {
        free( val );
        return interp_val;
 }
+

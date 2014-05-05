@@ -94,6 +94,6 @@ convert_float_ibm_to_ieee32.o:
 wgdos.o:
 temporal_dimension_functions.o: 
 spatial_dimension_functions.o: vertical_dimensions.o
-netcdf_variable_functions.o: interp.o umfile_operations.o wgdos.o 
+netcdf_variable_functions.o: util.o interp.o umfile_operations.o wgdos.o 
 netcdf_functions.o: interp.o lat_lon_coordinates.o spatial_dimension_functions.o vertical_dimensions.o temporal_dimension_functions.o netcdf_variable_functions.o
 um2netcdf.o: util.o stashfile_operations.o umfile_operations.o netcdf_functions.o

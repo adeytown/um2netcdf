@@ -69,6 +69,28 @@ void usage() {
 
 
 /***
+ *** IEEE_USAGE_MESSAGE
+ ***
+ *** Displays a message instructing user how to use the IEEE utility when
+ *** trying to convert/display an UM input file with WGDOS-packed fields.
+ ***
+ ***   Mark Cheeseman, NIWA
+ ***   May 6, 2014
+ ***/
+
+void ieee_usage_message() {
+     printf( "\nWARNING: you are attempting to convert an UM Fields or Dump field with\n" );
+     printf( "           fields that are WGDOS-packed.  You will need to unpack the input\n" );
+     printf( "           file using the following procedure:\n\n" );
+     printf( "STEP 1: log into FitzRoy or Barometer\n\n" );
+     printf( "STEP 2: set the UMDIR environment variable as so:\n" );
+     printf( "        export UMDIR=/oper/admin/um_fcm/um\n\n" );
+     printf( "STEP 3: Run the IEEE utility that comes with the UM release as so:\n" );
+     printf( "        /oper/admin/um_fcm/um/vn8.4/ibm/utils/ieee -64e <input_filename> <output_filename>\n\n" );
+}
+ 
+
+/***
  *** IBM_IEEE_FLOAT_CONVERSION 
  ***
  *** Subroutine that converts an array of floats from IBM float32 to IEEE float32 format.

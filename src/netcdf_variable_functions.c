@@ -38,6 +38,7 @@ double *b_to_c_grid_interp_u_points( double *val, int nx, int ny );
 void   endian_swap_4bytes( void *ptr, int nchunk );
 void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf,
                      double mdi );
+void ieee_usage_message();
 
 /***
  *** FILL_VARIABLES
@@ -74,8 +75,10 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
        /** Determine ID & # of dimensions of variable **/
          ierr = nc_inq_varid( ncid, name, &varid );
          if ( stored_um_fields[n].slices[0].lbpack==1 ) {
-            printf( "%s is WGDOS packed.  Its values won't be read\n", stored_um_fields[n].name );
-            continue;
+            ieee_usage_message();
+            exit(1);
+//            printf( "%s is WGDOS packed.  Its values won't be read\n", stored_um_fields[n].name );
+//            continue;
          } else { 
             printf( "     %5d %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
                                                     stored_um_fields[n].nx, stored_um_fields[n].ny ); 
@@ -130,7 +133,7 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 //             }
              
        /** Perform interpolation if requested **/
-             buf = field_interpolation( buf, stored_um_fields[n].nx, stored_um_fields[n].ny );            
+             buf = field_interpolation( buf, stored_um_fields[n].nx, stored_um_fields[n].ny );
 
        /** Write the raw data to disk **/
              if ( rflag==0 ) { 

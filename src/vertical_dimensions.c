@@ -151,31 +151,37 @@ void set_pressure_levels( int ncid, int n, int id ) {
 
 void set_altitude( int ncid, int n, int id ) {
 
-     int    i, ind, ierr, var_id, dim_id[1];
+     int    i, ierr, var_id, dim_id[1];
      char   dim_name[10];
      float  height;
      size_t nc_index[1];
 
-  /** Create the appropriate NetCDF dimension **/
+  /** Get ID of the appropriate NetCDF dimension **/
      sprintf( dim_name, "altitude%d", n );
+     ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] );
+     if ( ierr==NC_NOERR ) {
+        stored_um_fields[id].z_dim = dim_id[0];
+        return;
+     }
+
+  /** Create the appropriate NetCDF dimension **/
      ierr = nc_def_dim( ncid, dim_name, n, &dim_id[0] );
 
   /** Create a corresponding NetCDF variable **/
      ierr = nc_def_var( ncid, dim_name, NC_FLOAT, 1, dim_id, &var_id );
 
   /** Add some appropriate attributes **/
-     ierr = nc_put_att_text( ncid, var_id,        "units",  1, "m" );
-     ierr = nc_put_att_text( ncid, var_id,     "positive",  2, "up" );
-     ierr = nc_put_att_text( ncid, var_id,         "axis",  1, "Z" );
-     ierr = nc_put_att_text( ncid, var_id,"standard_name",  8, "altitude" );
-     ierr = nc_put_att_text( ncid, var_id,    "long_name", 22, "height above sea level" );
+     ierr = nc_put_att_text( ncid, var_id,    "units", 1, "m" );
+     ierr = nc_put_att_text( ncid, var_id,     "axis", 1, "Z" );
+     ierr = nc_put_att_text( ncid, var_id,"standard_name", 8, "altitude" );
+     ierr = nc_put_att_text( ncid, var_id, "positive", 2, "up" );
+     ierr = nc_put_att_text( ncid, var_id, "long_name", 22, "height above sea level" );
+
+  /** Fill the new NetCDF variable **/
      ierr = nc_enddef( ncid );
 
-  /** NOTE: need to write axis values individually.  Compiler optimizer ignores loop **/
-  /**       if fill array write attempted.                                           **/
      for ( i=0; i<n; i++ ) {
-         ind = (int ) stored_um_fields[id].slices[i].level;
-         height = (float ) level_constants[4][ind];
+         height = (float ) stored_um_fields[id].slices[i].level;
          nc_index[0] = (size_t) i;
          ierr = nc_put_var1_float( ncid, var_id, nc_index, &height );
      }
