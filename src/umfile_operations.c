@@ -359,12 +359,12 @@ int check_um_file( char *filename, int rflag ) {
          stored_um_fields[j].ny     = (unsigned short ) lookup[i][17];
          stored_um_fields[j].nx     = (unsigned short ) lookup[i][18];
          stored_um_fields[j].lbvc   = (unsigned short ) lookup[i][25];
-         stored_um_fields[j].validity.tm_year = (int ) lookup[i][0];
-         stored_um_fields[j].validity.tm_mon  = (int ) lookup[i][1];
-         stored_um_fields[j].validity.tm_mday = (int ) lookup[i][2];
-         stored_um_fields[j].validity.tm_hour = (int ) lookup[i][3];
-         stored_um_fields[j].validity.tm_min  = (int ) lookup[i][4];
-         stored_um_fields[j].validity.tm_sec  = (int ) lookup[i][5];
+         stored_um_fields[j].validity.tm_year = (int ) lookup[i][6];
+         stored_um_fields[j].validity.tm_mon  = (int ) lookup[i][7];
+         stored_um_fields[j].validity.tm_mday = (int ) lookup[i][8];
+         stored_um_fields[j].validity.tm_hour = (int ) lookup[i][9];
+         stored_um_fields[j].validity.tm_min  = (int ) lookup[i][10];
+         stored_um_fields[j].validity.tm_sec  = (int ) lookup[i][11];
          stored_um_fields[j].lbproc           =        lookup[i][24]; 
          if ( rflag==0 ) {
             if ( lookup[i][38]==1 ) { stored_um_fields[j].vartype = NC_DOUBLE; }

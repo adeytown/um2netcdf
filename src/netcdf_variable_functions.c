@@ -69,23 +69,26 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
 
-       //  strcpy( name,um_vars[stored_um_fields[n].xml_index].varname ); 
+       /** Determine NetCDF variable ID of UM variable n **/
          strcpy( name, stored_um_fields[n].name ); 
-
-       /** Determine ID & # of dimensions of variable **/
          ierr = nc_inq_varid( ncid, name, &varid );
+
+       /** Stop if a WGDOS-packed field is encountered **/
          if ( stored_um_fields[n].slices[0].lbpack==1 ) {
             ieee_usage_message();
             exit(1);
-         } else { 
-            printf( "     %5d %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
-                                                    stored_um_fields[n].nx, stored_um_fields[n].ny ); 
          }
 
+       /** Determine # of dimensions for current UM variable **/
          num_z_levels = stored_um_fields[n].num_slices/num_timesteps;
-         if ( num_z_levels==1 ) { ndim = 3; } 
-         else                   { ndim = 4; printf( " x %2d", num_z_levels ); }
-         printf( "]\n" ); 
+         if ( num_z_levels==0 )      { continue; }
+         else if ( num_z_levels==1 ) { ndim = 3; } 
+         else                        { ndim = 4; }
+         printf( "     %5d %25s     [%4d x %4d x %3d]\n", stored_um_fields[n].stash_code, 
+                                                          stored_um_fields[n].name, 
+                                                          stored_um_fields[n].nx, 
+                                                          stored_um_fields[n].ny,
+                                                          num_z_levels ); 
 
          offset = (size_t *) calloc( ndim,sizeof(size_t) );
          count = (size_t *) malloc( ndim*sizeof(size_t) );
