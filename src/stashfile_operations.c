@@ -96,6 +96,11 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              fd[cnt].accum = atoi((const char *) str);
              xmlFree( str );
+          } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"level_type"))) {
+             str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+             if ( str!=NULL ) { fd[cnt].level_type = atoi((const char *) str); } 
+             else             { fd[cnt].level_type = 2; } 
+             xmlFree( str );
           }
           cur = cur->next;
      }

@@ -36,7 +36,7 @@
  ***   December 13, 2013
  ***/ 
 
-double *interp_do_nothing(  double *val, int nx, int ny ) {
+double *interp_do_nothing(  double *val, int nx, int ny, double maxval, double minval ) {
        return val;
 }
 
@@ -56,7 +56,7 @@ double *interp_do_nothing(  double *val, int nx, int ny ) {
  ***   December 6, 2013
  ***/
 
-double *u_to_p_point_interp_c_grid( double *val, int nx, int ny ) {
+double *u_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval ) {
 
        int     i, j, index, ny_interp;
        double *interp_val;
@@ -75,6 +75,12 @@ double *u_to_p_point_interp_c_grid( double *val, int nx, int ny ) {
        }
        }
        free( val );
+
+ /** Check for possible overflow and/or underflow **/
+       for ( i=0; i<nx*ny; i++ ) {
+           if ( interp_val[i]>maxval ) { interp_val[i] = maxval; }
+           if ( interp_val[i]<minval ) { interp_val[i] = minval; }
+       }
 
        return interp_val;
 }
@@ -96,7 +102,7 @@ double *u_to_p_point_interp_c_grid( double *val, int nx, int ny ) {
  ***   December 6, 2013
  ***/
 
-double *v_to_p_point_interp_c_grid( double *val, int nx, int ny ) {
+double *v_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval ) {
 
        int     i, j, index, ny_interp;
        double *interp_val;
@@ -122,6 +128,12 @@ double *v_to_p_point_interp_c_grid( double *val, int nx, int ny ) {
        }
        free( val );
 
+ /** Check for possible overflow and/or underflow **/
+       for ( i=0; i<nx*ny; i++ ) {
+           if ( interp_val[i]>maxval ) { interp_val[i] = maxval; }
+           if ( interp_val[i]<minval ) { interp_val[i] = minval; }
+       }
+
        return interp_val;
 }
 
@@ -140,7 +152,7 @@ double *v_to_p_point_interp_c_grid( double *val, int nx, int ny ) {
  ***   January 6, 2013
  ***/
 
-double *b_to_c_grid_interp_u_points( double *val, int nx, int ny ) {
+double *b_to_c_grid_interp_u_points( double *val, int nx, int ny, double maxval, double minval ) {
 
        int     i, j, index[4], ny_interp;
        double *interp_val;
@@ -171,6 +183,12 @@ double *b_to_c_grid_interp_u_points( double *val, int nx, int ny ) {
            interp_val[index[0]] = 0.25*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]]);
        }
        } 
+
+ /** Check for possible overflow and/or underflow **/
+       for ( i=0; i<nx*ny; i++ ) {
+           if ( interp_val[i]>maxval ) { interp_val[i] = maxval; }
+           if ( interp_val[i]<minval ) { interp_val[i] = minval; }
+       }
 
        free( val );
        return interp_val;

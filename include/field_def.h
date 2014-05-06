@@ -49,7 +49,7 @@ double   real_constants[6]; /* input UM fields files's real_constants array */
  *  FUNCTION POINTERS                                                        *
  *---------------------------------------------------------------------------*/
 
-double* (*field_interpolation)( double*, int, int );  /* ptr to appropriate interpolation procedure */
+double* (*field_interpolation)( double*, int, int, double, double );  /* ptr to appropriate interpolation procedure */
 void    (*endian_swap)( void*, int );                 /* ptr to appropriate endian swap procedure   */
 
 
@@ -66,6 +66,9 @@ typedef struct um_field_metadata {
        int code;           /* item code for the specific field */ 
        int model;          /* number of the UM model */
        int section;        /* section number where the field is located */
+       int level_type;     /* denotes which type of depth level is used for field (used for Hybrid levels only) */
+                           /*    level_type=1  -> points on model rho levels */
+                           /*    level_type=2  -> points on model theta levels (default) */
        int umgrid;         /* does field need to be intepreted onto the Arakawa-C grid? */
                            /*    umgrid=11 -> intepolate U,V points on an Arakawa-B grid (middle of a Arakawa-C grid cell) */
                            /*    umgrid=18 -> intepolate U-points on North-South cell faces to lower left data point */

@@ -31,14 +31,14 @@
 
 /** Function prototypes **/
 
-double *interp_do_nothing( double *val, int nx, int ny );
-double *u_to_p_point_interp_c_grid( double *val, int nx, int ny );
-double *v_to_p_point_interp_c_grid( double *val, int nx, int ny );
-double *b_to_c_grid_interp_u_points( double *val, int nx, int ny );
+double *interp_do_nothing( double *val, int nx, int ny, double maxval, double minval );
+double *u_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval );
+double *v_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval );
+double *b_to_c_grid_interp_u_points( double *val, int nx, int ny, double maxval, double minval );
 void   endian_swap_4bytes( void *ptr, int nchunk );
 void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf,
                      double mdi );
-void ieee_usage_message();
+void   ieee_usage_message();
 
 /***
  *** FILL_VARIABLES
@@ -61,9 +61,9 @@ void ieee_usage_message();
 
 int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
 
-     int      ierr, cnt, n, j, ndim, varid, i, num_z_levels;
+     int      ierr, cnt, n, j, ndim, varid, i, num_z_levels, loc;
      size_t   *offset, *count, dimlen;
-     double   *buf;
+     double   *buf, maxval, minval;
      float    *fbuf;
      char     name[45];
 
@@ -77,8 +77,6 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
          if ( stored_um_fields[n].slices[0].lbpack==1 ) {
             ieee_usage_message();
             exit(1);
-//            printf( "%s is WGDOS packed.  Its values won't be read\n", stored_um_fields[n].name );
-//            continue;
          } else { 
             printf( "     %5d %25s     [%4d x %4d", stored_um_fields[n].stash_code, stored_um_fields[n].name, 
                                                     stored_um_fields[n].nx, stored_um_fields[n].ny ); 
@@ -118,22 +116,20 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
          cnt = stored_um_fields[n].nx*stored_um_fields[n].ny;
          buf = (double *) calloc( cnt,sizeof(double) );   
 
+         loc = stored_um_fields[n].xml_index;
+         minval = um_vars[loc].validmin;
+         maxval = um_vars[loc].validmax;
+
          for ( j=0; j<stored_um_fields[n].num_slices; j++ ) {
              
        /** Read in a 2D raw data array **/
              fseek( fid, stored_um_fields[n].slices[j].location*wordsize, SEEK_SET );
-//             if ( (stored_um_fields[n].slices[j].lbpack==0)||(stored_um_fields[n].slices[j].lbpack==3000) ) { 
-                fread( buf, wordsize, cnt, fid ); 
-                endian_swap( buf, cnt );
-//             } else if ( stored_um_fields[n].slices[j].lbpack==1 ) {
-/* MPCH: April 29, 2014:  Not yet functional!!
-                wgdos_unpack( fid, stored_um_fields[n].nx, stored_um_fields[n].ny, buf, 
-                              stored_um_fields[n].slices[j].mdi );
- */
-//             }
+             fread( buf, wordsize, cnt, fid ); 
+             endian_swap( buf, cnt );
              
        /** Perform interpolation if requested **/
-             buf = field_interpolation( buf, stored_um_fields[n].nx, stored_um_fields[n].ny );
+             buf = field_interpolation( buf, stored_um_fields[n].nx, stored_um_fields[n].ny,
+                                        maxval, minval );
 
        /** Write the raw data to disk **/
              if ( rflag==0 ) { 

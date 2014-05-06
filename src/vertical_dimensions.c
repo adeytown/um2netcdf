@@ -202,13 +202,13 @@ void set_altitude( int ncid, int n, int id ) {
  ***               n -> number of hybrid levels to be filled
  ***              id -> index of the stored UM variable requiring this vertical
  ***                    dimension.
- ***            grid -> type of Arakawa Grid on which variable is defined
+ ***           level -> type of depth level on which the data is present
  ***
  ***   Mark Cheeseman, NIWA
  ***   April 29, 2014
  ***/
 
-void set_hybrid_levels( int ncid, int n, int id, unsigned short grid ) {
+void set_hybrid_levels( int ncid, int n, int id, int level ) {
 
      int    i, ierr, var_id, dim_id[1], ind;
      char   dim_name[8];
@@ -238,8 +238,8 @@ void set_hybrid_levels( int ncid, int n, int id, unsigned short grid ) {
 
      height = (float *) malloc( n*sizeof(float) );
 
-     ind = 4;
-     if ( (grid==11)||(grid==18)||(grid==19) ) { ind = 6; } 
+     if ( level==2 ) { ind = 4;}
+     else            { ind = 6; }
      for ( i=0; i<n; i++ ) 
          height[i] = (float ) level_constants[ind][stored_um_fields[id].slices[i].level]; 
 
@@ -364,7 +364,7 @@ void set_sea_surface_levels( int ncid, int n, int id ) {
 
 void set_vertical_dimensions( int ncid, int rflag ) {
 
-     int    i, num_instances;
+     int    i, num_instances, loc;
 
     /*** Check each stored UM variable its 'z-coordinate' ***/
      for ( i=0; i<num_stored_um_fields; i++ ) {
@@ -385,7 +385,8 @@ void set_vertical_dimensions( int ncid, int rflag ) {
                       set_pressure_levels( ncid, num_instances, i );
                       break;
                  case 65:
-                      set_hybrid_levels( ncid, num_instances, i, stored_um_fields[i].grid_type );
+                      loc = stored_um_fields[i].xml_index;
+                      set_hybrid_levels( ncid, num_instances, i, um_vars[loc].level_type );
                       break;
                  case 128:
                       set_sea_surface_levels( ncid, num_instances, i );
