@@ -34,7 +34,7 @@ void set_horizontal_dimensions( int ncid, int rflag );
 void set_lon_lat_dimensions( int ncid, int iflag, int rflag );
 void set_temporal_dimensions( int ncid );
 void construct_lat_lon_arrays( int ncid );
-int fill_variables( int ncid, FILE *fid, int iflag, int rflag );
+int  output_um_fields( int ncid, FILE *fid, int iflag, int rflag );
 
 /***
  *** CONSTRUCT_UM_VARIABLES
@@ -48,46 +48,45 @@ int fill_variables( int ncid, FILE *fid, int iflag, int rflag );
  ***   December 29, 2013
  ***/
 
-void construct_um_variables2( int ncid, int iflag ) {
+void construct_um_variables( int ncid, int iflag ) {
 
-     int     i, ierr, num_z_levels, *dim_ids, ndim, varID, loc, horz_dimids[3];
+     int     i, ierr, *dim_ids, ndim, varID, loc, horz_dimids[3];
      size_t *chunksize; 
 
   /** Determine the IDs of lon & lat dimensions **/
-     ierr = nc_inq_dimid( ncid,  "rlon", &horz_dimids[0] );
-     ierr = nc_inq_dimid( ncid,  "rlat", &horz_dimids[1] );
+     ierr = nc_inq_dimid( ncid, "rlon", &horz_dimids[0] );
+     ierr = nc_inq_dimid( ncid, "rlat", &horz_dimids[1] );
      if ( iflag==0 ) { ierr = nc_inq_dimid( ncid, "rlat2", &horz_dimids[2] ); }
 
      for ( i=0; i<num_stored_um_fields; i++ ) {
 
   /** Is this a 3D (t,y,x) or 4D (t,z,y,x) variable? **/
-         num_z_levels = stored_um_fields[i].num_slices / num_timesteps;
-         if ( num_z_levels>1 ) { ndim = 4; }
-         else                  { ndim = 3; }
+         if ( stored_um_vars[i].nz>1 ) { ndim = 4; }
+         else                          { ndim = 3; }
 
   /** Set the dimensions describing the UM variable. **/
          dim_ids = (int *) malloc( ndim*sizeof(int) );
 
-         dim_ids[0] = stored_um_fields[i].t_dim;
+         dim_ids[0]      = stored_um_vars[i].t_dim;
          dim_ids[ndim-1] = horz_dimids[0];
          dim_ids[ndim-2] = horz_dimids[1]; 
 
          if ( iflag==0 ) {  
-            if ( stored_um_fields[i].ny==int_constants[6] ) { dim_ids[ndim-2] = horz_dimids[1]; }
-            else                                            { dim_ids[ndim-2] = horz_dimids[2]; }
+            if ( stored_um_vars[i].ny==int_constants[6] ) { dim_ids[ndim-2] = horz_dimids[1]; }
+            else                                          { dim_ids[ndim-2] = horz_dimids[2]; }
          }
 
-         if ( ndim==4 ) { dim_ids[1] = stored_um_fields[i].z_dim; }
+         if ( ndim==4 ) { dim_ids[1] = stored_um_vars[i].z_dim; }
 
   /** Define the appropriate NetCDF variable **/
-         ierr = nc_def_var( ncid, stored_um_fields[i].name, stored_um_fields[i].vartype, ndim, dim_ids, &varID );
+         ierr = nc_def_var( ncid, stored_um_vars[i].name, stored_um_vars[i].vartype, ndim, dim_ids, &varID );
          free( dim_ids );
 
  /** Set the chunking attribute for this variable **/
          chunksize = (size_t* ) malloc( ndim*sizeof(size_t) );
          chunksize[0] = 1;
-         chunksize[ndim-1] = stored_um_fields[i].nx;
-         if ( iflag==0 ) { chunksize[ndim-2] = stored_um_fields[i].ny; }
+         chunksize[ndim-1] = stored_um_vars[i].nx;
+         if ( iflag==0 ) { chunksize[ndim-2] = stored_um_vars[i].ny; }
          else            { chunksize[ndim-2] = int_constants[6]; }
          if ( ndim==4 ) { chunksize[1] = 1; }
 
@@ -98,37 +97,36 @@ void construct_um_variables2( int ncid, int iflag ) {
          ierr = nc_def_var_deflate( ncid, varID, NC_NOSHUFFLE, 1, 4 );
 
  /*** Output details about the coordinate system used to describe field ***/
-         if ( stored_um_fields[i].coordinates==101 ) {
+         if ( stored_um_vars[i].coordinates==101 ) {
             ierr = nc_put_att_text( ncid, varID, "grid_mapping", 12, "rotated_pole" );
          } 
-         
 
  /*** Determine if any post-processing was performed on the data-field.  If so, ***/
  /*** indicate the operation performed.***/
-        if ( stored_um_fields[i].lbproc>0 ) { 
-           if ( (stored_um_fields[i].lbproc==8)||(stored_um_fields[i].lbproc==64) ) {  
+        if ( stored_um_vars[i].lbproc>0 ) { 
+           if ( (stored_um_vars[i].lbproc==8)||(stored_um_vars[i].lbproc==64) ) {  
               ierr = nc_put_att_text( ncid, varID, "cell_method", 11, "space:zonal" );
            }
-           else if ( stored_um_fields[i].lbproc==128 )  { 
-                if ( stored_um_fields[i].accum==0 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 9, "time:mean" ); }
-                else                                { ierr = nc_put_att_text( ncid, varID, "cell_method", 8, "time:sum" ); }
+           else if ( stored_um_vars[i].lbproc==128 )  { 
+                if ( stored_um_vars[i].accum==0 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 9, "time:mean" ); }
+                else                              { ierr = nc_put_att_text( ncid, varID, "cell_method", 8, "time:sum" ); }
            }
-           else if ( stored_um_fields[i].lbproc==4096 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 8, "time:min" ); }
-           else if ( stored_um_fields[i].lbproc==8192 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 8, "time:max" ); }
+           else if ( stored_um_vars[i].lbproc==4096 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 8, "time:min" ); }
+           else if ( stored_um_vars[i].lbproc==8192 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 8, "time:max" ); }
         }
 
 /** Add the appropriate attributes **/
-         loc = stored_um_fields[i].xml_index; 
+         loc = stored_um_vars[i].xml_index; 
          ierr = nc_put_att_int( ncid, varID,   "stash_model", NC_INT, 1, &
-                                    um_vars[loc].model );
+                                um_vars[loc].model );
          ierr = nc_put_att_int( ncid, varID, "stash_section", NC_INT, 1, &
-                                    um_vars[loc].section );
+                                um_vars[loc].section );
          ierr = nc_put_att_int( ncid, varID,    "stash_item", NC_INT, 1, &
-                                    um_vars[loc].code );
+                                um_vars[loc].code );
          ierr = nc_put_att_float( ncid, varID, "valid_max", NC_FLOAT, 1, &
-                                      um_vars[loc].validmax );
+                                  um_vars[loc].validmax );
          ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &
-                                      um_vars[loc].validmin );
+                                  um_vars[loc].validmin );
          ierr = nc_put_att_text( ncid, varID, "long_name", 100, um_vars[loc].longname );
          ierr = nc_put_att_text( ncid, varID, "standard_name", 75, um_vars[loc].stdname );
          ierr = nc_put_att_text( ncid, varID, "units", 25, um_vars[loc].units );
@@ -231,7 +229,7 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
   ** STEP 2:  VARIABLES                                                      **
   **=========================================================================**/ 
 
-     construct_um_variables2( ncid, iflag );
+     construct_um_variables( ncid, iflag );
 
  /**=========================================================================**
   ** STEP 3:  GLOBAL ATTRIBUTES                                              **
@@ -367,11 +365,7 @@ int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag ) {
   *-------------------------------------------------------------------------*/
      construct_lat_lon_arrays( ncid );
 
-     printf( "-----------------------------------------------------------\n" );
-     printf( "  Stash_Code        Variable_Name             Dimensions\n" );
-     printf( "-----------------------------------------------------------\n" );
-
-     i = fill_variables( ncid, fid, iflag, rflag );
+     i = output_um_fields( ncid, fid, iflag, rflag );
      if ( i==-1 ) { 
         printf( "ERROR: write failed\n" );
         return i;

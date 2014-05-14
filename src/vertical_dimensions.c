@@ -64,7 +64,7 @@ void set_soil_levels( int ncid, int n, int id ) {
 
      buf = (float *) calloc( n,sizeof(float) );
      for ( i=0; i<n; i++ ) { 
-         nn = (int ) (stored_um_fields[id].slices[i].level - 1);
+         nn = (int ) (stored_um_vars[id].slices[0][i].level - 1);
          buf[i] = (float ) level_constants[3][nn]; 
      }
 
@@ -72,7 +72,7 @@ void set_soil_levels( int ncid, int n, int id ) {
      free( buf );
 
   /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_fields[id].z_dim = dim_id[0];
+     stored_um_vars[id].z_dim = dim_id[0];
 
      return;
 }
@@ -102,7 +102,7 @@ void set_pressure_levels( int ncid, int n, int id ) {
      sprintf( dim_name, "pressure%d", n );
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
      if ( ierr==NC_NOERR ) {
-        stored_um_fields[id].z_dim = dim_id[0];
+        stored_um_vars[id].z_dim = dim_id[0];
         return;
      }
 
@@ -123,13 +123,13 @@ void set_pressure_levels( int ncid, int n, int id ) {
      ierr = nc_enddef( ncid );
 
      for ( i=0; i<n; i++ ) {
-         pressure = (float ) stored_um_fields[id].slices[i].level; 
+         pressure = (float ) stored_um_vars[id].slices[0][i].level; 
          nc_index[0] = (size_t) i;
          ierr = nc_put_var1_float( ncid, var_id, nc_index, &pressure );
      }
 
   /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_fields[id].z_dim = dim_id[0];
+     stored_um_vars[id].z_dim = dim_id[0];
 
      return;
 }
@@ -160,7 +160,7 @@ void set_altitude( int ncid, int n, int id ) {
      sprintf( dim_name, "altitude%d", n );
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] );
      if ( ierr==NC_NOERR ) {
-        stored_um_fields[id].z_dim = dim_id[0];
+        stored_um_vars[id].z_dim = dim_id[0];
         return;
      }
 
@@ -181,13 +181,13 @@ void set_altitude( int ncid, int n, int id ) {
      ierr = nc_enddef( ncid );
 
      for ( i=0; i<n; i++ ) {
-         height = (float ) stored_um_fields[id].slices[i].level;
+         height = (float ) stored_um_vars[id].slices[0][i].level;
          nc_index[0] = (size_t) i;
          ierr = nc_put_var1_float( ncid, var_id, nc_index, &height );
      }
 
   /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_fields[id].z_dim = dim_id[0];
+     stored_um_vars[id].z_dim = dim_id[0];
 
      return;
 }
@@ -217,7 +217,7 @@ void set_hybrid_levels( int ncid, int n, int id, int level ) {
      sprintf( dim_name, "hybrid%d", n );
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
      if ( ierr==NC_NOERR ) {
-        stored_um_fields[id].z_dim = dim_id[0];
+        stored_um_vars[id].z_dim = dim_id[0];
         return;
      }
 
@@ -241,13 +241,13 @@ void set_hybrid_levels( int ncid, int n, int id, int level ) {
      if ( level==2 ) { ind = 4;}
      else            { ind = 6; }
      for ( i=0; i<n; i++ ) 
-         height[i] = (float ) level_constants[ind][stored_um_fields[id].slices[i].level]; 
+         height[i] = (float ) level_constants[ind][stored_um_vars[id].slices[0][i].level]; 
 
      ierr = nc_put_var_float( ncid, var_id, height );
      free( height );
 
   /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_fields[id].z_dim = dim_id[0];
+     stored_um_vars[id].z_dim = dim_id[0];
 
      return;
 }
@@ -293,7 +293,7 @@ void set_surface_levels( int ncid, int n, int id ) {
      free( buf );
 
   /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_fields[id].z_dim = dim_id[0];
+     stored_um_vars[id].z_dim = dim_id[0];
 
      return;
 }
@@ -341,7 +341,7 @@ void set_sea_surface_levels( int ncid, int n, int id ) {
      free( buf );
 
   /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_fields[id].z_dim = dim_id[0];
+     stored_um_vars[id].z_dim = dim_id[0];
 
      return;
 }
@@ -370,11 +370,11 @@ void set_vertical_dimensions( int ncid, int rflag ) {
      for ( i=0; i<num_stored_um_fields; i++ ) {
 
        /** determine # of 'z-levels' for this variable */
-         num_instances = stored_um_fields[i].num_slices / num_timesteps;
+         num_instances = stored_um_vars[i].nz;
 
        /** Create new dimension if variable is 4D **/
          if ( num_instances>1 ) {
-            switch ( stored_um_fields[i].lbvc ) {
+            switch ( stored_um_vars[i].lbvc ) {
                  case 1:
                       set_altitude( ncid, num_instances, i );
                       break;
@@ -385,7 +385,7 @@ void set_vertical_dimensions( int ncid, int rflag ) {
                       set_pressure_levels( ncid, num_instances, i );
                       break;
                  case 65:
-                      loc = stored_um_fields[i].xml_index;
+                      loc = stored_um_vars[i].xml_index;
                       set_hybrid_levels( ncid, num_instances, i, um_vars[loc].level_type );
                       break;
                  case 128:

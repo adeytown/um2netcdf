@@ -40,8 +40,217 @@ void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf
                      double mdi );
 void   ieee_usage_message();
 
+
+
+void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
+
+     int     n, i, j, k, ndim, cnt, loc, varid;
+     size_t *count, *offset;
+     double *buf, maxval, minval;
+     float  *fbuf;
+     char    name[45];
+
+     for ( n=0; n<num_stored_um_fields; n++ ) {
+
+         strcpy( name, stored_um_vars[n].name );
+         i = nc_inq_varid( ncid, name, &varid );
+
+       /** Determine # of dimensions for current UM variable **/
+         ndim = 3;
+         if ( stored_um_vars[n].nz>1 ) { ndim = 4; }
+
+       /*** Allocate & set the sizes of a 2D slice in the UM variable ***/
+       /*** Remember that COUNT = COUNT[NT,NZ,NY,NX]                  ***/
+
+         count = (size_t *) malloc( ndim*sizeof(size_t) );
+         count[ndim-2] = int_constants[6];
+         count[ndim-1] = stored_um_vars[n].nx;
+         count[0]      = 1;   // only 1 timeslice printed at a time
+
+       /*** For 4D variables, we only want to output 1 depth level at a time ***/
+
+         if ( ndim==4 ) { count[1] = 1; }
+
+         offset = (size_t *) calloc( ndim,sizeof(size_t) );
+
+       /** Initialize function pointer to proper interpolation function **/
+         switch ( stored_um_vars[n].grid_type ) {
+                 case 11: 
+                        field_interpolation = &b_to_c_grid_interp_u_points;
+                 case 18: 
+                        field_interpolation = &u_to_p_point_interp_c_grid;
+                 case 19: 
+                        field_interpolation = &v_to_p_point_interp_c_grid;
+                 default:
+                        field_interpolation = &interp_do_nothing;
+         }
+
+       /** Create a buffer to hold the raw data values **/
+         cnt = stored_um_vars[n].nx*stored_um_vars[n].ny;
+         buf = (double *) calloc( cnt,sizeof(double) );
+
+         loc = stored_um_vars[n].xml_index;
+         minval = um_vars[loc].validmin;
+         maxval = um_vars[loc].validmax;
+
+       /*** Write the 2D data slices belonging to the UM field one at a time ***/
+         if ( ndim==3 ) {
+
+            offset[0] = 0;
+            for ( k=0; k<stored_um_vars[n].nt; k++ ) {
+
+                fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
+                fread( buf, wordsize, cnt, fid );
+                endian_swap( buf, cnt );
+
+                buf = field_interpolation( buf, stored_um_vars[n].nx, stored_um_vars[n].ny,
+                                           maxval, minval );
+
+                if ( rflag==0 ) {
+                   i = nc_put_vara_double( ncid, varid, offset, count, buf );
+                 } else {
+                   fbuf = (float *) malloc( cnt*sizeof(float) );
+                   for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
+                   i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                   free( fbuf );
+                }
+                offset[0]++;
+             }
+
+         } else if ( ndim==4 ) {
+ 
+            offset[0] = 0;
+            for ( k=0; k<stored_um_vars[n].nt; k++ ) {
+                offset[1] = 0;
+                for ( j=0; j<stored_um_vars[n].nz; j++ ) {
+                    fseek( fid, stored_um_vars[n].slices[k][j].location*wordsize, SEEK_SET );
+                    fread( buf, wordsize, cnt, fid );
+                    endian_swap( buf, cnt );
+
+                    buf = field_interpolation( buf, stored_um_vars[n].nx, stored_um_vars[n].ny,
+                                               maxval, minval );
+
+                    if ( rflag==0 ) {
+                       i = nc_put_vara_double( ncid, varid, offset, count, buf );
+                    } else {
+                       fbuf = (float *) malloc( cnt*sizeof(float) );
+                       for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
+                       i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                       free( fbuf );
+                    }
+                    offset[1]++;
+                }
+                offset[0]++;
+             }
+
+         }
+
+         free( count );
+         free( offset );
+         free( buf );
+
+     }  // End of FOR LOOP
+
+     return;
+}
+
+
+void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
+
+     int     n, i, j, k, ndim, cnt, loc, varid;
+     size_t *count, *offset;
+     double *buf, maxval, minval;
+     float  *fbuf;
+     char    name[45];
+
+     for ( n=0; n<num_stored_um_fields; n++ ) {
+
+         strcpy( name, stored_um_vars[n].name );
+         i = nc_inq_varid( ncid, name, &varid );
+
+       /** Determine # of dimensions for current UM variable **/
+         ndim = 3;
+         if ( stored_um_vars[n].nz>1 ) { ndim = 4; }
+
+       /*** Allocate & set the sizes of a 2D slice in the UM variable ***/
+       /*** Remember that COUNT = COUNT[NT,NZ,NY,NX]                  ***/
+
+         count = (size_t *) malloc( ndim*sizeof(size_t) );
+         count[ndim-2] = int_constants[6];
+         count[ndim-1] = stored_um_vars[n].nx;
+         count[0]      = 1;   // only 1 timeslice printed at a time
+
+       /*** For 4D variables, we only want to output 1 depth level at a time ***/
+
+         if ( ndim==4 ) { count[1] = 1; }
+
+         offset = (size_t *) calloc( ndim,sizeof(size_t) );
+
+       /** Create a buffer to hold the raw data values **/
+         cnt = stored_um_vars[n].nx*stored_um_vars[n].ny;
+         buf = (double *) calloc( cnt,sizeof(double) );
+
+         loc = stored_um_vars[n].xml_index;
+         minval = um_vars[loc].validmin;
+         maxval = um_vars[loc].validmax;
+
+       /*** Write the 2D data slices belonging to the UM field one at a time ***/
+         if ( ndim==3 ) {
+
+            offset[0] = 0;
+            for ( k=0; k<stored_um_vars[n].nt; k++ ) {
+
+                fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
+                fread( buf, wordsize, cnt, fid );
+                endian_swap( buf, cnt );
+
+                if ( rflag==0 ) {
+                   i = nc_put_vara_double( ncid, varid, offset, count, buf );
+                 } else {
+                   fbuf = (float *) malloc( cnt*sizeof(float) );
+                   for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
+                   i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                   free( fbuf );
+                }
+                offset[0]++;
+             }
+
+         } else if ( ndim==4 ) {
+ 
+            offset[0] = 0;
+            for ( k=0; k<stored_um_vars[n].nt; k++ ) {
+                offset[1] = 0;
+                for ( j=0; j<stored_um_vars[n].nz; j++ ) {
+                    fseek( fid, stored_um_vars[n].slices[k][j].location*wordsize, SEEK_SET );
+                    fread( buf, wordsize, cnt, fid );
+                    endian_swap( buf, cnt );
+
+                    if ( rflag==0 ) {
+                       i = nc_put_vara_double( ncid, varid, offset, count, buf );
+                    } else {
+                       fbuf = (float *) malloc( cnt*sizeof(float) );
+                       for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
+                       i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                       free( fbuf );
+                    }
+                    offset[1]++;
+                }
+                offset[0]++;
+             }
+
+         }
+
+         free( count );
+         free( offset );
+         free( buf );
+
+     }  // End of FOR LOOP
+
+     return;
+}
+
 /***
- *** FILL_VARIABLES
+ *** OUTPUT_UM_FIELDS 
  ***
  *** The input UM fields file is parsed for 2D dataslices belonging to
  *** each previously identified UM variable.  Appropriate dataslices
@@ -59,123 +268,60 @@ void   ieee_usage_message();
  ***   December 23, 2013
  ***/
 
-int fill_variables( int ncid, FILE *fid, int iflag, int rflag ) {
+int output_um_fields( int ncid, FILE *fid, int iflag, int rflag ) {
 
-     int      ierr, cnt, n, j, ndim, varid, i, num_z_levels, loc;
-     size_t   *offset, *count, dimlen;
-     double   *buf, maxval, minval;
-     float    *fbuf;
-     char     name[45];
+     int    ierr, n, varid;
+     char   name[45];
+     size_t dimlen;
+     float  *buf;
+
+  /*
+   * Perform a check for WGDOS-packed fields (currently not supported)
+   *-------------------------------------------------------------------*/
+     for ( n=0; n<num_stored_um_fields; n++ ) {
+         if ( stored_um_vars[n].slices[0][0].lbpack==1 ) {
+            ieee_usage_message();
+            return -1;
+         }   
+     }
+
+  /*
+   * List the UM variables to be written 
+   *-------------------------------------------------------------------*/
+     printf( "-----------------------------------------------------------\n" );
+     printf( "  Stash_Code        Variable_Name             Dimensions\n" );
+     printf( "-----------------------------------------------------------\n" );
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
-
-       /** Determine NetCDF variable ID of UM variable n **/
-         strcpy( name, stored_um_fields[n].name ); 
-         ierr = nc_inq_varid( ncid, name, &varid );
-
-       /** Stop if a WGDOS-packed field is encountered **/
-         if ( stored_um_fields[n].slices[0].lbpack==1 ) {
-            ieee_usage_message();
-            exit(1);
-         }
-
-       /** Determine # of dimensions for current UM variable **/
-         num_z_levels = stored_um_fields[n].num_slices/num_timesteps;
-         if ( num_z_levels==0 )      { continue; }
-         else if ( num_z_levels==1 ) { ndim = 3; } 
-         else                        { ndim = 4; }
-         printf( "     %5d %25s     [%4d x %4d x %3d]\n", stored_um_fields[n].stash_code, 
-                                                          stored_um_fields[n].name, 
-                                                          stored_um_fields[n].nx, 
-                                                          stored_um_fields[n].ny,
-                                                          num_z_levels ); 
-
-         offset = (size_t *) calloc( ndim,sizeof(size_t) );
-         count = (size_t *) malloc( ndim*sizeof(size_t) );
-
-       /** set the offsets for the upcoming NetCDF write **/
-         count[0] = 1;
-         if ( ndim==4 ) { count[1] = 1; }
-         if ( iflag==0 ) { count[ndim-2] = stored_um_fields[n].ny; }
-         else            { count[ndim-2] = int_constants[6]; }
-         count[ndim-1] = stored_um_fields[n].nx; 
-
-       /** Initialize function pointer to proper interpolation function **/
-         if ( iflag==0 ) { field_interpolation = &interp_do_nothing; }
-         else {
-            if ( stored_um_fields[n].grid_type==11 ) {
-               field_interpolation = &b_to_c_grid_interp_u_points;
-            }
-            else if ( stored_um_fields[n].grid_type==18 ) {
-               field_interpolation = &u_to_p_point_interp_c_grid;
-            }
-            else if ( stored_um_fields[n].grid_type==19 ) {
-               field_interpolation = &v_to_p_point_interp_c_grid;
-            }
-            else { field_interpolation = &interp_do_nothing; }
-         }
-    
-       /** Create a buffer to hold the raw data values **/
-         cnt = stored_um_fields[n].nx*stored_um_fields[n].ny;
-         buf = (double *) calloc( cnt,sizeof(double) );   
-
-         loc = stored_um_fields[n].xml_index;
-         minval = um_vars[loc].validmin;
-         maxval = um_vars[loc].validmax;
-
-         for ( j=0; j<stored_um_fields[n].num_slices; j++ ) {
-             
-       /** Read in a 2D raw data array **/
-             fseek( fid, stored_um_fields[n].slices[j].location*wordsize, SEEK_SET );
-             fread( buf, wordsize, cnt, fid ); 
-             endian_swap( buf, cnt );
-             
-       /** Perform interpolation if requested **/
-             buf = field_interpolation( buf, stored_um_fields[n].nx, stored_um_fields[n].ny,
-                                        maxval, minval );
-
-       /** Write the raw data to disk **/
-             if ( rflag==0 ) { 
-                ierr = nc_put_vara_double( ncid, varid, offset, count, buf ); 
-             } else {
-                fbuf = (float *) malloc( cnt*sizeof(float) );
-                for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
-                ierr = nc_put_vara_float( ncid, varid, offset, count, fbuf ); 
-                free( fbuf );   
-             }  
-
-       /** Update the offset counter **/
-             if ( ndim==3 ) { offset[0]++;  }
-             else {
-                 offset[1]++;
-                 if ( offset[1] == num_z_levels ) {
-                    offset[0]++;
-                    offset[1] = 0;
-                 }   
-             }
-
-         }  
-         free( buf ); 
-         free( count );
-         free( offset );  
-
+         strcpy( name, stored_um_vars[n].name ); 
+         printf( "     %5d %25s     [%4d x %4d", stored_um_vars[n].stash_code, 
+                                                 stored_um_vars[n].name, 
+                                                 stored_um_vars[n].nx, 
+                                                 stored_um_vars[n].ny );
+         if ( stored_um_vars[n].nz>1 ) {  printf( " x %3d", stored_um_vars[n].nz ); }
+         printf( "]\n" );
      }
-     printf( "\n" ); 
+
+  /*
+   * Write the UM field to hard disk one 2D data slice at a time. 
+   *-------------------------------------------------------------------*/
+     if ( iflag==1 ) { write_interpolated_fields( ncid, fid, rflag ); }
+     else            { write_uninterpolated_fields( ncid, fid, rflag ); }
 
     /*** Output the coefficients for the ETA arrays ***/
 
      dimlen = (size_t ) header[110];
 
-     fbuf = (float *) malloc( dimlen*sizeof(float) );
-     for ( j=0; j<dimlen; j++ ) { fbuf[j] = level_constants[0][j]; } 
+     buf = (float *) malloc( dimlen*sizeof(float) );
+     for ( n=0; n<dimlen; n++ ) { buf[n] = level_constants[0][n]; } 
      ierr = nc_inq_varid( ncid, "eta_theta", &varid );   
-     ierr = nc_put_var_float( ncid, varid, fbuf );
-     free( fbuf ); 
+     ierr = nc_put_var_float( ncid, varid, buf );
+     free( buf ); 
 
-     fbuf = (float *) malloc( (dimlen-1)*sizeof(float) );
-     for ( j=0; j<dimlen-1; j++ ) { fbuf[j] = level_constants[1][j]; } 
+     buf = (float *) malloc( (dimlen-1)*sizeof(float) );
+     for ( n=0; n<dimlen-1; n++ ) { buf[n] = level_constants[1][n]; } 
      ierr = nc_inq_varid( ncid, "eta_rho", &varid );   
-     ierr = nc_put_var_float( ncid, varid, fbuf );
+     ierr = nc_put_var_float( ncid, varid, buf );
 
      return 1;
 }

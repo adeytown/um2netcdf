@@ -27,7 +27,7 @@
 #include "field_def.h"
 
 /***
- *** ARE_TIME_BND_REQUIRED
+ *** SET_TIME_BND
  ***
  *** Function that determines if any of the variables in the UM field file are
  *** accummulation data fields.  If so, the time bounds for each accummulation
@@ -40,129 +40,109 @@
  ***    May 1, 2014
  ***/
 
-void are_time_bnd_required( int ncid, float dt, int num_times ) {
+void set_time_bnd( int ncid, int var_index ) {
 
-    int    i, j, k, ierr, dim_ids[2], varID, flag;
-    size_t count[2], offset[2];
-    float  val[2];
-    char   time_bnd_str[9];
+    int   i, ierr, dim_ids[2], varID;
+    char  time_bnd_str[9], dim_name[6];
+    float dt, tval[2];
+    size_t index[2];
 
- /** Do any of the UM variables present contain post-processing that requires **
-  ** temporal boundaries?                                                     **/
-    flag = 0;
-    for ( i=0; i<num_stored_um_fields; i++ ) 
-        if ( stored_um_fields[i].lbproc>0 ) { flag=1; break; } 
+ /** Get the dimensions for the new time bounds variable **/
 
-    if ( flag==0 ) { return; }
+     sprintf( dim_name, "time%i", stored_um_vars[var_index].t_dim );
+     ierr = nc_inq_dimid( ncid, dim_name, &dim_ids[0] );
 
- /***********************   IMPORTANT NOTE   ******************************
-  *************************************************************************
-  ** It will be assumed that only 1 timestep value (dt) is present in the**
-  ** input UM file.
-  *************************************************************************
-  *************************************************************************/  
+     ierr = nc_inq_dimid( ncid,     "nv", &dim_ids[1] );
+     if ( ierr!=NC_NOERR ) { ierr = nc_def_dim( ncid, "nv", 2, &dim_ids[1] ); }
 
- /** Create the new NetCDF time bounds variable **/
-
-    ierr = nc_def_dim( ncid, "nv", 2, &dim_ids[1] );
-
-    for ( i=0; i<num_times; i++ ) {
-        dim_ids[0] = i;
-
-        sprintf( time_bnd_str, "time_bnd%i", i );
-        ierr = nc_def_var( ncid, time_bnd_str, NC_FLOAT, 2, dim_ids, &varID );
+ /** Create a time_bnd variable if an appropriate one is not present **/
+ 
+     sprintf( time_bnd_str, "time_bnd%hu", stored_um_vars[var_index].t_dim );
+     ierr = nc_inq_varid( ncid, time_bnd_str, &varID );
+     if ( ierr!=NC_NOERR ) {
+        ierr = nc_def_var( ncid, time_bnd_str, NC_FLOAT, 2, dim_ids, &varID ); 
         ierr = nc_put_att_text( ncid, varID, "long_name", 37, "start & end times for the cell method" );
         ierr = nc_put_att_text( ncid, varID,     "units",  5, "hours" );
+     }
+     ierr = nc_enddef( ncid );
 
-    }
-    ierr = nc_enddef( ncid );
+ /** Determine the time values for the operation **/
+     if ( stored_um_vars[var_index].nt==1 ) {
+        tval[0] = 0.0;
+        tval[1] = stored_um_vars[var_index].times[0];
+        ierr = nc_put_var_float( ncid, varID, tval );
+     } else {
+        dt = 0.5*(stored_um_vars[var_index].times[1] - stored_um_vars[var_index].times[0]);
+        for ( i=0; i<stored_um_vars[var_index].nt; i++ ) {
+            index[0] = i;
+            index[1] = 0;
+            tval[0] = stored_um_vars[var_index].times[i] - dt;
+            ierr = nc_put_var1_float( ncid, varID, index, &tval[0] );
+            index[1] = 1;
+            tval[1] = stored_um_vars[var_index].times[i] + dt;
+            ierr = nc_put_var1_float( ncid, varID, index, &tval[1] );
+        } 
+     }   
 
- /** Write the temporal bound values to hard disk **/
-
-    for ( k=0; k<num_times; k++ ) {
-
-        sprintf( time_bnd_str, "time_bnd%d", k );
-        ierr = nc_inq_varid( ncid, time_bnd_str, &varID );
-        val[0] = 0.0;
-        val[1] = dt;
-        count[0] = 1;
-        count[1] = 2;
-        offset[1] = 0;
-     
-        for ( i=0; i<num_timesteps; i++ ) {
-            offset[0] = i;
-            ierr = nc_put_vara_float( ncid, varID, offset, count, val );
-            for ( j=0; j<2; j++ ) { val[j] += dt; }
-        }
-
-    }
-    ierr = nc_redef( ncid );
-    return;
+     ierr = nc_redef( ncid );
+     return;
 }
 
-float create_time_dim( int ncid, int num_times, int *vars ) {
+void create_time_dim( int ncid, int var_index, int time_dim_cnt ) {
 
-     int  *dimID, dim_id[2], i, j ,k;
+     int  dimID[1], j, ierr, varID;
      char time_des[40], dim_name[6], calendar[9], mth_str[3], day_str[3],
           hr_str[3], min_str[3], sec_str[3];
-     float dt =0.0;
 
-     dimID = (int *) malloc( num_times*sizeof(int) );
+   /** Construct an appropriate name for the time dimension **/
+     sprintf( dim_name, "time%i", time_dim_cnt );
+
+   /** Define the dimension & a corresponding variable **/
+     ierr = nc_def_dim( ncid, dim_name, (size_t ) stored_um_vars[var_index].nt, &dimID[0] );
+     ierr = nc_def_var( ncid, dim_name, NC_FLOAT, 1, dimID, &varID );
+
+   /** Add some attributes to the time variable **/
 
      if ( header[7]==1 ) { sprintf( calendar, "gregorian" ); }
      else                { sprintf( calendar, "360_day" ); }
+     ierr = nc_put_att_text( ncid, varID, "calendar", 9, calendar );
 
-     for ( i=0; i<num_times; i++ ) {
+     j = stored_um_vars[var_index].slices[0][0].datatime.tm_mon;
+     if ( j<10 ) { snprintf( mth_str, sizeof mth_str, "0%d", j ); }
+     else        { snprintf( mth_str, sizeof mth_str,  "%d", j ); }
 
-     /** Create the appropriate time dimension **/
-        sprintf( dim_name, "time%i", i );
-        j = nc_def_dim( ncid, dim_name, num_timesteps, &dim_id[0] );
+     j = stored_um_vars[var_index].slices[0][0].datatime.tm_mday;
+     if ( j<10 ) { snprintf( day_str, sizeof day_str, "0%d", j ); }
+     else        { snprintf( day_str, sizeof day_str,  "%d", j ); }
 
-     /** Construct timestamp for variable's validity time **/
-        j = stored_um_fields[vars[i]].validity.tm_mon;
-        if ( j<10 ) { snprintf( mth_str, sizeof mth_str, "0%d", j ); }
-        else        { snprintf( mth_str, sizeof mth_str,  "%d", j ); }
+     j = stored_um_vars[var_index].slices[0][0].datatime.tm_hour;
+     if ( j<10 ) { snprintf( hr_str, sizeof hr_str, "0%d", j ); }
+     else        { snprintf( hr_str, sizeof hr_str,  "%d", j ); }
 
-        j = stored_um_fields[vars[i]].validity.tm_mday;
-        if ( j<10 ) { snprintf( day_str, sizeof day_str, "0%d", j ); }
-        else        { snprintf( day_str, sizeof day_str,  "%d", j ); }
+     j = stored_um_vars[var_index].slices[0][0].datatime.tm_min;
+     if ( j<10 ) { snprintf( min_str, sizeof min_str, "0%d", j ); }
+     else        { snprintf( min_str, sizeof min_str,  "%d", j ); }
 
-        j = stored_um_fields[vars[i]].validity.tm_hour;
-        if ( j<10 ) { snprintf( hr_str, sizeof hr_str, "0%d", j ); }
-        else        { snprintf( hr_str, sizeof hr_str,  "%d", j ); }
+     j = stored_um_vars[var_index].slices[0][0].datatime.tm_sec;
+     if ( j<10 ) { snprintf( sec_str, sizeof sec_str, "0%d", j ); }
+     else        { snprintf( sec_str, sizeof sec_str,  "%d", j ); }
 
-        j = stored_um_fields[vars[i]].validity.tm_min;
-        if ( j<10 ) { snprintf( min_str, sizeof min_str, "0%d", j ); }
-        else        { snprintf( min_str, sizeof min_str,  "%d", j ); }
+     sprintf( time_des, "hours since %d-%s-%s %s:%s:%s",
+              stored_um_vars[var_index].slices[0][0].datatime.tm_year,
+              mth_str, day_str, hr_str, min_str, sec_str );
+     time_des[31] = '\0';
+     ierr = nc_put_att_text( ncid, varID, "units", 31, time_des );
 
-        j = stored_um_fields[vars[i]].validity.tm_sec;
-        if ( j<10 ) { snprintf( sec_str, sizeof sec_str, "0%d", j ); }
-        else        { snprintf( sec_str, sizeof sec_str,  "%d", j ); }
+     ierr = nc_put_att_text( ncid, varID,          "axis",  1, "T" );
+     ierr = nc_put_att_text( ncid, varID, "standard_name",  4, "time" );
+     ierr = nc_put_att_text( ncid, varID,     "long_name", 42, "forecast period (end of reporting period)" );
 
-        sprintf( time_des, "hours since %d-%s-%s %s:%s:%s",
-                 stored_um_fields[vars[i]].validity.tm_year,
-                 mth_str, day_str, hr_str, min_str, sec_str );
-        time_des[31] = '\0';
+   /** Write time offset values that correspond to the newly created time dimension **/
+     ierr = nc_enddef( ncid );
+     ierr = nc_put_var_float( ncid, varID, stored_um_vars[var_index].times );
+     ierr = nc_redef( ncid );
 
-     /** Create variable to hold time offset values for time dimension **/
-        j = nc_def_var( ncid, dim_name, NC_FLOAT, 1, dim_id, &k );
-        j = nc_put_att_text( ncid, k,      "calendar",  9, calendar );
-        j = nc_put_att_text( ncid, k,         "units", 31, time_des );
-        j = nc_put_att_text( ncid, k,          "axis",  1, "T" );
-        j = nc_put_att_text( ncid, k, "standard_name",  4, "time" );
-        j = nc_put_att_text( ncid, k,     "long_name", 42, "forecast period (end of reporting period)" );
-
-     /** Write time offset values that correspond to the newly created time dimension **/
-        j = nc_enddef( ncid );
-        j = nc_put_var_float( ncid, k, stored_um_fields[vars[i]].time_offsets );
-        j = nc_redef( ncid );
-
-     /** Record the timestep from the first time offset dimension **/
-        if ( i==0 ) { dt = stored_um_fields[vars[i]].time_offsets[1]; }
-
-    }
-    free( dimID );
-    return dt;
+     return;
 
 }
 
@@ -179,68 +159,63 @@ float create_time_dim( int ncid, int num_times, int *vars ) {
 
  void set_temporal_dimensions( int ncid ) {
 
-    int    i, j, k;
-    int    num_validity_times, *field_ids;
-    double tdiff; 
-    float  dt;
-    unsigned short int *fid;
+    float *sums, tol, flag;
+    int    i, j, num_unique_times;
 
-    fid = (unsigned short int *) calloc( num_stored_um_fields,sizeof(unsigned short int) );
+ /*
+  * Start by determining the # of time dimensions required
+  *-----------------------------------------------------------------------*/
+    sums = (float *) calloc( num_stored_um_fields,sizeof(float) );
+    for ( i=0; i<num_stored_um_fields; i++ ) {
+    for ( j=0; j<stored_um_vars[i].nt; j++ ) {
+        sums[i] += stored_um_vars[i].times[j]; 
+    } 
+    } 
 
-    fid[0] = 1;
-    for ( i=1; i<num_stored_um_fields; i++ ) {
-        tdiff = difftime( mktime(&stored_um_fields[0].validity),
-                          mktime(&stored_um_fields[i].validity) );
-        if ( tdiff>0.00001 ) { fid[i] = 1; }
-    }
-
-    for ( k=1; k<num_stored_um_fields; k++ ) {
-    for ( i=k; i<num_stored_um_fields; i++ ) {
-        if ( fid[i]==1 ) {
+    flag = -1.0;
+    for ( i=0;   i<num_stored_um_fields; i++ ) {
+        if ( sums[i]>-0.5 ) {
            for ( j=i+1; j<num_stored_um_fields; j++ ) {
-               tdiff = difftime( mktime(&stored_um_fields[i].validity),
-                                 mktime(&stored_um_fields[j].validity) );
-               if ( tdiff<0.00001 ) { fid[j] = 0; }
+               if ( sums[j]>-0.5 ) {
+                  tol = (sums[i]-sums[j])*(sums[i]-sums[j]);
+                  if ( tol<0.0001 ) { sums[j] = flag; }
+               }
            }
+           flag = flag-1.0;
+        }
+    } 
+    
+    num_unique_times = (int )(-1.0*(flag+1.0));
+
+ /*
+  * Create a NetCDF dimension for each required time dimension 
+  *-----------------------------------------------------------------------*/
+    j = 0;
+    for ( i=0; i<num_stored_um_fields; i++ ) 
+        if ( sums[i]>-0.5 ) { create_time_dim( ncid, i, j ); j++; }
+
+ /*
+  * Set t_dim value of each UM field to point to the appropriate NetCDF
+  * time dimension for that variable.
+  *-----------------------------------------------------------------------*/
+    j = 0;
+    for ( i=0; i<num_stored_um_fields; i++ ) {
+        if ( sums[i]>-0.5 ) { stored_um_vars[i].t_dim = (unsigned short int) j; j++; }
+        else                { stored_um_vars[i].t_dim = (unsigned short int) ( -1.0*(sums[i]+1.0) ); }
+    }
+    free( sums );
+
+ /*
+  * If any UM variable is some sort of temporal accummulation, we need to
+  * set temporal bounds for that variable. 
+  *-----------------------------------------------------------------------*/
+    for ( i=0; i<num_stored_um_fields; i++ ) {
+        if ( (stored_um_vars[i].lbproc==128)||(stored_um_vars[i].lbproc==4096)||(stored_um_vars[i].lbproc==8192) ) {
+           set_time_bnd( ncid, i );
+           j++;
         }
     }
-    }
 
-  /*** How many unique validity exist in the input UM file? ***/
-    num_validity_times = 1;
-    for ( i=1; i<num_stored_um_fields; i++ )
-        if ( fid[i]==1 ) { num_validity_times++; }
-
-  /*** Get the IDs of the UM variables with unique validity times ***/
-    field_ids = (int *) calloc( num_validity_times,sizeof(int) );
-    k = 0;
-    for ( i=0; i<num_stored_um_fields; i++ )
-        if ( fid[i]==1 ) { field_ids[k] = i; k++; }
-
-    free( fid );
-
-  /*** Create the time dimension(s) in the NetCDF file ***/
-    dt = create_time_dim( ncid, num_validity_times, field_ids );
-
-  /*** Set the time dimension for the stored UM variables ***/
-    if ( num_validity_times==1 ) {
-       for ( i=0; i<num_stored_um_fields; i++ ) { stored_um_fields[i].t_dim = 0; }
-    } else {
-       
-       for ( i=0; i<num_stored_um_fields; i++ ) {
-       for ( j=0; j<num_validity_times; j++ ) {
-           tdiff = difftime( mktime(&stored_um_fields[field_ids[j]].validity),
-                             mktime(&stored_um_fields[i].validity) );
-           if ( abs(tdiff)<0.00001 ) { stored_um_fields[i].t_dim = j; }
-       }
-       }
-
-    }
-
-  /*** Set temporal bounds for any UM accummulation variables ***/
-    are_time_bnd_required( ncid, dt, num_validity_times );
-
-    free( field_ids );
     return;
 }
 

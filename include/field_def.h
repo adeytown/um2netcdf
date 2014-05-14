@@ -104,6 +104,7 @@ typedef struct um_dataslice {
         long size;             /* Size of the slice in words */
         long lbproc;           /* denotes whether post-processing has been performed on variable.  0 if not */
         double mdi;            /* value used to denote a missing data point */
+        struct tm validity, datatime;
 } um_dataslice;
 
 
@@ -132,8 +133,31 @@ typedef struct um_variable {
                                       /* each stored timestep of the variable */
         um_dataslice   *slices;       /* array of data slices belonging to this UM variable */
         nc_type        vartype;       /* datatype of the UM variable (float/double/int/long) */     
-        struct tm      validity;
 } um_variable;
 
 um_variable *stored_um_fields;
 
+
+typedef struct new_um_variable {
+        char           name[55];   /* name of the UM variable */
+        unsigned short stash_code;
+        unsigned short xml_index;  /* location of field in the XML stash description file */ 
+        unsigned short nt;
+        unsigned short nz;
+        unsigned short nx, ny;     /* # of points in the x (lon) and y (lat) directions */
+        unsigned short lbvc;       /* indicates the vertical coordinate system used */
+        unsigned short accum;      /* indicates if field is a product of some sort of accummulation process */
+        unsigned short coordinates;
+        unsigned short grid_type;  /* used for interpolation; indicates the Arakawa grid used for the data */
+        unsigned short lbproc;     /* denotes whether post-processing has been performed on variable.  0 if not */
+        unsigned short t_dim ;     /* ID of the "time" dimension of variable */
+        unsigned short z_dim ;     /* ID of the vertical coordinate of variable */
+        float *times;
+        float **time_bnds;         /* difference between start & end times for accummulation during */
+                                   /* each stored timestep of the variable */
+        float space_bnds[2];       /* start & end points for either spatial accumulation done in the variable */
+        um_dataslice **slices;
+        nc_type        vartype;    /* datatype of the UM variable (float/double/int/long) */     
+} new_um_variable;
+
+new_um_variable *stored_um_vars;

@@ -49,7 +49,7 @@ int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag );
 
 int main( int argc, char *argv[] ) {
 
-     int ncid, status, c, iflag, rflag, sflag, n;
+     int ncid, status, c, iflag, rflag, sflag, n, i;
 
  /*
   * Check if the user has included the correct number of commandline arguments
@@ -83,10 +83,11 @@ int main( int argc, char *argv[] ) {
   *---------------------------------------------------------------------------*/ 
      if ( sflag==1 ) {
         num_stored_um_fields = argc - 4 - iflag - rflag;
-        stored_um_fields = (um_variable* ) malloc( num_stored_um_fields*sizeof(um_variable) );
+        stored_um_vars = (new_um_variable *) malloc( num_stored_um_fields*sizeof(new_um_variable) );
         for ( n=0; n<num_stored_um_fields; n++ ) {
-            stored_um_fields[n].stash_code = atoi(argv[2+iflag+rflag+n]);
-            stored_um_fields[n].num_slices = 0;
+            stored_um_vars[n].stash_code = atoi(argv[2+iflag+rflag+n]);
+            stored_um_vars[n].nt = 0;
+            stored_um_vars[n].nz = 0;
         }
      }
 
@@ -126,9 +127,16 @@ int main( int argc, char *argv[] ) {
      status_check( status, "ERROR: data write to NetCDF file failed" );
 
  /*
-  * Free any remaining allocated memory 
+  * Free allocated memory 
   *---------------------------------------------------------------------------*/ 
-     free( stored_um_fields );  
+     for ( i=0; i<num_stored_um_fields; i++ ) {
+         free( stored_um_vars[i].times );
+         for ( n=0; n<stored_um_vars[i].nt; n++ )
+             free( stored_um_vars[i].slices[n] );
+         free( stored_um_vars[i].slices );
+     }
+ 
+     free( stored_um_vars );  
 
      return 1;
 }
