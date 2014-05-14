@@ -34,6 +34,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <netcdf.h>
 #include "field_def.h"
@@ -44,12 +45,13 @@ void status_check( int status, char *message );
 void usage();
 int read_stash_file( char *filename );
 int check_um_file( char *filename, int rflag);
-int create_netcdf_file( char *um_file, int iflag, int rflag );
+int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_file );
 int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag );
 
 int main( int argc, char *argv[] ) {
 
-     int ncid, status, c, iflag, rflag, sflag, n, i;
+     int ncid, status, c, iflag, rflag, n, i, tmp[25];
+     char *netcdf_filename=NULL, *dest;
 
  /*
   * Check if the user has included the correct number of commandline arguments
@@ -62,9 +64,8 @@ int main( int argc, char *argv[] ) {
 
      iflag = 0;
      rflag = 0;
-     sflag = 0;
      num_stored_um_fields = 0;
-     while ( (c = getopt(argc,argv,"irs")) != EOF ) {
+     while ( (c = getopt(argc,argv,"irs:o:")) != EOF ) {
            switch(c) {
                case 'i':
                        iflag = 1;
@@ -73,19 +74,34 @@ int main( int argc, char *argv[] ) {
                        rflag = 1;
                        break;
                case 's':
-                       sflag = 1;
+                       optind--;
+                       while ( optind<argc ) {
+                          tmp[num_stored_um_fields] = atoi( argv[optind] );
+                          if ( tmp[num_stored_um_fields]==0 ) { break; }
+                          num_stored_um_fields++;
+                          if ( num_stored_um_fields==25 ) { 
+                             printf( "ERROR: one can only specify up to 25 stash codes\n" ); 
+                             exit(1); 
+                          }
+                          optind++;
+                       }
+                       break;
+               case 'o':
+                       netcdf_filename = optarg;
+                       dest = strstr( netcdf_filename, ".nc" );
+                       if ( dest==NULL ) { printf("ERROR: No proper output filename found\n"); exit(1); } 
                        break;
            }
-     } 
+     }
 
  /*
-  * If the user has requested specific stash codes (-s option), read them in. 
+  * If the user has requested specific stash codes (-s option), allocate 
+  * space to hold the corresponding UM variables. 
   *---------------------------------------------------------------------------*/ 
-     if ( sflag==1 ) {
-        num_stored_um_fields = argc - 4 - iflag - rflag;
+     if ( num_stored_um_fields>0 ) {
         stored_um_vars = (new_um_variable *) malloc( num_stored_um_fields*sizeof(new_um_variable) );
         for ( n=0; n<num_stored_um_fields; n++ ) {
-            stored_um_vars[n].stash_code = atoi(argv[2+iflag+rflag+n]);
+            stored_um_vars[n].stash_code = (unsigned short int ) tmp[n];
             stored_um_vars[n].nt = 0;
             stored_um_vars[n].nz = 0;
         }
@@ -118,7 +134,7 @@ int main( int argc, char *argv[] ) {
  /*
   * Create a NetCDF file to hold the UM data 
   *---------------------------------------------------------------------------*/ 
-     ncid = create_netcdf_file( argv[argc-2], iflag, rflag );  
+     ncid = create_netcdf_file( argv[argc-2], iflag, rflag, netcdf_filename );  
 
  /*
   * Write the UM data into the NetCDF file 

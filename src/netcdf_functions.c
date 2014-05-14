@@ -160,7 +160,7 @@ void construct_um_variables( int ncid, int iflag ) {
  ***   November 29, 2013
  ***/
 
-int create_netcdf_file( char *um_file, int iflag, int rflag ) {
+int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filename ) {
      
      int   ncid, ierr, pos, val;
      char  forecast_ref_time[40], netcdf_filename[50], *str, *dest, creation_time[25];
@@ -184,21 +184,25 @@ int create_netcdf_file( char *um_file, int iflag, int rflag ) {
      if ( fid==NULL ) { return 999; }
 
  /* 
-  * 0a) Create an appropriate name for the NetCDF file 
+  * 0a) Create an appropriate name for the NetCDF file (if necessary) 
   *---------------------------------------------------------------------------*/
-     dest = strstr( um_file, ".um" );
-     if ( dest!=NULL ) { 
-        pos = dest - um_file;
+     if ( output_filename==NULL ) {
+        dest = strstr( um_file, ".um" );
+        if ( dest!=NULL ) { 
+           pos = dest - um_file;
 
-        str = malloc( 1 + strlen(um_file) );
-        if ( str ) { strncpy( str, um_file, pos ); }
-        else       { return 999; }
-        str[pos] = '\0';
+           str = malloc( 1 + strlen(um_file) );
+           if ( str ) { strncpy( str, um_file, pos ); }
+           else       { return 999; }
+           str[pos] = '\0';
 
-        snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
-        free( str );
+           snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", str ); 
+           free( str );
+        } else {
+           snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", um_file );
+        }
      } else {
-        snprintf( netcdf_filename, sizeof netcdf_filename, "%s.nc", um_file );
+        strcpy( netcdf_filename, output_filename );
      }
 
      ierr = nc_set_chunk_cache( 129600000, 101, 0.75 );
