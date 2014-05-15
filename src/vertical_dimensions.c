@@ -202,19 +202,20 @@ void set_altitude( int ncid, int n, int id ) {
  ***               n -> number of hybrid levels to be filled
  ***              id -> index of the stored UM variable requiring this vertical
  ***                    dimension.
- ***           level -> type of depth level on which the data is present
  ***
  ***   Mark Cheeseman, NIWA
  ***   April 29, 2014
  ***/
 
-void set_hybrid_levels( int ncid, int n, int id, int level ) {
+void set_hybrid_levels( int ncid, int n, int id ) {
 
-     int    i, ierr, var_id, dim_id[1], ind;
-     char   dim_name[8];
+     int    i, ierr, var_id, dim_id[1], ind[2], z_level;
+     char   dim_name[9];
      float  *height;
 
-     sprintf( dim_name, "hybrid%d", n );
+     if ( stored_um_vars[id].level_type==1 ) { sprintf( dim_name, "hybridr%d", n ); }
+     else                                    { sprintf( dim_name, "hybridt%d", n ); }
+     
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
      if ( ierr==NC_NOERR ) {
         stored_um_vars[id].z_dim = dim_id[0];
@@ -236,12 +237,14 @@ void set_hybrid_levels( int ncid, int n, int id, int level ) {
   /** Fill the new NetCDF variable **/
      ierr = nc_enddef( ncid );
 
-     height = (float *) malloc( n*sizeof(float) );
+     if ( stored_um_vars[id].level_type==1 ) { ind[0]=6; ind[1]=7; }
+     else                                    { ind[0]=4; ind[1]=5; }
 
-     if ( level==2 ) { ind = 4;}
-     else            { ind = 6; }
-     for ( i=0; i<n; i++ ) 
-         height[i] = (float ) level_constants[ind][stored_um_vars[id].slices[0][i].level]; 
+     height = (float *) malloc( n*sizeof(float) );
+     for ( i=0; i<n; i++ ) { 
+         z_level = stored_um_vars[id].slices[0][i].level;
+         height[i] = (float ) (level_constants[ind[0]][z_level] + level_constants[ind[1]][z_level]); 
+     }
 
      ierr = nc_put_var_float( ncid, var_id, height );
      free( height );
@@ -364,7 +367,7 @@ void set_sea_surface_levels( int ncid, int n, int id ) {
 
 void set_vertical_dimensions( int ncid, int rflag ) {
 
-     int    i, num_instances, loc;
+     int i, num_instances;
 
     /*** Check each stored UM variable its 'z-coordinate' ***/
      for ( i=0; i<num_stored_um_fields; i++ ) {
@@ -385,8 +388,7 @@ void set_vertical_dimensions( int ncid, int rflag ) {
                       set_pressure_levels( ncid, num_instances, i );
                       break;
                  case 65:
-                      loc = stored_um_vars[i].xml_index;
-                      set_hybrid_levels( ncid, num_instances, i, um_vars[loc].level_type );
+                      set_hybrid_levels( ncid, num_instances, i );
                       break;
                  case 128:
                       set_sea_surface_levels( ncid, num_instances, i );

@@ -84,7 +84,6 @@ typedef struct um_field_metadata {
        char longname[100]; /* full descriptive name of field */
        char stdname[75];   /* CF-compliant name of field */
        char units[25];     /* units for field */
-       char coord[25];     /* coordinate system used to describe field */
 } um_field_metadata;
 
 um_field_metadata *um_vars;
@@ -100,7 +99,7 @@ typedef struct um_dataslice {
         unsigned short level;  /* Depth or z-level on which the data slice resides */
         unsigned short lbpack; /* Code used to denote the packing method used */ 
         long location;         /* Starting address of dataslice in UM fields file lookup[n][28] */
-        long reclength;        /* Size of the storec dataslice in records */
+        long reclength;        /* Size of the stored dataslice in records */
         long size;             /* Size of the slice in words */
         long lbproc;           /* denotes whether post-processing has been performed on variable.  0 if not */
         double mdi;            /* value used to denote a missing data point */
@@ -112,31 +111,6 @@ typedef struct um_dataslice {
  ** UM_variable - Struct that contains essential attributes for a variable 
  **               stored in the input UM fields file.
  **/ 
-
-typedef struct um_variable {
-        char           name[55];   /* name of the UM variable */
-        unsigned short num_slices; /* # of 2D slices beinging to this variable */
-        unsigned short xml_index;  /* location of field in the XML stash description file */ 
-        unsigned short grid_type;  /* used for interpolation; indicates the Arakawa grid used for the data */
-        unsigned short nx, ny;     /* # of points in the x (lon) and y (lat) directions */
-        unsigned short accum;      /* indicates if field is a product of some sort of accummulation process */
-        long lbproc;     /* denotes whether post-processing has been performed on variable.  0 if not */
-        unsigned short lbvc;       /* indicates the vertical coordinate system used */
-        unsigned short stash_code;
-        unsigned short coordinates;/* LBCODE that describes the coordinate system used to map field */
-        int            z_dim ;        /* ID of the vertical coordinate of variable */
-        int            t_dim ;        /* ID of the "time" dimension of variable */
-        float          space_bnds[2]; /* start & end points for either spatial accumulation done in the variable */
-        float          *time_offsets; /* array containing temporal offset of each timesetp of variable from */
-                                      /* the initial validity date & time. [in hours] */
-        float          **time_bnds;   /* difference between start & end times for accummulation during */
-                                      /* each stored timestep of the variable */
-        um_dataslice   *slices;       /* array of data slices belonging to this UM variable */
-        nc_type        vartype;       /* datatype of the UM variable (float/double/int/long) */     
-} um_variable;
-
-um_variable *stored_um_fields;
-
 
 typedef struct new_um_variable {
         char           name[55];   /* name of the UM variable */
@@ -152,6 +126,8 @@ typedef struct new_um_variable {
         unsigned short lbproc;     /* denotes whether post-processing has been performed on variable.  0 if not */
         unsigned short t_dim ;     /* ID of the "time" dimension of variable */
         unsigned short z_dim ;     /* ID of the vertical coordinate of variable */
+        unsigned short level_type; /* used to denote whether variable is on a RHO level (1) or a  */
+                                   /* THETA level (2) */
         float *times;
         float **time_bnds;         /* difference between start & end times for accummulation during */
                                    /* each stored timestep of the variable */

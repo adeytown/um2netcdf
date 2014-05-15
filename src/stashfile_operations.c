@@ -81,13 +81,6 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { fd[cnt].validmin = atof((const char *)str); }
              xmlFree( str );
-          } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"coordinates"))) {
-             str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-             if ( str!=NULL ) { 
-                memset( fd[cnt].coord, '\0', sizeof(fd[cnt].coord) );
-                strcpy( fd[cnt].coord,(const char *)str ); 
-             }
-             xmlFree( str );
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"umgrid"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              fd[cnt].umgrid = atoi((const char *) str);

@@ -35,6 +35,10 @@ double *interp_do_nothing( double *val, int index );
 double *u_to_p_point_interp_c_grid( double *val, int index );
 double *v_to_p_point_interp_c_grid( double *val, int index );
 double *b_to_c_grid_interp_u_points( double *val, int index );
+float  *interp_do_nothing_float( double *val, int index );
+float  *u_to_p_point_interp_c_grid_float( double *val, int index );
+float  *v_to_p_point_interp_c_grid_float( double *val, int index );
+float  *b_to_c_grid_interp_u_points_float( double *val, int index );
 void endian_swap_4bytes( void *ptr, int nchunk );
 void wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf,
                    double mdi );
@@ -44,10 +48,10 @@ void ieee_usage_message();
 
 void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
-     int     n, i, j, k, kk, ndim, cnt, varid;
+     int     n, i, j=0, k, kk, ndim, cnt, varid;
      size_t *count, *offset;
      double *buf;
-     float  *fbuf;
+     float  *fbuf=NULL;
      char    name[45];
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
@@ -62,6 +66,7 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
        /*** Allocate & set the sizes of a 2D slice in the UM variable ***/
        /*** Remember that COUNT = COUNT[NT,NZ,NY,NX]                  ***/
 
+         offset = (size_t *) calloc( ndim,sizeof(size_t) );
          count = (size_t *) malloc( ndim*sizeof(size_t) );
          count[ndim-2] = int_constants[6];
          count[ndim-1] = stored_um_vars[n].nx;
@@ -71,83 +76,80 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
          if ( ndim==4 ) { count[1] = 1; }
 
-         offset = (size_t *) calloc( ndim,sizeof(size_t) );
+       /*** Create a buffer to hold the raw data values ***/
 
-       /** Initialize function pointer to proper interpolation function **/
-         switch ( stored_um_vars[n].grid_type ) {
-                 case 11:
-                        field_interpolation = &b_to_c_grid_interp_u_points;
-                        break;
-                 case 18: 
-                        field_interpolation = &u_to_p_point_interp_c_grid;
-                        break;
-                 case 19: 
-                        field_interpolation = &v_to_p_point_interp_c_grid;
-                        break;
-                 default:
-                        field_interpolation = &interp_do_nothing;
-                        break;
-         }
-
-       /** Create a buffer to hold the raw data values **/
          cnt = stored_um_vars[n].nx*stored_um_vars[n].ny;
          buf = (double *) malloc( cnt*sizeof(double) );
 
-         if ( rflag==1 ) {
-            j = stored_um_vars[n].nx*int_constants[6];
-            fbuf = (float *) malloc( j*sizeof(float) );
+       /*** Initialize function pointer to proper interpolation function ***/
+
+         switch ( stored_um_vars[n].grid_type ) {
+                 case 11:
+                        field_interpolation = &b_to_c_grid_interp_u_points; 
+                        break;
+                 case 18: 
+                        field_interpolation = &u_to_p_point_interp_c_grid; 
+                        break;
+                 case 19: 
+                        field_interpolation = &v_to_p_point_interp_c_grid; 
+                        break;
+                 default:
+                        field_interpolation = &interp_do_nothing; 
+                        if ( int_constants[6]!=stored_um_vars[n].ny ) {
+                           printf( "ERROR: NY dimension of %s is not equal to %ld\n", name, int_constants[6] );
+                           printf( "       Check the umgrid value in the XML stashfile for this field\n\n" );
+                           exit(1);
+                        }
+                        break;
          }
 
        /*** Write the 2D data slices belonging to the UM field one at a time ***/
+
          if ( ndim==3 ) {
+               for ( k=0; k<stored_um_vars[n].nt; k++ ) {
+                   fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
+                   fread( buf, wordsize, cnt, fid );
+                   endian_swap( buf, cnt );
 
-            for ( k=0; k<stored_um_vars[n].nt; k++ ) {
+                   buf = field_interpolation( buf, n );
 
-                fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
-                fread( buf, wordsize, cnt, fid );
-                endian_swap( buf, cnt );
-
-                buf = field_interpolation( buf, n );
-
-                if ( rflag==1 ) {
-                   for ( i=0; i<j; i++ ) { fbuf[i] = (float ) buf[i]; }
-                   i = nc_put_vara_float( ncid, varid, offset, count, fbuf ); 
-                } else {    
-                   i = nc_put_vara_double( ncid, varid, offset, count, buf );
-                }
-
-                offset[0]++;
-             }
-
+                   if ( rflag==0 ) { i = nc_put_vara_double( ncid, varid, offset, count, buf ); }
+                   else {
+                      i = int_constants[6]*((int ) stored_um_vars[n].nx);
+                      fbuf = (float *) calloc( i,sizeof(float) );
+                      for ( j=0; j<i; j++ ) { fbuf[j] = (float ) buf[j]; }
+                      i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                      free( fbuf );
+                   }
+                   offset[0]++;
+               }
          } else if ( ndim==4 ) {
- 
-            offset[0] = 0;
-            for ( k=0; k<stored_um_vars[n].nt; k++ ) {
-                offset[1] = 0;
-                for ( j=0; j<stored_um_vars[n].nz; j++ ) {
-                    fseek( fid, stored_um_vars[n].slices[k][j].location*wordsize, SEEK_SET );
-                    fread( buf, wordsize, cnt, fid );
-                    endian_swap( buf, cnt );
+              for ( k=0; k<stored_um_vars[n].nt; k++ ) {
+                  offset[1] = 0;
+                  for ( j=0; j<stored_um_vars[n].nz; j++ ) {
+                      fseek( fid, stored_um_vars[n].slices[k][j].location*wordsize, SEEK_SET );
+                      fread( buf, wordsize, cnt, fid );
+                      endian_swap( buf, cnt );
 
-                    buf = field_interpolation( buf, n ); 
+                      buf = field_interpolation( buf, n ); 
 
-                    if ( rflag==0 ) {
-                       i = nc_put_vara_double( ncid, varid, offset, count, buf );
-                    } else {
-                       for ( i=0; i<kk; i++ ) { fbuf[i] = (float ) buf[i]; }
-                       i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
-                    }
-                    offset[1]++;
-                }
-                offset[0]++;
-             }
-
-         }
+                      if ( rflag==0 ) { i = nc_put_vara_double( ncid, varid, offset, count, buf ); }
+                      else {
+                         i = int_constants[6]*((int ) stored_um_vars[n].nx);
+                         fbuf = (float *) calloc( i,sizeof(float) );
+                         for ( kk=0; kk<i; kk++ ) { fbuf[kk] = (float ) buf[kk]; }
+                         i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                         free( fbuf );
+                      }
+                      offset[1]++;
+                  }
+                  offset[0]++;
+              }
+         } // End of NDIM if block 
 
          free( count );
          free( offset );
          free( buf );
-         if ( rflag==1 ) { free( fbuf ); }
 
      }  // End of FOR LOOP
 
@@ -160,7 +162,7 @@ void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
      int     n, i, j, k, ndim, cnt, varid;
      size_t *count, *offset;
      double *buf;
-     float  *fbuf;
+     float  *fbuf=NULL;
      char    name[45];
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
@@ -295,7 +297,7 @@ int output_um_fields( int ncid, FILE *fid, int iflag, int rflag ) {
                                                  stored_um_vars[n].name, 
                                                  stored_um_vars[n].nx, 
                                                  stored_um_vars[n].ny );
-         if ( stored_um_vars[n].nz>1 ) {  printf( " x %3d", stored_um_vars[n].nz ); }
+         if ( stored_um_vars[n].nz>1 ) { printf( " x %d", stored_um_vars[n].nz ); } 
          printf( "]\n" );
      }
 

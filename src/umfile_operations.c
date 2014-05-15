@@ -520,10 +520,11 @@ int check_um_file( char *filename, int rflag ) {
      for ( i=0; i<num_stored_um_fields; i++ ) {
      for ( j=0; j<num_xml_vars; j++ ) {
          if ( stored_um_vars[i].stash_code == 1000*um_vars[j].section + um_vars[j].code ) {
-            stored_um_vars[i].xml_index = j;
+            stored_um_vars[i].xml_index   = j;
             strcpy( stored_um_vars[i].name, um_vars[j].varname );
-            stored_um_vars[i].grid_type = um_vars[j].umgrid;
-            stored_um_vars[i].accum = um_vars[j].accum;
+            stored_um_vars[i].grid_type   = (unsigned short ) um_vars[j].umgrid;
+            stored_um_vars[i].accum       = (unsigned short ) um_vars[j].accum;
+            stored_um_vars[i].level_type  = (unsigned short ) um_vars[j].level_type;
             break;
          }
      }

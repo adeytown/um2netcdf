@@ -23,6 +23,7 @@
 
 
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "field_def.h"
 
@@ -39,6 +40,7 @@
 double *interp_do_nothing(  double *val, int var_index ) {
        return val;
 }
+
 
 /***
  *** U_TO_P_POINT_INTERP_C_GRID 
