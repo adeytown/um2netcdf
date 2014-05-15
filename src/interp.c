@@ -36,7 +36,7 @@
  ***   December 13, 2013
  ***/ 
 
-double *interp_do_nothing(  double *val, int nx, int ny, double maxval, double minval ) {
+double *interp_do_nothing(  double *val, int var_index ) {
        return val;
 }
 
@@ -56,33 +56,42 @@ double *interp_do_nothing(  double *val, int nx, int ny, double maxval, double m
  ***   December 6, 2013
  ***/
 
-double *u_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval ) {
+double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index, ny_interp;
-       double *interp_val;
+       int     i, j, index[3];
+       double *buf;
 
-  /** Is NY equal to the latitude dimension of the interpolated grid? **/
-       if ( ny==int_constants[6] ) { ny_interp = ny; }
-       else                        { ny_interp = ny+1; }
+       j = stored_um_vars[var_index].nx*int_constants[6];
+       buf = (double *) malloc( j*sizeof(double) );
 
-       interp_val = (double *)calloc( nx*ny_interp,sizeof(double) );
+   /** Take the average of the U points above & below the desired P-point **/
 
- /** Take the average of the U points above & below the desired P-point **/
-       for ( i=0; i<nx; i++ ) {
-       for ( j=ny-1; j>0; j-- ) {
-           index = i + nx*j;
-           interp_val[index] = 0.5*( val[index] + val[index-nx] ); 
+       for ( j=1; j<stored_um_vars[var_index].ny-1; j++ ) {
+       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+           index[0] = i + stored_um_vars[var_index].nx*j;
+           index[1] = i + stored_um_vars[var_index].nx*(j-1);
+           index[2] = i + stored_um_vars[var_index].nx*(j+1);
+           buf[index[0]] = 0.5*( val[index[1]] + val[index[2]] ); 
        }
        }
+
+       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) { 
+           index[0] = stored_um_vars[var_index].nx + i;
+           buf[i] = buf[index[0]]; 
+       }
+
+       for ( j=stored_um_vars[var_index].ny-1; j<int_constants[6]; j++ ) {
+       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+           index[0] = i + stored_um_vars[var_index].nx*j;
+           index[1] = i + stored_um_vars[var_index].nx*(j-1);
+           buf[index[0]] = buf[index[1]]; 
+       }
+       }
+
+   /** Deallocate the memory holding the uninterpolated data. Reassign pointer. **/
+
        free( val );
-
- /** Check for possible overflow and/or underflow **/
-       for ( i=0; i<nx*ny; i++ ) {
-           if ( interp_val[i]>maxval ) { interp_val[i] = maxval; }
-           if ( interp_val[i]<minval ) { interp_val[i] = minval; }
-       }
-
-       return interp_val;
+       return buf;
 }
 
 
@@ -102,40 +111,42 @@ double *u_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, 
  ***   December 6, 2013
  ***/
 
-double *v_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval ) {
+double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index, ny_interp;
-       double *interp_val;
+       int     i, j, index[2];
+       double *buf;
 
-  /** Is NY equal to the latitude dimension of the interpolated grid? **/
-       if ( ny==int_constants[6] ) { ny_interp = ny; }
-       else                        { ny_interp = ny+1; }
-
-       interp_val = (double *)calloc( nx*ny_interp,sizeof(double) );
+       j = int_constants[6]*stored_um_vars[var_index].nx;
+       buf = (double *) malloc( j*sizeof(double) );
 
  /** Take the average of the V points to the left & right of the desired P-point **/
-       for ( j=0; j<ny-1; j++ ) {
-       for ( i=nx-1; i>1; i-- ) {
-           index = i + nx*j;
-           interp_val[index] = 0.5*( val[index] + val[index-1] ); 
+
+       for ( j=0; j<stored_um_vars[var_index].ny; j++ ) {
+       for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+           index[0] = j*stored_um_vars[var_index].nx + i;
+           buf[index[0]] = 0.5*( val[index[0]+1] + val[index[0]-1] );
        }
        }
 
- /** The top-most row must be replaced by the second top-most row. **/
-       for ( i=0; i<nx; i++ ) {
-           index = nx*(ny-1) + i;   
-           interp_val[index] = val[index-nx];  
+       for ( j=stored_um_vars[var_index].ny-1; j<int_constants[6]; j++ ) {
+       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+           index[0] = i + stored_um_vars[var_index].nx*j;
+           index[1] = i + stored_um_vars[var_index].nx*(j-1);
+           buf[index[0]] = buf[index[1]]; 
        }
+       }
+
+       for ( j=0; j<stored_um_vars[var_index].ny; j++ ) {
+           index[0] = j*stored_um_vars[var_index].nx;
+           buf[index[0]] = buf[index[0]+1];
+           index[1] = (j+1)*stored_um_vars[var_index].nx - 1;
+           buf[index[1]] = buf[index[1]-1];
+       }
+
        free( val );
-
- /** Check for possible overflow and/or underflow **/
-       for ( i=0; i<nx*ny; i++ ) {
-           if ( interp_val[i]>maxval ) { interp_val[i] = maxval; }
-           if ( interp_val[i]<minval ) { interp_val[i] = minval; }
-       }
-
-       return interp_val;
+       return buf;
 }
+
 
 /***
  *** B_TO_C_GRID_INTERP_U_POINTS 
@@ -152,45 +163,54 @@ double *v_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, 
  ***   January 6, 2013
  ***/
 
-double *b_to_c_grid_interp_u_points( double *val, int nx, int ny, double maxval, double minval ) {
+double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
 
-       int     i, j, index[4], ny_interp;
-       double *interp_val;
+     int     i, j, index[5];
+     double *buf;
 
-  /** Is NY equal to the latitude dimension of the interpolated grid? **/
-       if ( ny==int_constants[6] ) { ny_interp = ny; }
-       else                        { ny_interp = ny+1; }
-
-       interp_val = (double *)calloc( nx*ny_interp,sizeof(double) );
-
-  /** Fill in the edges with un-interpolated values **/
-       for ( i=0; i<nx; i++ ) {
-           interp_val[i] = val[i+nx];
-           interp_val[nx*ny-1-i] = val[nx*ny-1-i-nx];
-       }
-       for ( j=0; j<ny; j++ ) {
-           interp_val[j*nx] = val[j*nx+1];
-           interp_val[(j+1)*nx-1] = val[(j+1)*nx-2];
-       }
+     j = int_constants[6]*stored_um_vars[var_index].nx; 
+     buf = (double *) malloc( j*sizeof(double) );
 
   /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
-       for ( j=1; j<ny-1; j++ ) {
-       for ( i=1; i<nx-1; i++ ) {
-           index[0] = i + nx*j;
-           index[1] = i + nx*j - 1;
-           index[2] = i + nx*(j-1);
-           index[3] = i + nx*(j-1) - 1;
-           interp_val[index[0]] = 0.25*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]]);
-       }
-       } 
+  
+     for ( j=1; j<stored_um_vars[var_index].ny-1; j++ ) {
+     for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+         index[0] = j*stored_um_vars[var_index].nx + i; 
+         index[1] = index[0] - 1; 
+         index[2] = index[0] + 1; 
+         index[3] = index[0] - stored_um_vars[var_index].nx; 
+         index[4] = index[0] + stored_um_vars[var_index].nx; 
+         buf[index[0]] = 0.25*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]] ); 
+     }
+     }
 
- /** Check for possible overflow and/or underflow **/
-       for ( i=0; i<nx*ny; i++ ) {
-           if ( interp_val[i]>maxval ) { interp_val[i] = maxval; }
-           if ( interp_val[i]<minval ) { interp_val[i] = minval; }
-       }
+  /** Fill the missing rows [0 and NY-1 -> INT_CONSTANTS(6)] **/
 
-       free( val );
-       return interp_val;
+     for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+         index[0] = i + stored_um_vars[var_index].nx;
+         buf[i] = buf[index[0]];
+     } 
+
+     for ( j=stored_um_vars[var_index].ny-1; j<int_constants[6]; j++ ) {
+     for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+         index[0] = i + stored_um_vars[var_index].nx*j;
+         index[1] = i + stored_um_vars[var_index].nx*(j-1);
+         buf[index[0]] = buf[index[1]]; 
+     }
+     }
+
+  /** Fill the missing columns [0 and NX-1] **/
+
+     for ( j=0; j<int_constants[6]; j++ ) {
+         index[0] = j*stored_um_vars[var_index].nx;
+         index[1] = index[0] + 1;
+         buf[index[0]] = buf[index[1]];
+         index[2] = (j+1)*stored_um_vars[var_index].nx - 1;
+         index[3] = index[2] - 1;
+         buf[index[2]] = buf[index[3]];
+     }
+
+     free( val );
+     return buf;
 }
 

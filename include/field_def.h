@@ -49,8 +49,8 @@ double   real_constants[6]; /* input UM fields files's real_constants array */
  *  FUNCTION POINTERS                                                        *
  *---------------------------------------------------------------------------*/
 
-double* (*field_interpolation)( double*, int, int, double, double );  /* ptr to appropriate interpolation procedure */
-void    (*endian_swap)( void*, int );                 /* ptr to appropriate endian swap procedure   */
+double *(*field_interpolation)( double*, int );  /* ptr to appropriate interpolation procedure */
+void    (*endian_swap)( void*, int );         /* ptr to appropriate endian swap procedure   */
 
 
 /*---------------------------------------------------------------------------*

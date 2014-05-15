@@ -31,22 +31,22 @@
 
 /** Function prototypes **/
 
-double *interp_do_nothing( double *val, int nx, int ny, double maxval, double minval );
-double *u_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval );
-double *v_to_p_point_interp_c_grid( double *val, int nx, int ny, double maxval, double minval );
-double *b_to_c_grid_interp_u_points( double *val, int nx, int ny, double maxval, double minval );
-void   endian_swap_4bytes( void *ptr, int nchunk );
-void   wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf,
-                     double mdi );
-void   ieee_usage_message();
+double *interp_do_nothing( double *val, int index );
+double *u_to_p_point_interp_c_grid( double *val, int index );
+double *v_to_p_point_interp_c_grid( double *val, int index );
+double *b_to_c_grid_interp_u_points( double *val, int index );
+void endian_swap_4bytes( void *ptr, int nchunk );
+void wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf,
+                   double mdi );
+void ieee_usage_message();
 
 
 
 void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
-     int     n, i, j, k, ndim, cnt, loc, varid;
+     int     n, i, j, k, kk, ndim, cnt, varid;
      size_t *count, *offset;
-     double *buf, maxval, minval;
+     double *buf;
      float  *fbuf;
      char    name[45];
 
@@ -75,45 +75,47 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
        /** Initialize function pointer to proper interpolation function **/
          switch ( stored_um_vars[n].grid_type ) {
-                 case 11: 
+                 case 11:
                         field_interpolation = &b_to_c_grid_interp_u_points;
+                        break;
                  case 18: 
                         field_interpolation = &u_to_p_point_interp_c_grid;
+                        break;
                  case 19: 
                         field_interpolation = &v_to_p_point_interp_c_grid;
+                        break;
                  default:
                         field_interpolation = &interp_do_nothing;
+                        break;
          }
 
        /** Create a buffer to hold the raw data values **/
          cnt = stored_um_vars[n].nx*stored_um_vars[n].ny;
-         buf = (double *) calloc( cnt,sizeof(double) );
+         buf = (double *) malloc( cnt*sizeof(double) );
 
-         loc = stored_um_vars[n].xml_index;
-         minval = um_vars[loc].validmin;
-         maxval = um_vars[loc].validmax;
+         if ( rflag==1 ) {
+            j = stored_um_vars[n].nx*int_constants[6];
+            fbuf = (float *) malloc( j*sizeof(float) );
+         }
 
        /*** Write the 2D data slices belonging to the UM field one at a time ***/
          if ( ndim==3 ) {
 
-            offset[0] = 0;
             for ( k=0; k<stored_um_vars[n].nt; k++ ) {
 
                 fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
                 fread( buf, wordsize, cnt, fid );
                 endian_swap( buf, cnt );
 
-                buf = field_interpolation( buf, stored_um_vars[n].nx, stored_um_vars[n].ny,
-                                           maxval, minval );
+                buf = field_interpolation( buf, n );
 
-                if ( rflag==0 ) {
+                if ( rflag==1 ) {
+                   for ( i=0; i<j; i++ ) { fbuf[i] = (float ) buf[i]; }
+                   i = nc_put_vara_float( ncid, varid, offset, count, fbuf ); 
+                } else {    
                    i = nc_put_vara_double( ncid, varid, offset, count, buf );
-                 } else {
-                   fbuf = (float *) malloc( cnt*sizeof(float) );
-                   for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
-                   i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
-                   free( fbuf );
                 }
+
                 offset[0]++;
              }
 
@@ -127,16 +129,13 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                     fread( buf, wordsize, cnt, fid );
                     endian_swap( buf, cnt );
 
-                    buf = field_interpolation( buf, stored_um_vars[n].nx, stored_um_vars[n].ny,
-                                               maxval, minval );
+                    buf = field_interpolation( buf, n ); 
 
                     if ( rflag==0 ) {
                        i = nc_put_vara_double( ncid, varid, offset, count, buf );
                     } else {
-                       fbuf = (float *) malloc( cnt*sizeof(float) );
-                       for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
+                       for ( i=0; i<kk; i++ ) { fbuf[i] = (float ) buf[i]; }
                        i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
-                       free( fbuf );
                     }
                     offset[1]++;
                 }
@@ -148,6 +147,7 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
          free( count );
          free( offset );
          free( buf );
+         if ( rflag==1 ) { free( fbuf ); }
 
      }  // End of FOR LOOP
 
@@ -157,9 +157,9 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
 void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
 
-     int     n, i, j, k, ndim, cnt, loc, varid;
+     int     n, i, j, k, ndim, cnt, varid;
      size_t *count, *offset;
-     double *buf, maxval, minval;
+     double *buf;
      float  *fbuf;
      char    name[45];
 
@@ -176,7 +176,7 @@ void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
        /*** Remember that COUNT = COUNT[NT,NZ,NY,NX]                  ***/
 
          count = (size_t *) malloc( ndim*sizeof(size_t) );
-         count[ndim-2] = int_constants[6];
+         count[ndim-2] = stored_um_vars[n].ny;
          count[ndim-1] = stored_um_vars[n].nx;
          count[0]      = 1;   // only 1 timeslice printed at a time
 
@@ -190,9 +190,7 @@ void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
          cnt = stored_um_vars[n].nx*stored_um_vars[n].ny;
          buf = (double *) calloc( cnt,sizeof(double) );
 
-         loc = stored_um_vars[n].xml_index;
-         minval = um_vars[loc].validmin;
-         maxval = um_vars[loc].validmax;
+         if ( rflag==1 ) { fbuf = (float *) malloc( cnt*sizeof(float) ); }
 
        /*** Write the 2D data slices belonging to the UM field one at a time ***/
          if ( ndim==3 ) {
@@ -200,17 +198,17 @@ void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
             offset[0] = 0;
             for ( k=0; k<stored_um_vars[n].nt; k++ ) {
 
+            /** Read in the 2D data slice **/
                 fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
                 fread( buf, wordsize, cnt, fid );
                 endian_swap( buf, cnt );
 
+            /** Output the 2D data slice **/
                 if ( rflag==0 ) {
                    i = nc_put_vara_double( ncid, varid, offset, count, buf );
                  } else {
-                   fbuf = (float *) malloc( cnt*sizeof(float) );
                    for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
                    i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
-                   free( fbuf );
                 }
                 offset[0]++;
              }
@@ -228,10 +226,8 @@ void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
                     if ( rflag==0 ) {
                        i = nc_put_vara_double( ncid, varid, offset, count, buf );
                     } else {
-                       fbuf = (float *) malloc( cnt*sizeof(float) );
                        for ( i=0; i<cnt; i++ ) { fbuf[i] = (float ) buf[i]; }
                        i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
-                       free( fbuf );
                     }
                     offset[1]++;
                 }
@@ -243,6 +239,7 @@ void write_uninterpolated_fields( int ncid, FILE *fid, int rflag ) {
          free( count );
          free( offset );
          free( buf );
+         if ( rflag==1 ) { free( fbuf ); }
 
      }  // End of FOR LOOP
 
