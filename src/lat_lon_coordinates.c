@@ -44,7 +44,7 @@
 void construct_lon_array( float *lon ) {
 
      int    i, j, ind;
-     double tlat, tlon, degtorad, sock, cpart, t1, t2, longitude, latitude;
+     double tlat, tlon, tol, degtorad, sock, cpart, t1, t2, longitude, latitude;
      double pseudolat, pseudolon, cos_pseudolat, sin_pseudolat, factor;
 
      if ( header[3]<99 ) {
@@ -52,9 +52,9 @@ void construct_lon_array( float *lon ) {
      /** For an unrotated coordinate system, don't do anything.  Just copy the **/
      /** lon values into the correct position in the 2D array.                 **/
 
-        for ( j=0; j<int_constants[5]; j++ ) {
-        for ( i=0; i<int_constants[6]; i++ ) {
-            ind = j*int_constants[6] + i;
+        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( i=0; i<int_constants[5]; i++ ) {
+            ind = j*int_constants[5] + i;
             tlon = real_constants[3] + real_constants[0]*((double ) i);
             lon[ind] = (float ) tlon;
         }
@@ -67,41 +67,31 @@ void construct_lon_array( float *lon ) {
         pseudolat = real_constants[4] * degtorad;
         pseudolon = real_constants[5] * degtorad;
 
-  /** Take cosine/sine functions of the newly converted rotated pole lat/lon **/
-        cos_pseudolat = cos( pseudolat );
-        sin_pseudolat = sin( pseudolat );
+        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( i=0; i<int_constants[5]; i++ ) {
+             tlat = (real_constants[2] + real_constants[1]*((double ) j))*degtorad;
+             tlon = (real_constants[3] + real_constants[0]*((double ) i))*degtorad;
 
-        if ( pseudolon==0 ) { sock = 0.0; }
-        else                { sock = pseudolon - 3.1415926535898; }
+             sock = pseudolon - 3.1415926535898;
+             tol = pseudolon*pseudolon;
+             if ( tol<1.0e-20 ) { sock = 0; }
 
-        for ( i=0; i<int_constants[6]; i++) {
+             cpart = cos(tlon) * cos(tlat);
 
-        /** Determine model longitude value along column j **/
-            tlon = ( real_constants[3] + ((double ) i)*real_constants[0] )*degtorad;
+             latitude = asin((cos(pseudolat)*cpart)+(sin(pseudolat)*sin(tlat)));
+             t1 = -cos(pseudolat)*sin(tlat);
+             t2 = sin(pseudolat)*cpart;
+ 
+             tol = (cos(latitude)+(t1+t2)) * (cos(latitude)+(t1+t2));
+             if ( tol<=1.0e-16 ) { longitude = 3.1415926535898; }
+             else               { longitude = -acos((t1+t2)/cos(latitude)); }
+    
+             if ( (tlon>-1.0e-20) && (tlon<3.1415926535898001) ) { longitude = -1.0*longitude; }
+             longitude += sock;
 
-            factor = 1.0;
-            if ( (tlon>=0.0) && (tlon<=3.1415926535898) ) { factor = -1.0; }
-            tlon = cos( tlon );
-
-            for ( j=0; j<int_constants[5]; j++) {
-
-            /** Determine model longitude value along column j **/
-                tlat = ( real_constants[2] + ((double ) j)*real_constants[1] )*degtorad;
-
-                cpart = tlon*cos(tlat);
-                latitude = asin( cos_pseudolat*cpart + sin_pseudolat*sin(tlat) );
-
-                t1 = -cos_pseudolat*sin(tlat);
-                t2 = sin_pseudolat*cpart;
-                if ( fabs( cos(latitude)+t1+t2 )<=1.0e-8 ) { longitude = 3.1415926535898; }
-                else                                      { longitude = -acos((t1+t2)/cos(latitude)); }
-
-                longitude = factor*longitude + sock;
-                if ( longitude<0.0 ) { longitude += 2.0*3.1415926535898; }
-
-                lon[i+int_constants[6]*j] = (float ) (longitude / degtorad);
-
-            }
+             if ( longitude<0.0 ) { longitude += 2.0*3.1415926535898; }
+             lon[i+int_constants[5]*j] = (float ) (longitude / degtorad);
+        }
         }
 
      }
@@ -188,7 +178,7 @@ void construct_lat_array( float *lat ) {
 void construct_lon_bounds_array( float *lon ) {
 
      int    i, j, k, ind;
-     double tlat, tlon, degtorad, sock, cpart, t1, t2, longitude, latitude;
+     double tlat, tlon, tol, degtorad, sock, cpart, t1, t2, longitude, latitude;
      double pseudolat, pseudolon, cos_pseudolat, sin_pseudolat, factor;
 
   /** For an unrotated coordinate system, just add/subtract one half of a grid **/
@@ -256,7 +246,7 @@ void construct_lon_bounds_array( float *lon ) {
             }
 
             factor = 1.0;
-            if ( (tlon>=0.0) && (tlon<=3.1415926535898) ) { factor = -1.0; }
+            if ( (tlon>-0.000000001) && (tlon<3.1415926535899) ) { factor = -1.0; }
             tlon = cos( tlon );
 
             cpart = tlon*cos(tlat);
@@ -264,8 +254,9 @@ void construct_lon_bounds_array( float *lon ) {
 
             t1 = -cos_pseudolat*sin(tlat);
             t2 = sin_pseudolat*cpart;
-            if ( fabs( cos(latitude)+t1+t2 )<=1.0e-8 ) { longitude = 3.1415926535898; }
-            else                                      { longitude = -acos((t1+t2)/cos(latitude)); }
+            tol =  (cos(latitude)+t1+t2) * (cos(latitude)+t1+t2);
+            if ( tol<=1.0e-8 ) { longitude = 3.1415926535898; }
+            else               { longitude = -acos((t1+t2)/cos(latitude)); }
 
             longitude = factor*longitude + sock;
             if ( longitude<0.0 ) { longitude += 2.0*3.1415926535898; }

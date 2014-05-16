@@ -99,6 +99,10 @@ void construct_um_variables( int ncid, int iflag ) {
  /*** Output details about the coordinate system used to describe field ***/
          if ( stored_um_vars[i].coordinates==101 ) {
             ierr = nc_put_att_text( ncid, varID, "grid_mapping", 12, "rotated_pole" );
+            ierr = nc_put_att_text( ncid, varID, "coordinates",  18, "latitude longitude" );
+         }
+         else if ( stored_um_vars[i].coordinates==1 ) {
+            ierr = nc_put_att_text( ncid, varID, "coordinates",  18, "latitude longitude" );
          } 
 
  /*** Determine if any post-processing was performed on the data-field.  If so, ***/
