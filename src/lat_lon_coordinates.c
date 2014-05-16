@@ -185,15 +185,15 @@ void construct_lon_bounds_array( float *lon ) {
   /** cell width/height to find the proper cell bound values.                  **/
 
      if ( header[3]<99 ) {
-        for ( j=0; j<int_constants[5]; j++ ) {
-        for ( i=0; i<int_constants[6]; i++ ) {
+        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( i=0; i<int_constants[5]; i++ ) {
 
         /*** Find longitude of center of grid cell at (i,j) ***/
             tlon = real_constants[3] + real_constants[0]*((double ) i);
 
         /*** Find & store longitude of sides 1 and 2 ***/
             t1 = tlon - 0.5*real_constants[0];
-            ind = j*int_constants[6] + i;
+            ind = j*int_constants[5] + i;
             lon[ind] = (float ) t1;
             ind += int_constants[5]*int_constants[6];
             lon[ind] = (float ) t1;
@@ -221,8 +221,8 @@ void construct_lon_bounds_array( float *lon ) {
         if ( pseudolon==0 ) { sock = 0.0; }
         else                { sock = pseudolon - 3.1415926535898; }
 
-        for ( i=0; i<int_constants[6]; i++) {
-        for ( j=0; j<int_constants[5]; j++) {
+        for ( i=0; i<int_constants[5]; i++) {
+        for ( j=0; j<int_constants[6]; j++) {
         for ( k=1; k<5; k++ ) {
 
            /** Determine lat & lon for the grid cell side k**/
@@ -246,7 +246,7 @@ void construct_lon_bounds_array( float *lon ) {
             }
 
             factor = 1.0;
-            if ( (tlon>-0.000000001) && (tlon<3.1415926535899) ) { factor = -1.0; }
+            if ( (tlon>-1.0e-20) && (tlon<3.14159265358001) ) { factor = -1.0; }
             tlon = cos( tlon );
 
             cpart = tlon*cos(tlat);
@@ -255,13 +255,13 @@ void construct_lon_bounds_array( float *lon ) {
             t1 = -cos_pseudolat*sin(tlat);
             t2 = sin_pseudolat*cpart;
             tol =  (cos(latitude)+t1+t2) * (cos(latitude)+t1+t2);
-            if ( tol<=1.0e-8 ) { longitude = 3.1415926535898; }
-            else               { longitude = -acos((t1+t2)/cos(latitude)); }
+            if ( tol<=1.0e-16 ) { longitude = 3.1415926535898; }
+            else                { longitude = -acos((t1+t2)/cos(latitude)); }
 
             longitude = factor*longitude + sock;
             if ( longitude<0.0 ) { longitude += 2.0*3.1415926535898; }
 
-            ind = (k-1)*int_constants[6]*int_constants[5] + int_constants[6]*j + i;
+            ind = (k-1)*int_constants[6]*int_constants[5] + int_constants[5]*j + i;
             lon[ind] = (float ) (longitude / degtorad);
 
         }
@@ -305,7 +305,7 @@ void construct_lat_bounds_array( float *lat ) {
             for ( i=0; i<int_constants[5]; i++ ) {
             
             /*** Store latitude of side 1 ***/
-                ind = j*int_constants[6] + i;
+                ind = j*int_constants[5] + i;
                 lat[ind] = (float ) t1;
             
             /*** Store latitude of side 2 ***/
@@ -336,8 +336,8 @@ void construct_lat_bounds_array( float *lat ) {
         if ( pseudolon==0 ) { sock = 0.0; }
         else                { sock = pseudolon - 3.1415926535898; }
 
-        for ( i=0; i<int_constants[6]; i++) {
-        for ( j=0; j<int_constants[5]; j++) {
+        for ( i=0; i<int_constants[5]; i++) {
+        for ( j=0; j<int_constants[6]; j++) {
         for ( k=1; k<5; k++ ) {
 
            /** Determine lat & lon for the grid cell side k**/
@@ -364,7 +364,7 @@ void construct_lat_bounds_array( float *lat ) {
             cpart = tlon*cos(tlat);
             latitude = asin( cos_pseudolat*cpart + sin_pseudolat*sin(tlat) );
 
-            ind = (k-1)*int_constants[6]*int_constants[5] + int_constants[6]*j + i;
+            ind = (k-1)*int_constants[6]*int_constants[5] + int_constants[5]*j + i;
             lat[ind] = (float ) (latitude / degtorad);
 
         }
