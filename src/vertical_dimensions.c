@@ -237,12 +237,14 @@ void set_hybrid_levels( int ncid, int n, int id ) {
   /** Fill the new NetCDF variable **/
      ierr = nc_enddef( ncid );
 
-     if ( stored_um_vars[id].level_type==1 ) { ind[0]=6; ind[1]=7; }
-     else                                    { ind[0]=4; ind[1]=5; }
+  /** Set the vertical spacing type: Theta or Rho-based mesh **/
+     if ( stored_um_vars[id].level_type==1 )      { ind[0]=6; ind[1]=7; }
+     else if ( stored_um_vars[id].level_type==2 ) { ind[0]=4; ind[1]=5; }
+     else { printf( "ERROR: unknown vertical mesh type encountered\n\n"); exit(1); }
 
      height = (float *) malloc( n*sizeof(float) );
      for ( i=0; i<n; i++ ) { 
-         z_level = stored_um_vars[id].slices[0][i].level;
+         z_level = (int ) stored_um_vars[id].slices[0][i].level - 1;
          height[i] = (float ) (level_constants[ind[0]][z_level] + level_constants[ind[1]][z_level]); 
      }
 

@@ -271,9 +271,10 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "input_uri", strlen(um_file), um_file ); 
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "conventions", 6, "CF-v25" ); 
      ierr = nc_put_att_long( ncid, NC_GLOBAL, "um_version_number", NC_LONG, 1, &header[11] );
-     val = 33;
+     val = 34;
      ierr = nc_put_att_int( ncid, NC_GLOBAL, "met_office_ps", NC_INT, 1, &val ); 
-     if ( header[3]>100 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 26, "rotated_latitude_longitude" ); } 
+     if ( header[3]>100 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 26, "rotated_latitude_longitude" ); }
+     else                 { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 18, "latitude_longitude" ); } 
      if ( header[11]<=804 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core", 12, "new_dynamics" ); }
      else                   { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core",  8, "end_game" ); }
 
@@ -293,6 +294,7 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
         ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name",  8, "nzlam-12" ); 
         ierr = nc_put_att_text( ncid, NC_GLOBAL, "references", 60, "http://matiu/~ecoconnect_admin/eco-docs/DataSet_Definitions/" );
         ierr = nc_put_att_text( ncid, NC_GLOBAL, "comment",    58, "Ecoconnect operational implementation: Sept 2010 (FitzRoy)" );
+        ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", 7, "unknown" ); 
         if ( strstr( um_file, sls )!=NULL ) { 
            ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 67, 
                                    "Model: nzlam-12 output for Sea-Level and Sea state models (sls*.nc)" ); 
@@ -315,6 +317,7 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
   * Set global attributes specific to NZ 2km Convective Scale resolution Model 
   *---------------------------------------------------------------------------*/
      else if ( strstr( um_file, nzcsm )!=NULL ) {
+          ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 5, "nzcsm" ); 
           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 43, 
                                  "Model: NZCSM output for Weather Forecasting" ); 
           ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 5, "nzcsm" ); 
@@ -323,6 +326,7 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      }          
 
      else {
+        ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", 7, "unknown" ); 
         if ( strstr( um_file, sls )!=NULL ) { 
            ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 59,
                                    "Model: n320150 output for Sea-Level and Sea state (sls*.nc)" );
@@ -335,8 +339,9 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
   *---------------------------------------------------------------------------*/
      time( &rawtime );
      timeinfo = localtime( &rawtime );
-     strftime( creation_time, 25, "%Y-%m-%d %H:%M:%S", timeinfo );
-     ierr = nc_put_att_text( ncid, NC_GLOBAL, "file_creation_date", 18, creation_time ); 
+   //  strftime( creation_time, 30, "%Y-%m-%d %H:%M:%S", timeinfo );
+     strftime( creation_time, 30, "%c", timeinfo );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "file_creation_date", 25, creation_time ); 
 
  /*
   * Close the input UM fields file. 

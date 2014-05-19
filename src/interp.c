@@ -60,15 +60,20 @@ double *interp_do_nothing(  double *val, int var_index ) {
 
 double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index[3];
+       int     i, j, index[3], y_limit;
        double *buf;
 
        j = stored_um_vars[var_index].nx*int_constants[6];
        buf = (double *) malloc( j*sizeof(double) );
 
+   /** Find the appropriate Lat end limit for the interpolation calculations **/
+
+       if ( int_constants[6]<=stored_um_vars[var_index].ny ) { y_limit=int_constants[6]; }
+       else { y_limit = stored_um_vars[var_index].ny; }
+
    /** Take the average of the U points above & below the desired P-point **/
 
-       for ( j=1; j<stored_um_vars[var_index].ny-1; j++ ) {
+       for ( j=1; j<y_limit-1; j++ ) {
        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
            index[0] = i + stored_um_vars[var_index].nx*j;
            index[1] = i + stored_um_vars[var_index].nx*(j-1);
@@ -82,7 +87,7 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
            buf[i] = buf[index[0]]; 
        }
 
-       for ( j=stored_um_vars[var_index].ny-1; j<int_constants[6]; j++ ) {
+       for ( j=y_limit-1; j<int_constants[6]; j++ ) {
        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
            index[0] = i + stored_um_vars[var_index].nx*j;
            index[1] = i + stored_um_vars[var_index].nx*(j-1);
@@ -115,22 +120,27 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
 double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index[2];
+       int     i, j, index[2], y_limit;
        double *buf;
 
        j = int_constants[6]*stored_um_vars[var_index].nx;
        buf = (double *) malloc( j*sizeof(double) );
 
+   /** Find the appropriate Lat end limit for the interpolation calculations **/
+
+       if ( int_constants[6]<=stored_um_vars[var_index].ny ) { y_limit=int_constants[6]; }
+       else { y_limit = stored_um_vars[var_index].ny; }
+
  /** Take the average of the V points to the left & right of the desired P-point **/
 
-       for ( j=0; j<stored_um_vars[var_index].ny; j++ ) {
+       for ( j=0; j<y_limit; j++ ) {
        for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
            index[0] = j*stored_um_vars[var_index].nx + i;
            buf[index[0]] = 0.5*( val[index[0]+1] + val[index[0]-1] );
        }
        }
 
-       for ( j=stored_um_vars[var_index].ny-1; j<int_constants[6]; j++ ) {
+       for ( j=y_limit-1; j<int_constants[6]; j++ ) {
        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
            index[0] = i + stored_um_vars[var_index].nx*j;
            index[1] = i + stored_um_vars[var_index].nx*(j-1);
@@ -138,7 +148,7 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
        }
        }
 
-       for ( j=0; j<stored_um_vars[var_index].ny; j++ ) {
+       for ( j=0; j<int_constants[6]; j++ ) {
            index[0] = j*stored_um_vars[var_index].nx;
            buf[index[0]] = buf[index[0]+1];
            index[1] = (j+1)*stored_um_vars[var_index].nx - 1;
@@ -167,15 +177,20 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
 double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
 
-     int     i, j, index[5];
+     int     i, j, index[5], y_limit;
      double *buf;
 
      j = int_constants[6]*stored_um_vars[var_index].nx; 
-     buf = (double *) malloc( j*sizeof(double) );
+     buf = (double *) calloc( j,sizeof(double) );
+
+   /** Find the appropriate Lat end limit for the interpolation calculations **/
+
+       if ( int_constants[6]<=stored_um_vars[var_index].ny ) { y_limit=int_constants[6]; }
+       else { y_limit = stored_um_vars[var_index].ny; }
 
   /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
   
-     for ( j=1; j<stored_um_vars[var_index].ny-1; j++ ) {
+     for ( j=1; j<y_limit-1; j++ ) {
      for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
          index[0] = j*stored_um_vars[var_index].nx + i; 
          index[1] = index[0] - 1; 
@@ -193,7 +208,7 @@ double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
          buf[i] = buf[index[0]];
      } 
 
-     for ( j=stored_um_vars[var_index].ny-1; j<int_constants[6]; j++ ) {
+     for ( j=y_limit-1; j<int_constants[6]; j++ ) {
      for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
          index[0] = i + stored_um_vars[var_index].nx*j;
          index[1] = i + stored_um_vars[var_index].nx*(j-1);

@@ -105,17 +105,18 @@ int get_file_endianness_wordsize( FILE *fh ) {
    * Check first if file was created on a big endian 8-byte word platform
    * like the IBM Power system
    *----------------------------------------------------------------------*/
-    fseek( fh, 0, SEEK_SET );
-
     word_size = 8;
+    fseek( fh, 0, SEEK_SET );
     fread( header, word_size, 256, fh );
 
     if ( (header[1]==1)&&(header[150]==64) ) {
        endian_swap = &no_endian_swap;
+//       printf( "No swapping: %ld %ld\n", header[1], header[150] );
        return word_size;
     } else {
        endian_swap = &endian_swap_8bytes;
        endian_swap( header, 256 );
+//       printf( "Big Endian swapping: %ld %ld\n", header[1], header[150] );
        if ( (header[1]==1)&&(header[150]==64) ) {
           return word_size;
        }
@@ -123,22 +124,22 @@ int get_file_endianness_wordsize( FILE *fh ) {
 
   /*
    * Then check if file was created on a little endian 8-byte word platform
-   * like the IBM Power system
+   * like a x86 system
    *----------------------------------------------------------------------*/
     word_size = 4;
-
     fseek( fh, 0, SEEK_SET );
     fread( header, word_size, 256, fh );
+    printf( "%ld %ld\n", header[1], header[150] );
 
     if ( (header[1]==1)&&(header[150]==64) ) {
        endian_swap = &no_endian_swap;
-       printf( "wordsize: %d   no endian swap", word_size );
+//       printf( "No swapping: %ld %ld\n", header[1], header[150] );
        return word_size;
     } else {
        endian_swap = &endian_swap_4bytes;
        endian_swap( header, 256 );
+//       printf( "Little Endian swapping: %ld %ld\n", header[1], header[150] );
        if ( (header[1]==1)&&(header[150]==64) ) {
-          printf( "wordsize: %d   endian swap", word_size );
           return word_size;
        }
     }
@@ -573,6 +574,27 @@ int check_um_file( char *filename, int rflag ) {
          }  
 
      }
+
+/**
+ ** Check 
+ **---------------------------------------------------------------------------*/
+
+/*     for ( i=0; i<num_stored_um_fields; i++ ) {
+         printf( "%s %hu [%hu, %hu %hu, %hu]\n", stored_um_vars[i].name, stored_um_vars[i].stash_code,
+                                               stored_um_vars[i].nx, stored_um_vars[i].ny, stored_um_vars[i].nz,
+                                               stored_um_vars[i].nt );
+        printf( "TIMES: " );
+        for ( j=0; j<stored_um_vars[i].nt; j++ ) { printf( "%f ", stored_um_vars[i].times[j] ); }
+        printf( "\n" );
+        printf( "SLICES: " );
+        for ( j=0; j<stored_um_vars[i].nt; j++ ) { 
+        for ( k=0; k<stored_um_vars[i].nz; k++ ) {
+            printf( "%hu ", stored_um_vars[i].slices[j][k].id ); 
+        }
+        }
+        printf( "\n" );
+     }
+     exit(1);*/
 
 /**
  ** Free memory used by the LOOKUP 2D array
