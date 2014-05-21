@@ -197,7 +197,7 @@ int set_altitude( int ncid, int n, int id ) {
 
 int set_hybrid_levels( int ncid, int n, int id ) {
 
-     int    i, ierr, var_id, dim_id[1], ind, z_level;
+     int    i, ierr, var_id, dim_id[1], z_level;
      char   dim_name[9];
      float  *height;
 
@@ -222,15 +222,25 @@ int set_hybrid_levels( int ncid, int n, int id ) {
   /** Fill the new NetCDF variable **/
      ierr = nc_enddef( ncid );
 
-  /** Set the vertical spacing type: Theta or Rho-based mesh **/
-     if ( stored_um_vars[id].level_type==1 )      { ind=6; }
-     else if ( stored_um_vars[id].level_type==2 ) { ind=4; }
-     else { printf( "ERROR: unknown vertical mesh type encountered\n\n"); exit(1); }
+  /** Check if a level mesh type is et for this variable **/
+    if ( (stored_um_vars[id].level_type!=1)&&(stored_um_vars[id].level_type!=2) ) {
+       printf( "WARNING: unknown vertical mesh type for STASH_CODE=%hu\n", stored_um_vars[id].stash_code );
+       printf( "         setting to theta-point mesh by default\n" );
+    }
 
+  /** Set the vertical spacing type: Theta or Rho-based mesh **/
      height = (float *) malloc( n*sizeof(float) );
-     for ( i=0; i<n; i++ ) { 
-         z_level = (int ) stored_um_vars[id].slices[0][i].level - 1;
-         height[i] = (float ) level_constants[ind][z_level]; 
+     if ( stored_um_vars[id].level_type==1 )      { 
+        for ( i=0; i<n; i++ ) {
+            z_level = (int ) stored_um_vars[id].slices[0][i].level - 1;
+            height[i] = (float ) level_constants[6][z_level];
+         }
+     }
+     else { 
+        for ( i=0; i<n; i++ ) {
+            z_level = (int ) stored_um_vars[id].slices[0][i].level;
+            height[i] = (float ) level_constants[4][z_level];
+         }
      }
 
      ierr = nc_put_var_float( ncid, var_id, height );

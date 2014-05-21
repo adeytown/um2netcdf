@@ -10,9 +10,9 @@
 ## Compiler definitions
 ##-----------------------------------------------------------------------------
 
-CC = xlc 
+CC = xlc_r 
 RANLIB = ranlib 
-OPT_FLAGS = -O3 -g -q64 -qarch=pwr6 -qtune=pwr6
+OPT_FLAGS = -O3 -g -q64 -qarch=pwr6 -qtune=pwr6 -qsmp=omp
 
 
 ##-----------------------------------------------------------------------------

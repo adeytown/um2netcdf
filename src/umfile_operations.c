@@ -26,6 +26,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <netinet/in.h>
+#include <omp.h>
 #include "field_def.h"
 
 /***
@@ -47,6 +48,9 @@ void endian_swap_8bytes( void *ptr, int N ) {
      int      i;
      char *p, t;
 
+#pragma omp parallel shared(N,ptr) private(i,p,t) 
+{
+#pragma omp for 
      for ( i=0; i<N; i++ ) {
          p = (char*) ptr + 8*i;
          t=p[7]; p[7]=p[0]; p[0]=t;
@@ -54,6 +58,7 @@ void endian_swap_8bytes( void *ptr, int N ) {
          t=p[5]; p[5]=p[2]; p[2]=t;
          t=p[4]; p[4]=p[3]; p[3]=t; 
      }
+}
      return;
 }
 
@@ -202,7 +207,6 @@ int check_um_file( char *filename, int rflag ) {
      fread( int_constants, wordsize, 46, fid );
      endian_swap( int_constants,46 );
 
-
 /**
  ** Read in the LEVEL DEPENDENT CONSTANTS array 
  **---------------------------------------------------------------------------*/
@@ -237,6 +241,7 @@ int check_um_file( char *filename, int rflag ) {
          }
      }
      num_um_vars = cnt;
+     printf( "# of 2D slices found: %d\n", cnt );
 
 /**
  ** Gather all the valid lookup entries into a condensed array (called LOOKUP)) 
@@ -245,17 +250,17 @@ int check_um_file( char *filename, int rflag ) {
  **---------------------------------------------------------------------------*/
      lookup = (long **) malloc( cnt*sizeof(long *) );
 
-     cnt = -1;
+     cnt = 0;
      for ( nrec=0; nrec<header[151]; nrec++ ) {
          if ( tmp[nrec][28]!=-99 ) {
-            cnt++;
             lookup[cnt] = (long *) malloc( 45*sizeof(long) );
             for ( n=0; n<45; n++ ) {
                 lookup[cnt][n] = tmp[nrec][n]; 
             } 
+            cnt++;
          }
      }
-     num_um_vars = cnt;
+  //   num_um_vars = cnt+1;
 
      for ( nrec=0; nrec<header[151]; nrec++ )
            free( tmp[nrec] );
