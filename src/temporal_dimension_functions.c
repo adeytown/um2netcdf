@@ -160,7 +160,7 @@ void create_time_dim( int ncid, int var_index, int time_dim_cnt ) {
  void set_temporal_dimensions( int ncid ) {
 
     float *sums, tol, flag;
-    int    i, j, num_unique_times;
+    int    i, j, num_unique_times; //,k;
 
  /*
   * Start by determining the # of time dimensions required
@@ -215,6 +215,25 @@ void create_time_dim( int ncid, int var_index, int time_dim_cnt ) {
            j++;
         }
     }
+
+/*==============================================================================
+  START OF SANITY CHECK
+ *==============================================================================
+    for ( j=0; j<num_unique_times; j++ ) {
+        k= 0;
+        printf( "T_DIM = %d STASH_CODES = ", j );
+        for ( i=0; i<num_stored_um_fields; i++ ) {
+            if ( stored_um_vars[i].t_dim==(unsigned short int) j ) { 
+               printf( "%hu ", stored_um_vars[i].stash_code ); 
+               k++;
+            }
+        }
+        printf( "NUM_VARS=%d\n", k );
+    }
+    exit(1);
+ *==============================================================================
+  END OF SANITY CHECK
+ *==============================================================================*/
 
     return;
 }

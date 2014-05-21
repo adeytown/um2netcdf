@@ -41,18 +41,18 @@
  ***   May 2, 2014
  ***/
 
-void construct_lon_array( float *lon ) {
+void construct_lon_array( int ny, float *lon ) {
 
      int    i, j, ind;
      double tlat, tlon, tol, degtorad, sock, cpart, t1, t2, longitude, latitude;
-     double pseudolat, pseudolon, cos_pseudolat, sin_pseudolat, factor;
+     double pseudolat, pseudolon;
 
      if ( header[3]<99 ) {
 
      /** For an unrotated coordinate system, don't do anything.  Just copy the **/
      /** lon values into the correct position in the 2D array.                 **/
 
-        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( j=0; j<ny; j++ ) {
         for ( i=0; i<int_constants[5]; i++ ) {
             ind = j*int_constants[5] + i;
             tlon = real_constants[3] + real_constants[0]*((double ) i);
@@ -67,7 +67,7 @@ void construct_lon_array( float *lon ) {
         pseudolat = real_constants[4] * degtorad;
         pseudolon = real_constants[5] * degtorad;
 
-        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( j=0; j<ny; j++ ) {
         for ( i=0; i<int_constants[5]; i++ ) {
              tlat = (real_constants[2] + real_constants[1]*((double ) j))*degtorad;
              tlon = (real_constants[3] + real_constants[0]*((double ) i))*degtorad;
@@ -111,7 +111,7 @@ void construct_lon_array( float *lon ) {
  ***   May 2, 2014
  ***/
 
-void construct_lat_array( float *lat ) {
+void construct_lat_array( int ny, float *lat ) {
 
      int    i, j, ind;
      double tlat, tlon, degtorad, sock, cpart, latitude;
@@ -122,7 +122,7 @@ void construct_lat_array( float *lat ) {
      /** For an unrotated coordinate system, don't do anything.  Just copy the **/
      /** lat values into the correct position in the 2D array.                 **/
 
-        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( j=0; j<ny; j++ ) {
             tlat = real_constants[2] + real_constants[1]*((double ) j);
             for ( i=0; i<int_constants[5]; i++ ) {
                 ind = j*int_constants[5] + i;
@@ -151,7 +151,7 @@ void construct_lat_array( float *lat ) {
             tlon = ( real_constants[3] + ((double ) i)*real_constants[0] )*degtorad;
             tlon = cos( tlon );
 
-            for ( j=0; j<int_constants[6]; j++) {
+            for ( j=0; j<ny; j++) {
                 tlat = ( real_constants[2] + ((double ) j)*real_constants[1] )*degtorad;
                 cpart = tlon*cos(tlat);
                 latitude = asin( cos_pseudolat*cpart + sin_pseudolat*sin(tlat) );
@@ -175,7 +175,7 @@ void construct_lat_array( float *lat ) {
  ***   May 2, 2014
  ***/
 
-void construct_lon_bounds_array( float *lon ) {
+void construct_lon_bounds_array( int ny, float *lon ) {
 
      int    i, j, k, ind;
      double tlat, tlon, tol, degtorad, sock, cpart, t1, t2, longitude, latitude;
@@ -185,7 +185,7 @@ void construct_lon_bounds_array( float *lon ) {
   /** cell width/height to find the proper cell bound values.                  **/
 
      if ( header[3]<99 ) {
-        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( j=0; j<ny; j++ ) {
         for ( i=0; i<int_constants[5]; i++ ) {
 
         /*** Find longitude of center of grid cell at (i,j) ***/
@@ -195,14 +195,14 @@ void construct_lon_bounds_array( float *lon ) {
             t1 = tlon - 0.5*real_constants[0];
             ind = j*int_constants[5] + i;
             lon[ind] = (float ) t1;
-            ind += int_constants[5]*int_constants[6];
+            ind += int_constants[5]*ny;
             lon[ind] = (float ) t1;
 
         /*** Find & store longitude of sides 3 and 4 ***/
             t1 = tlon + 0.5*real_constants[0];
-            ind += int_constants[5]*int_constants[6];
+            ind += int_constants[5]*ny;
             lon[ind] = (float ) t1;
-            ind += int_constants[5]*int_constants[6];
+            ind += int_constants[5]*ny;
             lon[ind] = (float ) t1;
         }
         }
@@ -222,7 +222,7 @@ void construct_lon_bounds_array( float *lon ) {
         else                { sock = pseudolon - 3.1415926535898; }
 
         for ( i=0; i<int_constants[5]; i++) {
-        for ( j=0; j<int_constants[6]; j++) {
+        for ( j=0; j<ny; j++) {
         for ( k=1; k<5; k++ ) {
 
            /** Determine lat & lon for the grid cell side k**/
@@ -261,7 +261,7 @@ void construct_lon_bounds_array( float *lon ) {
             longitude = factor*longitude + sock;
             if ( longitude<0.0 ) { longitude += 2.0*3.1415926535898; }
 
-            ind = (k-1)*int_constants[6]*int_constants[5] + int_constants[5]*j + i;
+            ind = (k-1)*ny*int_constants[5] + int_constants[5]*j + i;
             lon[ind] = (float ) (longitude / degtorad);
 
         }
@@ -285,7 +285,7 @@ void construct_lon_bounds_array( float *lon ) {
  ***   May 2, 2014
  ***/
 
-void construct_lat_bounds_array( float *lat ) {
+void construct_lat_bounds_array( int ny, float *lat ) {
 
      int    i, j, k, ind;
      double tlat, tlon, degtorad, sock, cpart, t1, t2, latitude;
@@ -295,7 +295,7 @@ void construct_lat_bounds_array( float *lat ) {
   /** cell width/height to find the proper cell bound values.                  **/
 
      if ( header[3]<99 ) {
-        for ( j=0; j<int_constants[6]; j++ ) {
+        for ( j=0; j<ny; j++ ) {
 
         /*** Find latitude at center of grid cell at (i,j) ***/
             tlat = real_constants[2] + real_constants[1]*((double ) j);
@@ -309,15 +309,15 @@ void construct_lat_bounds_array( float *lat ) {
                 lat[ind] = (float ) t1;
             
             /*** Store latitude of side 2 ***/
-                ind += int_constants[5]*int_constants[6];
+                ind += int_constants[5]*ny;
                 lat[ind] = (float ) t2;
             
             /*** Store latitude of side 3 ***/
-                ind += int_constants[5]*int_constants[6];
+                ind += int_constants[5]*ny;
                 lat[ind] = (float ) t2;
             
             /*** Store latitude of side 4 ***/
-                ind += int_constants[5]*int_constants[6];
+                ind += int_constants[5]*ny;
                 lat[ind] = (float ) t1;
             }
         }
@@ -337,7 +337,7 @@ void construct_lat_bounds_array( float *lat ) {
         else                { sock = pseudolon - 3.1415926535898; }
 
         for ( i=0; i<int_constants[5]; i++) {
-        for ( j=0; j<int_constants[6]; j++) {
+        for ( j=0; j<ny; j++) {
         for ( k=1; k<5; k++ ) {
 
            /** Determine lat & lon for the grid cell side k**/
@@ -364,7 +364,7 @@ void construct_lat_bounds_array( float *lat ) {
             cpart = tlon*cos(tlat);
             latitude = asin( cos_pseudolat*cpart + sin_pseudolat*sin(tlat) );
 
-            ind = (k-1)*int_constants[6]*int_constants[5] + int_constants[5]*j + i;
+            ind = (k-1)*ny*int_constants[5] + int_constants[5]*j + i;
             lat[ind] = (float ) (latitude / degtorad);
 
         }
@@ -390,35 +390,69 @@ void construct_lat_bounds_array( float *lat ) {
 
 void construct_lat_lon_arrays( int ncid ) {
 
-     int    varID, ierr;
+     int    varID, ierr, ny, dimid;
      float *buf;
+     size_t dimlength;
 
   /** Compute/output the values for the 2D longitude & latitude UM variables **/
-     buf = (float *) malloc( int_constants[5]*int_constants[6]*sizeof(float) );
-     construct_lon_array( buf );
+     ny = (int ) int_constants[6];
+
+     buf = (float *) malloc( int_constants[5]*ny*sizeof(float) );
+     construct_lon_array( ny, buf );
 
      ierr = nc_inq_varid( ncid, "longitude", &varID );
      ierr = nc_put_var_float( ncid, varID, buf );
 
-     construct_lat_array( buf );
+     construct_lat_array( ny, buf );
 
      ierr = nc_inq_varid( ncid, "latitude", &varID );
      ierr = nc_put_var_float( ncid, varID, buf );
      free( buf );
 
   /** Compute/output the values for the 3D longitude & latitude cell bounds UM variables **/
-     buf = (float *) malloc( 4*int_constants[5]*int_constants[6]*sizeof(float) );
-     construct_lon_bounds_array( buf );
+     buf = (float *) malloc( 4*int_constants[5]*ny*sizeof(float) );
+     construct_lon_bounds_array( ny, buf );
 
      ierr = nc_inq_varid( ncid, "longitude_cell_bnd", &varID );
      ierr = nc_put_var_float( ncid, varID, buf );
 
-     construct_lat_bounds_array( buf );
+     construct_lat_bounds_array( ny, buf );
 
      ierr = nc_inq_varid( ncid, "latitude_cell_bnd", &varID );
      ierr = nc_put_var_float( ncid, varID, buf );
 
      free( buf );
+
+     ierr = nc_inq_dimid( ncid, "rlat0", &dimid );
+     if ( ierr==NC_NOERR ) {
+        ierr = nc_inq_dimlen( ncid, dimid, &dimlength );
+        ny = (int ) dimlength;
+
+        buf = (float *) malloc( int_constants[5]*ny*sizeof(float) );
+        construct_lon_array( ny, buf );
+
+        ierr = nc_inq_varid( ncid, "longitude0", &varID );
+        ierr = nc_put_var_float( ncid, varID, buf );
+
+        construct_lat_array( ny, buf );
+
+        ierr = nc_inq_varid( ncid, "latitude0", &varID );
+        ierr = nc_put_var_float( ncid, varID, buf );
+        free( buf );
+
+        buf = (float *) malloc( 4*int_constants[5]*ny*sizeof(float) );
+        construct_lon_bounds_array( ny, buf );
+
+        ierr = nc_inq_varid( ncid, "longitude_cell_bnd0", &varID );
+        ierr = nc_put_var_float( ncid, varID, buf );
+
+        construct_lat_bounds_array( ny, buf );
+
+        ierr = nc_inq_varid( ncid, "latitude_cell_bnd0", &varID );
+        ierr = nc_put_var_float( ncid, varID, buf );
+ 
+        free( buf );
+     }
 
      return;
 }

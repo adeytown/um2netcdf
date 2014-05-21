@@ -32,6 +32,8 @@
  *  VARIABLES                                                                *
  *---------------------------------------------------------------------------*/
 
+int num_unique_lats;
+
 int num_xml_vars;         /* # of possible defined in the XML stash file */
 int num_um_vars;          /* # of variables defined in the UM file */ 
 int wordsize;             /* wordsize of the architecture on which the input UM fields file was created: 4 or 8 bytes */
@@ -126,8 +128,11 @@ typedef struct new_um_variable {
         unsigned short lbproc;     /* denotes whether post-processing has been performed on variable.  0 if not */
         unsigned short t_dim ;     /* ID of the "time" dimension of variable */
         unsigned short z_dim ;     /* ID of the vertical coordinate of variable */
+        unsigned short y_dim ;     /* ID of the latitudinal coordinate of variable */
+        unsigned short x_dim ;     /* ID of the longitudinal coordinate of variable */
         unsigned short level_type; /* used to denote whether variable is on a RHO level (1) or a  */
                                    /* THETA level (2) */
+        int lat_index;
         float *times;
         float **time_bnds;         /* difference between start & end times for accummulation during */
                                    /* each stored timestep of the variable */

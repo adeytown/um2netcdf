@@ -50,13 +50,8 @@ int  output_um_fields( int ncid, FILE *fid, int iflag, int rflag );
 
 void construct_um_variables( int ncid, int iflag ) {
 
-     int     i, ierr, *dim_ids, ndim, varID, loc, horz_dimids[3];
+     int     i, ierr, *dim_ids, ndim, varID, loc;
      size_t *chunksize; 
-
-  /** Determine the IDs of lon & lat dimensions **/
-     ierr = nc_inq_dimid( ncid, "rlon", &horz_dimids[0] );
-     ierr = nc_inq_dimid( ncid, "rlat", &horz_dimids[1] );
-     if ( iflag==0 ) { ierr = nc_inq_dimid( ncid, "rlat2", &horz_dimids[2] ); }
 
      for ( i=0; i<num_stored_um_fields; i++ ) {
 
@@ -68,18 +63,13 @@ void construct_um_variables( int ncid, int iflag ) {
          dim_ids = (int *) malloc( ndim*sizeof(int) );
 
          dim_ids[0]      = stored_um_vars[i].t_dim;
-         dim_ids[ndim-1] = horz_dimids[0];
-         dim_ids[ndim-2] = horz_dimids[1]; 
-
-         if ( iflag==0 ) {  
-            if ( stored_um_vars[i].ny==int_constants[6] ) { dim_ids[ndim-2] = horz_dimids[1]; }
-            else                                          { dim_ids[ndim-2] = horz_dimids[2]; }
-         }
-
          if ( ndim==4 ) { dim_ids[1] = stored_um_vars[i].z_dim; }
+         dim_ids[ndim-2] = stored_um_vars[i].y_dim; 
+         dim_ids[ndim-1] = stored_um_vars[i].x_dim;
 
   /** Define the appropriate NetCDF variable **/
-         ierr = nc_def_var( ncid, stored_um_vars[i].name, stored_um_vars[i].vartype, ndim, dim_ids, &varID );
+         ierr = nc_def_var( ncid, stored_um_vars[i].name, stored_um_vars[i].vartype, 
+                            ndim, dim_ids, &varID );
          free( dim_ids );
 
  /** Set the chunking attribute for this variable **/
@@ -226,7 +216,6 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
   * 1b) Horizontal (Lat/Lon) Dimensions
   *---------------------------------------------------------------------------*/
      set_lon_lat_dimensions( ncid, iflag, rflag );
-     set_horizontal_dimensions( ncid, rflag );
 
  /* 
   * 1c) Vertical Dimensions

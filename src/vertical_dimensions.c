@@ -40,14 +40,17 @@
  ***   December 29, 2012
  ***/
 
-void set_soil_levels( int ncid, int n, int id ) {
+int set_soil_levels( int ncid, int n, int id ) {
 
      int    ierr, i, var_id, dim_id[1], nn;
      char   dim_name[12];
      float *buf;
 
-  /** Create the appropriate NetCDF dimension **/
      sprintf( dim_name, "soil_level%d", n );
+     ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] );
+     if ( ierr == NC_NOERR ) { return dim_id[0]; } 
+
+  /** Create the appropriate NetCDF dimension **/
      ierr = nc_def_dim( ncid, dim_name, n, &dim_id[0] );
 
   /** Create a corresponding NetCDF variable **/
@@ -71,10 +74,7 @@ void set_soil_levels( int ncid, int n, int id ) {
      ierr = nc_put_var_float( ncid, var_id, buf );
      free( buf );
 
-  /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_vars[id].z_dim = dim_id[0];
-
-     return;
+     return dim_id[0];
 }
 
 
@@ -92,7 +92,7 @@ void set_soil_levels( int ncid, int n, int id ) {
  ***   December 29, 2012
  ***/
 
-void set_pressure_levels( int ncid, int n, int id ) {
+int set_pressure_levels( int ncid, int n, int id ) {
 
      int    i, ierr, var_id, dim_id[1];
      char   dim_name[10];
@@ -101,10 +101,7 @@ void set_pressure_levels( int ncid, int n, int id ) {
 
      sprintf( dim_name, "pressure%d", n );
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
-     if ( ierr==NC_NOERR ) {
-        stored_um_vars[id].z_dim = dim_id[0];
-        return;
-     }
+     if ( ierr==NC_NOERR ) { return dim_id[0]; }
 
   /** Create the appropriate NetCDF dimension **/
      ierr = nc_def_dim( ncid, dim_name, n, &dim_id[0] );
@@ -128,10 +125,7 @@ void set_pressure_levels( int ncid, int n, int id ) {
          ierr = nc_put_var1_float( ncid, var_id, nc_index, &pressure );
      }
 
-  /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_vars[id].z_dim = dim_id[0];
-
-     return;
+     return dim_id[0];
 }
 
 
@@ -149,7 +143,7 @@ void set_pressure_levels( int ncid, int n, int id ) {
  ***   December 29, 2012
  ***/
 
-void set_altitude( int ncid, int n, int id ) {
+int set_altitude( int ncid, int n, int id ) {
 
      int    i, ierr, var_id, dim_id[1];
      char   dim_name[10];
@@ -159,10 +153,7 @@ void set_altitude( int ncid, int n, int id ) {
   /** Get ID of the appropriate NetCDF dimension **/
      sprintf( dim_name, "altitude%d", n );
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] );
-     if ( ierr==NC_NOERR ) {
-        stored_um_vars[id].z_dim = dim_id[0];
-        return;
-     }
+     if ( ierr==NC_NOERR ) { return dim_id[0]; }
 
   /** Create the appropriate NetCDF dimension **/
      ierr = nc_def_dim( ncid, dim_name, n, &dim_id[0] );
@@ -186,10 +177,7 @@ void set_altitude( int ncid, int n, int id ) {
          ierr = nc_put_var1_float( ncid, var_id, nc_index, &height );
      }
 
-  /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_vars[id].z_dim = dim_id[0];
-
-     return;
+     return dim_id[0];
 }
 
 
@@ -207,7 +195,7 @@ void set_altitude( int ncid, int n, int id ) {
  ***   April 29, 2014
  ***/
 
-void set_hybrid_levels( int ncid, int n, int id ) {
+int set_hybrid_levels( int ncid, int n, int id ) {
 
      int    i, ierr, var_id, dim_id[1], ind[2], z_level;
      char   dim_name[9];
@@ -217,10 +205,7 @@ void set_hybrid_levels( int ncid, int n, int id ) {
      else                                    { sprintf( dim_name, "hybridt%d", n ); }
      
      ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
-     if ( ierr==NC_NOERR ) {
-        stored_um_vars[id].z_dim = dim_id[0];
-        return;
-     }
+     if ( ierr==NC_NOERR ) { return dim_id[0]; }
 
   /** Create the appropriate NetCDF dimension **/
      ierr = nc_def_dim( ncid, dim_name, n, &dim_id[0] );
@@ -251,10 +236,7 @@ void set_hybrid_levels( int ncid, int n, int id ) {
      ierr = nc_put_var_float( ncid, var_id, height );
      free( height );
 
-  /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_vars[id].z_dim = dim_id[0];
-
-     return;
+     return dim_id[0];
 }
 
 
@@ -272,14 +254,17 @@ void set_hybrid_levels( int ncid, int n, int id ) {
  ***   December 29, 2012
  ***/
 
-void set_surface_levels( int ncid, int n, int id ) {
+int set_surface_levels( int ncid, int n, int id ) {
 
      int    i, ierr, var_id, dim_id[1];
      char   dim_name[9];
      float *buf;
 
-  /** Create the appropriate NetCDF dimension **/
      sprintf( dim_name, "surface%d", n );
+     ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
+     if ( ierr==NC_NOERR ) { return dim_id[0]; }
+
+  /** Create the appropriate NetCDF dimension **/
      ierr = nc_def_dim( ncid, dim_name, n, &dim_id[0] );
 
   /** Create a corresponding NetCDF variable **/
@@ -297,10 +282,7 @@ void set_surface_levels( int ncid, int n, int id ) {
      ierr = nc_put_var_float( ncid, var_id, buf );
      free( buf );
 
-  /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_vars[id].z_dim = dim_id[0];
-
-     return;
+     return dim_id[0];
 }
 
 
@@ -318,14 +300,17 @@ void set_surface_levels( int ncid, int n, int id ) {
  ***   December 29, 2012
  ***/
 
-void set_sea_surface_levels( int ncid, int n, int id ) {
+int set_sea_surface_levels( int ncid, int n, int id ) {
 
      int    i, ierr, var_id, dim_id[1];
      char   dim_name[13];
      float *buf;
 
-  /** Create the appropriate NetCDF dimension **/
      sprintf( dim_name, "sea_surface%d", n );
+     ierr = nc_inq_dimid( ncid, dim_name, &dim_id[0] ); 
+     if ( ierr==NC_NOERR ) { return dim_id[0]; }
+
+  /** Create the appropriate NetCDF dimension **/
      ierr = nc_def_dim( ncid, dim_name, n, &dim_id[0] );
 
   /** Create a corresponding NetCDF variable **/
@@ -345,10 +330,7 @@ void set_sea_surface_levels( int ncid, int n, int id ) {
      ierr = nc_put_var_float( ncid, var_id, buf );
      free( buf );
 
-  /** Need to set the ID of this vertical dimension for the stored UM variable **/
-     stored_um_vars[id].z_dim = dim_id[0];
-
-     return;
+     return dim_id[0];
 }
 
 /***
@@ -369,7 +351,7 @@ void set_sea_surface_levels( int ncid, int n, int id ) {
 
 void set_vertical_dimensions( int ncid, int rflag ) {
 
-     int i, num_instances;
+     int i, num_instances, dimID=0;
 
     /*** Check each stored UM variable its 'z-coordinate' ***/
      for ( i=0; i<num_stored_um_fields; i++ ) {
@@ -381,25 +363,30 @@ void set_vertical_dimensions( int ncid, int rflag ) {
          if ( num_instances>1 ) {
             switch ( stored_um_vars[i].lbvc ) {
                  case 1:
-                      set_altitude( ncid, num_instances, i );
+                      dimID = set_altitude( ncid, num_instances, i );
                       break;
                  case 6:
-                      set_soil_levels( ncid, num_instances, i );
+                      dimID = set_soil_levels( ncid, num_instances, i );
                       break;
                  case 8:
-                      set_pressure_levels( ncid, num_instances, i );
+                      dimID = set_pressure_levels( ncid, num_instances, i );
                       break;
                  case 65:
-                      set_hybrid_levels( ncid, num_instances, i );
+                      dimID = set_hybrid_levels( ncid, num_instances, i );
                       break;
                  case 128:
-                      set_sea_surface_levels( ncid, num_instances, i );
+                      dimID = set_sea_surface_levels( ncid, num_instances, i );
                       break;
                  case 129:
-                      set_surface_levels( ncid, num_instances, i );
+                      dimID = set_surface_levels( ncid, num_instances, i );
                       break;
+                 default:
+                      printf( "ERROR: unknown vertical coordinate for STASH CODE=%d\n\n", stored_um_vars[i].stash_code );
+                      exit(1);
             }
-
+            stored_um_vars[i].z_dim = (unsigned short int ) dimID;
+         } else {
+            stored_um_vars[i].z_dim = 999;
          }
 
      }
@@ -409,6 +396,21 @@ void set_vertical_dimensions( int ncid, int rflag ) {
                     &num_instances );
      i = nc_def_dim( ncid, "num_etaR_levels", (size_t ) (header[110]-1),
                     &num_instances );
+
+/*==============================================================================
+  START OF SANITY CHECK
+ *==============================================================================*
+     i = nc_enddef( ncid );
+     for ( i=0; i<num_stored_um_fields; i++ ) {
+         printf( "%hu %hu %hu %hu %hu\n", stored_um_vars[i].stash_code, stored_um_vars[i].x_dim,
+                                  stored_um_vars[i].y_dim, stored_um_vars[i].z_dim, 
+                                  stored_um_vars[i].t_dim );
+      }
+      exit(1);
+ *==============================================================================
+   END OF SANITY CHECK
+ *==============================================================================*/
+
 
      return;
 }

@@ -575,11 +575,11 @@ int check_um_file( char *filename, int rflag ) {
 
      }
 
-/**
- ** Check 
- **---------------------------------------------------------------------------*/
 
-/*     for ( i=0; i<num_stored_um_fields; i++ ) {
+/*==============================================================================
+ * START OF SANITY CHECK
+ *============================================================================== * 
+      for ( i=0; i<num_stored_um_fields; i++ ) {
          printf( "%s %hu [%hu, %hu %hu, %hu]\n", stored_um_vars[i].name, stored_um_vars[i].stash_code,
                                                stored_um_vars[i].nx, stored_um_vars[i].ny, stored_um_vars[i].nz,
                                                stored_um_vars[i].nt );
@@ -594,7 +594,10 @@ int check_um_file( char *filename, int rflag ) {
         }
         printf( "\n" );
      }
-     exit(1);*/
+     exit(1);
+ *==============================================================================
+ * END OF SANITY CHECK 
+ *==============================================================================*/ 
 
 /**
  ** Free memory used by the LOOKUP 2D array
