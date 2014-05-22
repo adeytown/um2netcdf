@@ -83,7 +83,7 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
     XXXX represents the platform on which you are building UM2NetCDF. This
     can only be set to 'x86' or 'pwr6' currently.  YYYY represents the compiler
     you wish to use for the compliation and linking of the binary.  Currently,
-    this can be set to 'gcc', 'pgcc' or 'xlc'.
+    this can be set to 'gcc', 'pgcc' or 'xlc_r'.
 
     Notes:
     A) The Makefile will try to include/read the appropriate machine file
@@ -133,11 +133,19 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
 
     where
 
-       FLAGS There are 3 flags that users can specify in an um2netcdf run:
+       FLAGS There are 6 flags that users can specify in an um2netcdf run:
+
+             -h  will display a help message outlining the various options that
+                 can be used with UM2NetCDF
 
              -i  all fields (found in the input UM fields file or specified by
                  the user) are written on the thermodynamic grid (eg. P-points on 
                  an Arakawa-C grid) 
+
+             -o  <FILENAME>
+
+                 used for when the user wishes to specify a particular file for
+                 the resulting output NetCDF file.
 
              -r  all fields written in the NetCDF file are written with 32-bit
                  precision. (Eg floats instead of doubles, integers instead of
@@ -149,6 +157,13 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
                  variables to be extracted from the input UM fields file and
                  written into the NetCDF file.  STASH codes provided must exist
                  in the XML field definition file used in the call to um2netcdf.x
+
+             -c  <XML Run Configuration File>
+
+                 Specifies the name of the XML file containing required run
+                 configuration data.  UM2NetCDF will not run if this file is not
+                 specified.  An example of such a file can be found in the 'run' 
+                 directory.
 
              Note that multiple flags may be used. However the '-s' flag must be
              the last flag used.

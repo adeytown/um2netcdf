@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<run_config>
+    <institution>Some Site</institution>
+    <ps>34</ps>
+    <niwa_eps>2</niwa_eps>
+    <rose_id>0</rose_id>
+    <model_name>UM</model_name>
+    <references>some url</references>
+    <comment>This is an example configuration</comment>
+    <title>Some model output</title>
+    <data_assimilation_method>unknown</data_assimilation_method>
+</run_config>
