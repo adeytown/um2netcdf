@@ -165,9 +165,6 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
                  specified.  An example of such a file can be found in the 'run' 
                  directory.
 
-             Note that multiple flags may be used. However the '-s' flag must be
-             the last flag used.
-  
        The Input UM fields file must contain unpacked data.  It can be of little
        or big endian format.  Note that the name of the output NetCDF file will
        be the same as the input UM fields file with the '.nc' suffix appended.
