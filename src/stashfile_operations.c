@@ -81,6 +81,11 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { fd[cnt].validmin = atof((const char *)str); }
              xmlFree( str );
+          } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"scalefact"))) {
+             str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+             if ( str!=NULL ) { fd[cnt].scale = atof((const char *)str); }
+             else             { fd[cnt].scale = 1.0; }
+             xmlFree( str );
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"umgrid"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              fd[cnt].umgrid = atoi((const char *) str);
@@ -211,3 +216,110 @@ int read_stash_file( char *filename ) {
 
      return 1; 
 }
+
+
+/***
+ *** READ_CONFIG_FILE
+ ***
+ *** Subroutine that opens the user-specified XML config file and reads
+ *** in the metadata associated with the UM run.
+ ***
+ ***   Mark Cheeseman, NIWA
+ ***   May 22, 2014
+ ***/
+
+int read_config_file( char *filename ) {
+
+     xmlDocPtr doc;
+     xmlNodePtr run;
+     xmlChar *str;
+
+/**
+ ** Open the XML file
+ **---------------------------------------------------------------------------*/
+     doc = xmlParseFile( filename );
+     if ( doc==NULL ) { return 0; }
+
+     run = xmlDocGetRootElement(doc);
+     if (run == NULL) { return 0; }
+     else { if (xmlStrcmp(run->name, (const xmlChar *) "run_config")) { return 0; } }
+
+/**
+ ** Loop over the different models
+ **---------------------------------------------------------------------------*/
+     run = run->xmlChildrenNode;
+     while ( run!= NULL ) {
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"institution"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) {
+                 memset( run_config.institution, '\0', sizeof(run_config.institution) );
+                 strcpy( run_config.institution,(const char *)str );
+              }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"ps"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) { run_config.eps = atoi((const char *) str); }
+              else             { run_config.eps = 34; }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"niwa_eps"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) { run_config.eps = atoi((const char *) str); }
+              else             { run_config.eps = 0; }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"rose_id"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) { run_config.rose_id = atoi((const char *) str); }
+              else             { run_config.rose_id = 0; }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"model_name"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) {
+                 memset( run_config.model, '\0', sizeof(run_config.model) );
+                 strcpy( run_config.model,(const char *)str );
+              }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"references"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) {
+                 memset( run_config.ref, '\0', sizeof(run_config.ref) );
+                 strcpy( run_config.ref,(const char *)str );
+              }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"comment"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) {
+                 memset( run_config.comment, '\0', sizeof(run_config.comment) );
+                 strcpy( run_config.comment,(const char *)str );
+              }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"title"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) {
+                 memset( run_config.title, '\0', sizeof(run_config.title) );
+                 strcpy( run_config.title,(const char *)str );
+              }
+              xmlFree( str );
+           }
+           if ((!xmlStrcmp(run->name, (const xmlChar *)"data_assimilation_method"))) {
+              str = xmlNodeListGetString(doc, run->xmlChildrenNode, 1);
+              if ( str!=NULL ) {
+                 memset( run_config.assim, '\0', sizeof(run_config.assim) );
+                 strcpy( run_config.assim,(const char *)str );
+              }
+              xmlFree( str );
+           }
+           run = run->next;
+     }
+     xmlFreeDoc( doc );
+
+     return 1;
+}
+
+

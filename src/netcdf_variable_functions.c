@@ -403,6 +403,7 @@ int output_um_fields( int ncid, FILE *fid, int iflag, int rflag ) {
          if ( stored_um_vars[n].nz>1 ) { printf( " x %d", stored_um_vars[n].nz ); } 
          printf( "]\n" );
      }
+     printf( "--------------------------------------------------------------\n\n" );
 
   /*
    * Write the UM field to hard disk one 2D data slice at a time. 

@@ -82,6 +82,7 @@ typedef struct um_field_metadata {
                            /*    accum=2  -> values are maximums */
        float validmax;     /* max valid value for the field */
        float validmin;     /* min valid value for the field */
+       float scale;        /* scale factor applied to files added to the output NetCDF file */
        char varname[45];   /* name of field in UM output file */ 
        char longname[100]; /* full descriptive name of field */
        char stdname[75];   /* CF-compliant name of field */
@@ -142,3 +143,23 @@ typedef struct new_um_variable {
 } new_um_variable;
 
 new_um_variable *stored_um_vars;
+
+
+/**
+ ** run_details - Struct that contains attributes about the UM run that produced  
+ **               the input UM data file.
+ **/ 
+
+typedef struct run_details {
+        char institution[25];  /* name of institution where field was generated */
+        int  ps;               /* UK MetOffice PS version used in the run */
+        int  eps;              /* EPS version number of the run */
+        int  rose_id;          /* id number of the ROSE application used for the run */
+        char model[15];        /* name of the specific UM model configuration used */
+        char ref[100];         /* string listing location of input field reference documentation */
+        char comment[100];     /* string containing additional info about run/config */
+        char title[50];        /* title of the model run */
+        char assim[50];        /* data assimilation method used in run */ 
+} run_details;
+
+run_details run_config;

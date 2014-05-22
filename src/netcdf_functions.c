@@ -52,6 +52,7 @@ void construct_um_variables( int ncid, int iflag ) {
 
      int     i, ierr, *dim_ids, ndim, varID, loc;
      size_t *chunksize; 
+     float   tol;
 
      for ( i=0; i<num_stored_um_fields; i++ ) {
 
@@ -121,6 +122,11 @@ void construct_um_variables( int ncid, int iflag ) {
                                   um_vars[loc].validmax );
          ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &
                                   um_vars[loc].validmin );
+         tol = (um_vars[loc].scale-1.0)*(um_vars[loc].scale-1.0);
+         if ( tol>0.0000001 ) {
+            ierr = nc_put_att_float( ncid, varID, "scale_factor", NC_FLOAT, 1, &
+                                     um_vars[loc].scale );
+         }
          ierr = nc_put_att_text( ncid, varID, "long_name", 100, um_vars[loc].longname );
          ierr = nc_put_att_text( ncid, varID, "standard_name", 75, um_vars[loc].stdname );
          ierr = nc_put_att_text( ncid, varID, "units", 25, um_vars[loc].units );
@@ -156,16 +162,11 @@ void construct_um_variables( int ncid, int iflag ) {
 
 int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filename ) {
      
-     int   ncid, ierr, pos, val;
-     char  forecast_ref_time[40], netcdf_filename[50], *str, *dest, creation_time[25];
-     char  *nzlam = "nzlam";
-     char  *nzcsm = "nzcsm";
-     char  *escape = "escape";
-     char  *tn_ = "tn_";
-     char  *met = "met";
-     char  *sls = "sls";
-     char  mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
-     FILE *fid;
+     int    ncid, ierr, pos;
+     size_t slen;
+     char   forecast_ref_time[40], netcdf_filename[50], *str, *dest, creation_time[25];
+     char   mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
+     FILE  *fid;
      time_t rawtime;
      struct tm * timeinfo;
 
@@ -202,6 +203,11 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      ierr = nc_set_chunk_cache( 129600000, 101, 0.75 );
      ierr = nc_create( netcdf_filename, NC_NETCDF4, &ncid ); 
      if ( ierr != NC_NOERR ) { return 999; }
+
+     printf( "Output NetCDF File\n" );
+     printf( "--------------------------------------------------------------\n" );
+     printf( "   Filename  : %s\n", netcdf_filename );
+     printf( "   Wordsize  : %d\n\n", wordsize );
  
  /**=========================================================================**
   ** STEP 1:  DIMENSIONS                                                     **
@@ -260,68 +266,30 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "input_uri", strlen(um_file), um_file ); 
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "conventions", 6, "CF-v25" ); 
      ierr = nc_put_att_long( ncid, NC_GLOBAL, "um_version_number", NC_LONG, 1, &header[11] );
-     val = 34;
-     ierr = nc_put_att_int( ncid, NC_GLOBAL, "met_office_ps", NC_INT, 1, &val ); 
      if ( header[3]>100 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 26, "rotated_latitude_longitude" ); }
      else                 { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 18, "latitude_longitude" ); } 
      if ( header[11]<=804 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core", 12, "new_dynamics" ); }
      else                   { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core",  8, "end_game" ); }
 
  /*
-  * Set global attributes specific to NIWA 
+  * Add site & run-specific global attributes 
   *--------------------------------------------------------------------------*/
-     ierr = nc_put_att_text( ncid, NC_GLOBAL, "institution", 4, "NIWA" );
-     val = 2; 
-     ierr = nc_put_att_int( ncid, NC_GLOBAL, "niwa_eps", NC_INT, 1, &val ); 
-     val = 0; 
-     ierr = nc_put_att_int( ncid, NC_GLOBAL,  "rose_id", NC_INT, 1, &val ); 
+     ierr = nc_put_att_int( ncid, NC_GLOBAL, "met_office_ps", NC_INT, 1, &run_config.ps ); 
+     ierr = nc_put_att_int( ncid, NC_GLOBAL,      "niwa_eps", NC_INT, 1, &run_config.eps ); 
+     ierr = nc_put_att_int( ncid, NC_GLOBAL,       "rose_id", NC_INT, 1, &run_config.rose_id ); 
 
- /*
-  * Set global attributes specific to NZ 12km resolution Limited Area Model 
-  *--------------------------------------------------------------------------*/
-     if ( strstr( um_file, nzlam )!=NULL ) { 
-        ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name",  8, "nzlam-12" ); 
-        ierr = nc_put_att_text( ncid, NC_GLOBAL, "references", 60, "http://matiu/~ecoconnect_admin/eco-docs/DataSet_Definitions/" );
-        ierr = nc_put_att_text( ncid, NC_GLOBAL, "comment",    58, "Ecoconnect operational implementation: Sept 2010 (FitzRoy)" );
-        ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", 7, "unknown" ); 
-        if ( strstr( um_file, sls )!=NULL ) { 
-           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 67, 
-                                   "Model: nzlam-12 output for Sea-Level and Sea state models (sls*.nc)" ); 
-        } 
-        if ( strstr( um_file, met )!=NULL ) { 
-           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 48, 
-                                   "Model: nzlam-12 output for meteorology (met*.nc)" ); 
-        } 
-        if ( strstr( um_file, tn_ )!=NULL ) { 
-           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 50, 
-                                   "Model: nzlam-12 sub-set output for topnet (tn*.nc)" ); 
-        } 
-        if ( strstr( um_file, escape )!=NULL ) { 
-           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 51, 
-                                   "Model: nzlam-12 output for energyscape (escape*.nc)" ); 
-        } 
-     } 
-
- /*
-  * Set global attributes specific to NZ 2km Convective Scale resolution Model 
-  *---------------------------------------------------------------------------*/
-     else if ( strstr( um_file, nzcsm )!=NULL ) {
-          ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 5, "nzcsm" ); 
-          ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 43, 
-                                 "Model: NZCSM output for Weather Forecasting" ); 
-          ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 5, "nzcsm" ); 
-          ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", 24, 
-                                 "pseudo analysis of NZLAM" );
-     }          
-
-     else {
-        ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", 7, "unknown" ); 
-        if ( strstr( um_file, sls )!=NULL ) { 
-           ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", 59,
-                                   "Model: n320150 output for Sea-Level and Sea state (sls*.nc)" );
-           ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", 7, "n320150" ); 
-        }
-     }
+     slen = strlen( run_config.institution );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "institution", slen, run_config.institution );
+     slen = strlen( run_config.model );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "model_name", slen, run_config.model ); 
+     slen = strlen( run_config.ref );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "references",slen, run_config.ref );
+     slen = strlen( run_config.comment );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "comment", slen, run_config.comment );
+     slen = strlen( run_config.assim );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "data_assimilation_method", slen, run_config.assim ); 
+     slen = strlen( run_config.title );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "title", slen, run_config.title ); 
 
  /*
   * Add date & time at which the NetCDF file was created 

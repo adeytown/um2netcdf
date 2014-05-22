@@ -55,6 +55,7 @@ OBJS =	util.o stashfile_operations.o umfile_operations.o interp.o \
 
 #BINARY=/hpcf/working/cheesemanmp/um2netcdf/NZCSM_CHECK/surface/um2netcdf.x
 BINARY=../test/um2netcdf.x
+#BINARY=/opt/niwa/um2netcdf/Linux/latest/um2netcdf.x
 
 ##-----------------------------------------------------------------------------
 ## Global Compile Rules

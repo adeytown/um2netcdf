@@ -44,6 +44,7 @@
 void status_check( int status, char *message );
 void usage();
 int read_stash_file( char *filename );
+int read_config_file( char *filename );
 int check_um_file( char *filename, int rflag);
 int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_file );
 int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag );
@@ -51,7 +52,7 @@ int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag );
 int main( int argc, char *argv[] ) {
 
      int ncid, status, c, iflag, rflag, n, i, tmp[25];
-     char *netcdf_filename=NULL, *dest;
+     char *netcdf_filename=NULL, *dest, *run_config_filename=NULL;;
 
  /*
   * Check if the user has included the correct number of commandline arguments
@@ -65,8 +66,11 @@ int main( int argc, char *argv[] ) {
      iflag = 0;
      rflag = 0;
      num_stored_um_fields = 0;
-     while ( (c = getopt(argc,argv,"irs:o:")) != EOF ) {
+     while ( (c = getopt(argc,argv,"hirs:o:c:")) != EOF ) {
            switch(c) {
+               case 'h':
+                       usage();
+                       exit(1);
                case 'i':
                        iflag = 1;
                        break;
@@ -89,7 +93,10 @@ int main( int argc, char *argv[] ) {
                case 'o':
                        netcdf_filename = optarg;
                        dest = strstr( netcdf_filename, ".nc" );
-                       if ( dest==NULL ) { printf("ERROR: No proper output filename found\n"); exit(1); } 
+                       if ( dest==NULL ) { printf("ERROR: specified output filename must have .nc suffix\n"); exit(1); } 
+                       break;
+               case 'c':
+                       run_config_filename = optarg;
                        break;
            }
      }
@@ -111,7 +118,17 @@ int main( int argc, char *argv[] ) {
   * Read in the variable definitions in the XML stash file 
   *---------------------------------------------------------------------------*/ 
      status = read_stash_file( argv[argc-1] );
-     status_check( status, "ERROR: could not parse stash file" ); 
+     status_check( status, "ERROR: could not parse XML stash file" ); 
+
+ /*
+  * Read in the run configuration XML file 
+  *---------------------------------------------------------------------------*/ 
+     if (run_config_filename==NULL ) {
+        printf( "ERROR: no run configuration file specified. Use the '-c' option to specify one.\n\n" );
+        exit(1);
+     }
+     status = read_config_file( run_config_filename );
+     status_check( status, "ERROR: could not parse run configuration file" ); 
 
  /*
   * Determine the type of input UM file specified by user, its endianness
@@ -120,20 +137,21 @@ int main( int argc, char *argv[] ) {
      status = check_um_file( argv[argc-2], rflag ); 
      status_check( status, "ERROR: could not determine UM filetype" );
 
-     printf( "\n===========================================================\n" );
-     printf( "                          UM2NetCDF\n" );
-     printf( "===========================================================\n\n" );
-     printf( "Input UM Fields File\n" );
-     printf( "-----------------------------------------------------------\n" );
-     printf( "   Filename  : %s\n", argv[argc-2] );
-     printf( "   Wordsize  : %d\n\n", wordsize );
-     printf( "UM Stash Codes->CF Metadata XML File\n" );
-     printf( "-----------------------------------------------------------\n" );
-     printf( "   Filename  : %s\n\n", argv[argc-1] );
-     
  /*
   * Create a NetCDF file to hold the UM data 
   *---------------------------------------------------------------------------*/ 
+     printf( "\n==============================================================\n" );
+     printf( "                           UM2NetCDF\n" );
+     printf( "==============================================================\n\n" );
+     printf( "XML Files\n" );
+     printf( "--------------------------------------------------------------\n" );
+     printf( "   UM Stash Code->CF Metadata File : %s\n", argv[argc-1] );
+     printf( "   Run Configuration File          : %s\n\n", run_config_filename );
+     printf( "Input UM Data File\n" );
+     printf( "--------------------------------------------------------------\n" );
+     printf( "   Filename  : %s\n", argv[argc-2] );
+     printf( "   Wordsize  : %d\n\n", wordsize );
+     
      ncid = create_netcdf_file( argv[argc-2], iflag, rflag, netcdf_filename );  
 
  /*
@@ -154,5 +172,5 @@ int main( int argc, char *argv[] ) {
  
      free( stored_um_vars );  
 
-     return 1;
+     return 0;
 }

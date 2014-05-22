@@ -241,7 +241,6 @@ int check_um_file( char *filename, int rflag ) {
          }
      }
      num_um_vars = cnt;
-     printf( "# of 2D slices found: %d\n", cnt );
 
 /**
  ** Gather all the valid lookup entries into a condensed array (called LOOKUP)) 
