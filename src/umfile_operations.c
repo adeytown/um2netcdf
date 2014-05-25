@@ -236,7 +236,8 @@ int check_um_file( char *filename, int rflag ) {
  **---------------------------------------------------------------------------*/
      cnt = 0;
      for ( nrec=0; nrec<header[151]; nrec++ ) {
-         if ( tmp[nrec][28]!=-99 ) { 
+         if ( (tmp[nrec][28]!=-99) && (tmp[nrec][17]>0) && (tmp[nrec][18]>0) ) {
+      //   if ( tmp[nrec][28]!=-99 ) { 
             cnt++; 
          }
      }
@@ -251,7 +252,8 @@ int check_um_file( char *filename, int rflag ) {
 
      cnt = 0;
      for ( nrec=0; nrec<header[151]; nrec++ ) {
-         if ( tmp[nrec][28]!=-99 ) {
+         if ( (tmp[nrec][28]!=-99) && (tmp[nrec][17]>0) && (tmp[nrec][18]>0) ) {
+//         if ( tmp[nrec][28]!=-99 ) {
             lookup[cnt] = (long *) malloc( 45*sizeof(long) );
             for ( n=0; n<45; n++ ) {
                 lookup[cnt][n] = tmp[nrec][n]; 
@@ -259,7 +261,6 @@ int check_um_file( char *filename, int rflag ) {
             cnt++;
          }
      }
-  //   num_um_vars = cnt+1;
 
      for ( nrec=0; nrec<header[151]; nrec++ )
            free( tmp[nrec] );
@@ -582,7 +583,7 @@ int check_um_file( char *filename, int rflag ) {
 
 /*==============================================================================
  * START OF SANITY CHECK
- *============================================================================== * 
+ *==============================================================================*
       for ( i=0; i<num_stored_um_fields; i++ ) {
          printf( "%s %hu [%hu, %hu %hu, %hu]\n", stored_um_vars[i].name, stored_um_vars[i].stash_code,
                                                stored_um_vars[i].nx, stored_um_vars[i].ny, stored_um_vars[i].nz,

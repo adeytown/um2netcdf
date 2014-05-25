@@ -78,7 +78,10 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
            index[0] = i + stored_um_vars[var_index].nx*j;
            index[1] = i + stored_um_vars[var_index].nx*(j-1);
            index[2] = i + stored_um_vars[var_index].nx*(j+1);
-           buf[index[0]] = 0.5*( val[index[1]] + val[index[2]] ); 
+           buf[index[0]] = 0.0;
+           if ( (val[index[1]]>1.0e-10)&&(val[index[1]]<1.0e12) ) { buf[index[0]] += 0.5*val[index[1]]; }
+           if ( (val[index[2]]>1.0e-10)&&(val[index[2]]<1.0e12) ) { buf[index[0]] += 0.5*val[index[2]]; }
+//           buf[index[0]] = 0.5*( val[index[1]] + val[index[2]] ); 
        }
        }
 
@@ -136,7 +139,10 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
        for ( j=0; j<y_limit; j++ ) {
        for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
            index[0] = j*stored_um_vars[var_index].nx + i;
-           buf[index[0]] = 0.5*( val[index[0]+1] + val[index[0]-1] );
+           buf[index[0]] = 0.0;
+           if ( (val[index[0]+1]>1.0e-10)&&(val[index[0]+1]<1.0e12) ) { buf[index[0]] += 0.5*val[index[0]+1]; }
+           if ( (val[index[0]-1]>1.0e-10)&&(val[index[0]-1]<1.0e12) ) { buf[index[0]] += 0.5*val[index[0]-1]; }
+       //    buf[index[0]] = 0.5*( val[index[0]+1] + val[index[0]-1] );
        }
        }
 
@@ -197,7 +203,12 @@ double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
          index[2] = index[0] + 1; 
          index[3] = index[0] - stored_um_vars[var_index].nx; 
          index[4] = index[0] + stored_um_vars[var_index].nx; 
-         buf[index[0]] = 0.25*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]] ); 
+         buf[index[0]] = 0.0;
+         if ( (val[index[0]]>1.0e-10)&&(val[index[0]]<1.0e12) ) { buf[index[0]] += 0.25*val[index[0]]; }
+         if ( (val[index[1]]>1.0e-10)&&(val[index[1]]<1.0e12) ) { buf[index[0]] += 0.25*val[index[1]]; }
+         if ( (val[index[2]]>1.0e-10)&&(val[index[2]]<1.0e12) ) { buf[index[0]] += 0.25*val[index[2]]; }
+         if ( (val[index[3]]>1.0e-10)&&(val[index[3]]<1.0e12) ) { buf[index[0]] += 0.25*val[index[3]]; }
+    //     buf[index[0]] = 0.25*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]] ); 
      }
      }
 

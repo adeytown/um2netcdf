@@ -391,8 +391,10 @@ void set_vertical_dimensions( int ncid, int rflag ) {
                       dimID = set_surface_levels( ncid, num_instances, i );
                       break;
                  default:
-                      printf( "ERROR: unknown vertical coordinate for STASH CODE=%d\n\n", stored_um_vars[i].stash_code );
-                      exit(1);
+                      printf( "ERROR: unknown vertical coordinate (%hu) for STASH CODE=%d\n\n", 
+                              stored_um_vars[i].lbvc, stored_um_vars[i].stash_code );
+                      break;
+                    //  exit(1);
             }
             stored_um_vars[i].z_dim = (unsigned short int ) dimID;
          } else {

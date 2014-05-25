@@ -207,7 +207,8 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      printf( "Output NetCDF File\n" );
      printf( "--------------------------------------------------------------\n" );
      printf( "   Filename  : %s\n", netcdf_filename );
-     printf( "   Wordsize  : %d\n\n", wordsize );
+     if ( rflag==1 ) { printf( "   Wordsize  : 4\n\n" ); }
+     else            { printf( "   Wordsize  : 8\n\n" ); }
  
  /**=========================================================================**
   ** STEP 1:  DIMENSIONS                                                     **

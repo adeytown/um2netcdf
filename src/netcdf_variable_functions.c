@@ -396,14 +396,15 @@ int output_um_fields( int ncid, FILE *fid, int iflag, int rflag ) {
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
          strcpy( name, stored_um_vars[n].name ); 
-         printf( "     %5d %25s     [%4d x %4d", stored_um_vars[n].stash_code, 
-                                                 stored_um_vars[n].name, 
-                                                 stored_um_vars[n].nx, 
-                                                 stored_um_vars[n].ny );
+         printf( "     %5d %25s", stored_um_vars[n].stash_code, stored_um_vars[n].name );
+         if ( (iflag==1)&&(stored_um_vars[n].ny!=int_constants[6]) ) { printf( "*" ); }
+         else { printf( " " ); }
+         printf( "    [%4d x %4d", stored_um_vars[n].nx, stored_um_vars[n].ny ); 
          if ( stored_um_vars[n].nz>1 ) { printf( " x %d", stored_um_vars[n].nz ); } 
          printf( "]\n" );
      }
      printf( "--------------------------------------------------------------\n\n" );
+     printf( "  * denotes that field is to be interpolated onto a P grid.\n\n" );
 
   /*
    * Write the UM field to hard disk one 2D data slice at a time. 
