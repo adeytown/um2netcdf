@@ -214,6 +214,27 @@ int read_stash_file( char *filename ) {
      }
      xmlFreeDoc( doc );
 
+/**
+ ** Check for non-sensical values and apply defaults if necessary 
+ **---------------------------------------------------------------------------*/
+     for ( cnt=0; cnt<num_xml_vars; cnt++ ) {
+
+/*         if ( um_vars[cnt].code<0 ) {
+            printf( "ERROR: incorrect item code found in XML file (%d)\n", 
+                    um_vars[cnt].code );
+         } 
+         if ( um_vars[cnt].section<0 ) {
+            printf( "ERROR: incorrect section code found in XML file (%d)\n", 
+                    um_vars[cnt].section );
+         }*/
+         if ( (um_vars[cnt].level_type!=1)&&(um_vars[cnt].level_type!=2) ) {
+            um_vars[cnt].level_type = 2; 
+         }
+         if ( (um_vars[cnt].scale<1e10-8)||(um_vars[cnt].scale>1e6) ) {
+            um_vars[cnt].scale = 1.0;
+         }
+     }
+
      return 1; 
 }
 
@@ -245,7 +266,7 @@ int read_config_file( char *filename ) {
      else { if (xmlStrcmp(run->name, (const xmlChar *) "run_config")) { return 0; } }
 
 /**
- ** Loop over the different models
+ ** Loop over the different parts of the run_details struct
  **---------------------------------------------------------------------------*/
      run = run->xmlChildrenNode;
      while ( run!= NULL ) {

@@ -58,16 +58,16 @@ int main( int argc, char *argv[] ) {
   * Check if the user has included the correct number of commandline arguments
   *---------------------------------------------------------------------------*/ 
      if ( argc<3 ) {
+        printf( "ERROR: too few commandline arguments\n\n" );
         usage(); 
-        status = 0;
-        status_check( status, "ERROR: too few commandline arguments" );
+        exit(1);
      } 
 
      iflag = 0;
      rflag = 0;
      num_stored_um_fields = 0;
      blacklist_cnt;
-     while ( (c = getopt(argc,argv,"hirs:o:c:b:")) != EOF ) {
+     while ( (c = getopt(argc,argv,"hirs:o:c:b:")) != EOF ) { 
            switch(c) {
                case 'h':
                        usage();
@@ -77,6 +77,14 @@ int main( int argc, char *argv[] ) {
                        break;
                case 'r':
                        rflag = 1;
+                       break;
+               case 'o':
+                       netcdf_filename = optarg;
+                       dest = strstr( netcdf_filename, ".nc" );
+                       if ( dest==NULL ) { printf("ERROR: specified output filename must have .nc suffix\n"); exit(1); } 
+                       break;
+               case 'c':
+                       run_config_filename = optarg;
                        break;
                case 's':
                        optind--;
@@ -90,14 +98,6 @@ int main( int argc, char *argv[] ) {
                           }
                           optind++;
                        }
-                       break;
-               case 'o':
-                       netcdf_filename = optarg;
-                       dest = strstr( netcdf_filename, ".nc" );
-                       if ( dest==NULL ) { printf("ERROR: specified output filename must have .nc suffix\n"); exit(1); } 
-                       break;
-               case 'c':
-                       run_config_filename = optarg;
                        break;
                case 'b':
                        optind--;
@@ -138,11 +138,21 @@ int main( int argc, char *argv[] ) {
   * Read in the run configuration XML file 
   *---------------------------------------------------------------------------*/ 
      if (run_config_filename==NULL ) {
-        printf( "ERROR: no run configuration file specified. Use the '-c' option to specify one.\n\n" );
-        exit(1);
+        printf( "WARNING: no run configuration file specified. Use the '-c' option to specify one.\n" );
+        printf( "         Default values to be used.\n\n" );
+        run_config.ps      = 0; 
+        run_config.eps     = 0; 
+        run_config.rose_id = 0; 
+        strcpy( run_config.institution, "ACME Corporation" );
+        strcpy( run_config.model, "my UM model" );
+        strcpy( run_config.ref, "no references listed" );
+        strcpy( run_config.comment, "no comment" );
+        strcpy( run_config.title, "Model Output" );
+        strcpy( run_config.assim, "no data assimilation used" );
+     } else {
+        status = read_config_file( run_config_filename );
+        status_check( status, "ERROR: could not parse run configuration file" ); 
      }
-     status = read_config_file( run_config_filename );
-     status_check( status, "ERROR: could not parse run configuration file" ); 
 
  /*
   * Determine the type of input UM file specified by user, its endianness
@@ -160,7 +170,10 @@ int main( int argc, char *argv[] ) {
      printf( "XML Files\n" );
      printf( "--------------------------------------------------------------\n" );
      printf( "   UM Stash Code->CF Metadata File : %s\n", argv[argc-1] );
-     printf( "   Run Configuration File          : %s\n\n", run_config_filename );
+      printf( "   Run Configuration File          : " );
+     if (run_config_filename==NULL ) { printf( "Not Specified\n\n" ); }
+     else                            { printf( "%s\n\n", run_config_filename ); }  
+
      printf( "Input UM Data File\n" );
      printf( "--------------------------------------------------------------\n" );
      printf( "   Filename  : %s\n", argv[argc-2] );

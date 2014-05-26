@@ -57,23 +57,29 @@ void status_check( int status, char *message ) {
  ***/
   
 void usage() {
-     printf( "\nUsage:  um2netcdf.x [OPTIONS] -c <config-file> <input-UM-fieldfile> <stash-xml-file> \n\n" );
-     printf( "  where\n" );
-     printf( "      -h used to display this help message\n" );
-     printf( "      -i interpolates all fields onto the thermodynamic grid (eg. P-points on an Arakawa-C grid)\n" );
-     printf( "      -r fields written in reduced precision (eg. INT/FLOAT instead of LONG/DOUBLE)\n" );
-     printf( "      -o <filename> \n");
-     printf( "         used to specify a filename to the output NetCDF file\n" );
-     printf( "      -s used to specify a set of stash codes of UM variables that can be selectively extracted\n" );
-     printf( "         from the input UM fields file into the NetCDF output file. Selected stash codes should\n" );
-     printf( "         be in a space-delimited list.  Example:\n\n" );
-     printf( "            um2netcdf.x -i -r -o test.nc -s 3209 3210 input.um stash.xml\n\n" );
-     printf( "      -c used to specify the name of the run configuration XML file" );
-     printf( "      -b used to specify a set of stash codes of UM variables to be ignored if located in the\n" );
-     printf( "         input UM fields file into the NetCDF output file. Specified stash codes should\n" );
-     printf( "         be in a space-delimited list.  Example:\n\n" );
+     printf( "\nUsage:  um2netcdf.x [ OPTIONS ] <input-file> <stash-file> \n\n" );
+     printf( "  where\n\n" );
+     printf( "    input-file  --> file whose contents are to be parsed and transferred to a netCDF\n" );
+     printf( "                    file. It can be an UM fields or dump file.\n\n" );
+     printf( "    stash-file  --> XML file that contains the metadata definitions of various UM\n" );
+     printf( "                    variables. These definitions include units, title, valid values\n" );
+     printf( "                    etc...\n\n" );
+     printf( "  The following options can be specified.  They MUST appear before the input filename!\n\n" );
+     printf( "    -h used to display this help message\n" );
+     printf( "    -i interpolates all fields onto the thermodynamic grid (eg. P-points on an Arakawa-C grid)\n" );
+     printf( "    -r fields written in reduced precision (eg. INT/FLOAT instead of LONG/DOUBLE)\n" );
+     printf( "    -o <filename> \n");
+     printf( "       used to specify a filename to the output NetCDF file\n" );
+     printf( "    -s used to specify a set of stash codes of UM variables that can be selectively extracted\n" );
+     printf( "       from the input UM fields file into the NetCDF output file. Selected stash codes should\n" );
+     printf( "       be in a space-delimited list.  Example:\n\n" );
+     printf( "          um2netcdf.x -i -r -o test.nc -s 3209 3210 input.um stash.xml\n\n" );
+     printf( "    -c used to specify the name of the run configuration XML file\n" );
+     printf( "    -b used to specify a set of stash codes of UM variables to be ignored if located in the\n" );
+     printf( "       input UM fields file into the NetCDF output file. Specified stash codes should\n" );
+     printf( "       be in a space-delimited list.  Example:\n\n" );
      printf( "            um2netcdf.x -i -r -o test.nc -b 3209 3210 input.um stash.xml -c config.xml\n\n" );
-     printf( "It does not matter which order you use for the flags.\n\n" );
+     printf( "   It does not matter which order you put the option flags.\n\n" );
 }
 
 

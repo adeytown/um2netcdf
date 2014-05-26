@@ -404,7 +404,9 @@ int output_um_fields( int ncid, FILE *fid, int iflag, int rflag ) {
          printf( "]\n" );
      }
      printf( "--------------------------------------------------------------\n\n" );
-     printf( "  * denotes that field is to be interpolated onto a P grid.\n\n" );
+     if ( iflag==1 ) {
+        printf( "  * denotes that field is to be interpolated onto a P grid.\n\n" );
+     }
 
   /*
    * Write the UM field to hard disk one 2D data slice at a time. 
