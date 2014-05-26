@@ -46,6 +46,8 @@ long int_constants[46];  /* input UM fields file's integer_constants array */
 double **level_constants;   /* input UM fields file's 2d level-dependent constants array */
 double   real_constants[6]; /* input UM fields files's real_constants array */
 
+unsigned short int blacklist[10]; /* STASH CODES of UM variables to be avoided */
+unsigned short int blacklist_cnt;
 
 /*---------------------------------------------------------------------------*
  *  FUNCTION POINTERS                                                        *

@@ -60,7 +60,7 @@ double *interp_do_nothing(  double *val, int var_index ) {
 
 double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index[3], y_limit;
+       int     i, j, index[3], y_limit, ind[3];
        double *buf;
 
        j = stored_um_vars[var_index].nx*int_constants[6];
@@ -74,15 +74,17 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
    /** Take the average of the U points above & below the desired P-point **/
 
        for ( j=1; j<y_limit-1; j++ ) {
-       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-           index[0] = i + stored_um_vars[var_index].nx*j;
-           index[1] = i + stored_um_vars[var_index].nx*(j-1);
-           index[2] = i + stored_um_vars[var_index].nx*(j+1);
-           buf[index[0]] = 0.0;
-           if ( (val[index[1]]>1.0e-10)&&(val[index[1]]<1.0e12) ) { buf[index[0]] += 0.5*val[index[1]]; }
-           if ( (val[index[2]]>1.0e-10)&&(val[index[2]]<1.0e12) ) { buf[index[0]] += 0.5*val[index[2]]; }
-//           buf[index[0]] = 0.5*( val[index[1]] + val[index[2]] ); 
-       }
+           ind[0] = stored_um_vars[var_index].nx*j;
+           ind[1] = ind[0] - (int ) stored_um_vars[var_index].nx;
+           ind[2] = ind[0] + (int ) stored_um_vars[var_index].nx;
+           for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+               index[0] = i + ind[0];
+               index[1] = i + ind[1];
+               index[2] = i + ind[2];
+               buf[index[0]] = 0.0;
+               if ( (val[index[1]]>-1e-10)&&(val[index[1]]<1e10) ) { buf[index[0]] += 0.5*val[index[1]]; }
+               if ( (val[index[2]]>-1e-10)&&(val[index[2]]<1e10) ) { buf[index[0]] += 0.5*val[index[2]]; }
+           }
        }
 
        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) { 

@@ -237,7 +237,6 @@ int check_um_file( char *filename, int rflag ) {
      cnt = 0;
      for ( nrec=0; nrec<header[151]; nrec++ ) {
          if ( (tmp[nrec][28]!=-99) && (tmp[nrec][17]>0) && (tmp[nrec][18]>0) ) {
-      //   if ( tmp[nrec][28]!=-99 ) { 
             cnt++; 
          }
      }
@@ -253,7 +252,6 @@ int check_um_file( char *filename, int rflag ) {
      cnt = 0;
      for ( nrec=0; nrec<header[151]; nrec++ ) {
          if ( (tmp[nrec][28]!=-99) && (tmp[nrec][17]>0) && (tmp[nrec][18]>0) ) {
-//         if ( tmp[nrec][28]!=-99 ) {
             lookup[cnt] = (long *) malloc( 45*sizeof(long) );
             for ( n=0; n<45; n++ ) {
                 lookup[cnt][n] = tmp[nrec][n]; 
@@ -286,6 +284,30 @@ int check_um_file( char *filename, int rflag ) {
 
             temp[num_stored_um_fields] = (unsigned short ) lookup[j][41];
             num_stored_um_fields++;
+        }
+
+     /*** Apply the blacklist (if necessary) ***/
+        if ( blacklist_cnt>0 ) {
+           for ( j=0; j<blacklist_cnt; j++ ) {
+               for ( i=0; i<num_stored_um_fields; i++ ) 
+                   if ( blacklist[j]==temp[i] ) { temp[i] = 999; }
+           }
+
+           cnt = 0;
+           for ( i=0; i<num_stored_um_fields; i++ )
+               if ( temp[i]!=999 )  { cnt++; } 
+
+           temp_id = (unsigned short int *) malloc( cnt*sizeof(unsigned short int) );
+           cnt = 0;
+           for ( i=0; i<num_stored_um_fields; i++ )
+               if ( temp[i]!=999 )  { temp_id[cnt] = temp[i]; cnt++; } 
+           
+           num_stored_um_fields = cnt;
+           temp = (unsigned short int *) realloc( temp, (int )num_stored_um_fields*sizeof(unsigned short int) );
+           for ( i=0; i<num_stored_um_fields; i++ )
+               temp[i] = temp_id[i];
+   
+           free( temp_id );
         }
 
      /*** Allocate UM variable data structure ***/ 

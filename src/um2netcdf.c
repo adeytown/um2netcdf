@@ -66,7 +66,8 @@ int main( int argc, char *argv[] ) {
      iflag = 0;
      rflag = 0;
      num_stored_um_fields = 0;
-     while ( (c = getopt(argc,argv,"hirs:o:c:")) != EOF ) {
+     blacklist_cnt;
+     while ( (c = getopt(argc,argv,"hirs:o:c:b:")) != EOF ) {
            switch(c) {
                case 'h':
                        usage();
@@ -84,7 +85,7 @@ int main( int argc, char *argv[] ) {
                           if ( tmp[num_stored_um_fields]==0 ) { break; }
                           num_stored_um_fields++;
                           if ( num_stored_um_fields==25 ) { 
-                             printf( "ERROR: one can only specify up to 25 stash codes\n" ); 
+                             printf( "ERROR: one can only specify up to 25 stash codes for extraction\n" ); 
                              exit(1); 
                           }
                           optind++;
@@ -97,6 +98,19 @@ int main( int argc, char *argv[] ) {
                        break;
                case 'c':
                        run_config_filename = optarg;
+                       break;
+               case 'b':
+                       optind--;
+                       while ( optind<argc ) {
+                          blacklist[blacklist_cnt] = atoi( argv[optind] );
+                          if ( blacklist[blacklist_cnt]==0 ) { break; }
+                          blacklist_cnt++;
+                          if ( blacklist_cnt==10 ) { 
+                             printf( "ERROR: one can only specify up to 10 stash codes for blacklisting\n" ); 
+                             exit(1); 
+                          }
+                          optind++;
+                       }
                        break;
            }
      }
