@@ -66,7 +66,7 @@ int main( int argc, char *argv[] ) {
      iflag = 0;
      rflag = 0;
      num_stored_um_fields = 0;
-     blacklist_cnt;
+     blacklist_cnt = 0;
      while ( (c = getopt(argc,argv,"hirs:o:c:b:")) != EOF ) { 
            switch(c) {
                case 'h':

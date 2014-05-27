@@ -215,9 +215,9 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
 void write_uninterpolated_fields( int ncid, FILE *fid ) {
 
-     int     n, i, j=0, k, cnt, varid;
-     size_t offset_3d[3], count_3d[3], offset_4d[4], count_4d[4];
-     double *buf;
+     int     n, i, j=0, k, kk, cnt, varid, loc;
+     size_t  offset_3d[3], count_3d[3], offset_4d[4], count_4d[4];
+     double *buf, factor;
      char    name[45];
 
      for ( n=0; n<3; n++ ) {
@@ -248,6 +248,11 @@ void write_uninterpolated_fields( int ncid, FILE *fid ) {
          cnt = (int ) stored_um_vars[n].nx*stored_um_vars[n].ny;
          buf = (double *) malloc( cnt*sizeof(double) );
 
+       /*** Get scaling factor for this UM variable ***/
+     
+         loc = stored_um_vars[n].xml_index;
+         factor = (double ) um_vars[loc].scale;
+
        /*** For a 3D UM variable [NX,NY,NT], read in a single 2D data slice per data time   ***/
        /*** valid for this UM variable.  Then apply the appropriate interpolation and write ***/
        /*** the final field to hard disk.                                                   ***/
@@ -258,6 +263,7 @@ void write_uninterpolated_fields( int ncid, FILE *fid ) {
                    fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
                    fread( buf, wordsize, cnt, fid );
                    endian_swap( buf, cnt );
+                   for ( kk=0; kk<cnt; kk++ ) { buf[kk] = factor*buf[kk]; }
                    i = nc_put_vara_double( ncid, varid, offset_3d, count_3d, buf );
                    offset_3d[0]++;
                }
@@ -275,6 +281,7 @@ void write_uninterpolated_fields( int ncid, FILE *fid ) {
                        fseek( fid, stored_um_vars[n].slices[k][j].location*wordsize, SEEK_SET );
                        fread( buf, wordsize, cnt, fid );
                        endian_swap( buf, cnt );
+                       for ( kk=0; kk<cnt; kk++ ) { buf[kk] = factor*buf[kk]; }
                        i = nc_put_vara_double( ncid, varid, offset_4d, count_4d, buf );
                        offset_4d[0]++;
                    }
@@ -290,10 +297,10 @@ void write_uninterpolated_fields( int ncid, FILE *fid ) {
 
 void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
 
-     int     n, i, j=0, k, kk, cnt, varid;
+     int     n, i, j=0, k, kk, cnt, varid, loc;
      size_t offset_3d[3], count_3d[3], offset_4d[4], count_4d[4];
      double *buf;
-     float  *fbuf=NULL;
+     float  *fbuf=NULL, factor;
      char    name[45];
 
      for ( n=0; n<3; n++ ) {
@@ -325,6 +332,11 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
          buf = (double *) malloc( cnt*sizeof(double) );
          fbuf = (float *) malloc( cnt*sizeof(float) ); 
 
+       /*** Get scaling factor for this UM variable ***/
+
+         loc = stored_um_vars[n].xml_index;
+         factor = um_vars[loc].scale;
+
        /*** For a 3D UM variable [NX,NY,NT], read in a single 2D data slice per data time   ***/
        /*** valid for this UM variable.  Then apply the appropriate interpolation and write ***/
        /*** the final field to hard disk.                                                   ***/
@@ -335,7 +347,7 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
                    fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
                    fread( buf, wordsize, cnt, fid );
                    endian_swap( buf, cnt );
-                   for ( j=0; j<cnt; j++ ) { fbuf[j] = (float ) buf[j]; }
+                   for ( j=0; j<cnt; j++ ) { fbuf[j] = factor * ((float ) buf[j]); }
                    i = nc_put_vara_float( ncid, varid, offset_3d, count_3d, fbuf );
                    offset_3d[0]++;
                }
@@ -353,7 +365,7 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
                        fseek( fid, stored_um_vars[n].slices[k][kk].location*wordsize, SEEK_SET );
                        fread( buf, wordsize, cnt, fid );
                        endian_swap( buf, cnt );
-                       for ( j=0; j<cnt; j++ ) { fbuf[j] = (float ) buf[j]; }
+                       for ( j=0; j<cnt; j++ ) { fbuf[j] = factor * ((float ) buf[j]); }
                        i = nc_put_vara_float( ncid, varid, offset_4d, count_4d, fbuf );
                        offset_4d[0]++;
                    }

@@ -52,7 +52,6 @@ void construct_um_variables( int ncid, int iflag ) {
 
      int     i, ierr, *dim_ids, ndim, varID, loc;
      size_t *chunksize; 
-     float   tol;
 
      for ( i=0; i<num_stored_um_fields; i++ ) {
 
@@ -122,11 +121,6 @@ void construct_um_variables( int ncid, int iflag ) {
                                   um_vars[loc].validmax );
          ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &
                                   um_vars[loc].validmin );
-         tol = (um_vars[loc].scale-1.0)*(um_vars[loc].scale-1.0);
-         if ( tol>0.0000001 ) {
-            ierr = nc_put_att_float( ncid, varID, "scale_factor", NC_FLOAT, 1, &
-                                     um_vars[loc].scale );
-         }
          ierr = nc_put_att_text( ncid, varID, "long_name", 100, um_vars[loc].longname );
          ierr = nc_put_att_text( ncid, varID, "standard_name", 75, um_vars[loc].stdname );
          ierr = nc_put_att_text( ncid, varID, "units", 25, um_vars[loc].units );

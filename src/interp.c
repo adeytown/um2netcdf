@@ -31,13 +31,28 @@
 /***
  *** INTERP_DO_NOTHING
  ***
- *** Empty subroutine that does nothing to the input fata field.
+ *** No interpolation is done to the field.  Only the scale factor is applied. 
  ***
  ***   Mark Cheeseman, NIWA
- ***   December 13, 2013
+ ***   May 27, 2014
  ***/ 
 
 double *interp_do_nothing(  double *val, int var_index ) {
+
+       int    loc, n, cnt;
+       double factor;
+
+   /** Get the scaling factor **/
+
+       loc = stored_um_vars[var_index].xml_index;
+       factor = (double ) um_vars[loc].scale; 
+
+   /** Apply the scaling factor **/
+
+       cnt = (int )( stored_um_vars[var_index].nx*stored_um_vars[var_index].ny );
+       for ( n=0; n<cnt; n++ )
+           val[n] = factor*val[n]; 
+
        return val;
 }
 
@@ -60,8 +75,13 @@ double *interp_do_nothing(  double *val, int var_index ) {
 
 double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index[3], y_limit, ind[3];
-       double *buf;
+       int     i, j, index[3], y_limit, ind[3], loc;
+       double *buf, factor;
+
+   /** Get the scaling factor **/
+
+       loc = stored_um_vars[var_index].xml_index;
+       factor = (double ) um_vars[loc].scale; 
 
        j = stored_um_vars[var_index].nx*int_constants[6];
        buf = (double *) malloc( j*sizeof(double) );
@@ -81,7 +101,7 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
                index[0] = i + ind[0];
                index[1] = i + ind[1];
                index[2] = i + ind[2];
-               buf[index[0]] = 0.5*( val[index[1]] + val[index[2]] );
+               buf[index[0]] = 0.5*factor*( val[index[1]] + val[index[2]] );
            }
        }
 
@@ -123,8 +143,13 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
 double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index[2], y_limit;
-       double *buf;
+       int     i, j, index[2], y_limit, loc;
+       double *buf, factor;
+
+   /** Get the scaling factor **/
+
+       loc = stored_um_vars[var_index].xml_index;
+       factor = (double ) um_vars[loc].scale; 
 
        j = int_constants[6]*stored_um_vars[var_index].nx;
        buf = (double *) malloc( j*sizeof(double) );
@@ -140,7 +165,7 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
        for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
            index[0] = j*stored_um_vars[var_index].nx + i;
            buf[index[0]] = 0.0;
-           buf[index[0]] = 0.5*( val[index[0]+1] + val[index[0]-1] );
+           buf[index[0]] = 0.5*factor*( val[index[0]+1] + val[index[0]-1] );
        }
        }
 
@@ -181,8 +206,13 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
 double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
 
-     int     i, j, index[5], y_limit;
-     double *buf;
+     int     i, j, index[5], y_limit, loc;
+     double *buf, factor;
+
+   /** Get the scaling factor **/
+
+     loc = stored_um_vars[var_index].xml_index;
+     factor = (double ) um_vars[loc].scale; 
 
      j = int_constants[6]*stored_um_vars[var_index].nx; 
      buf = (double *) calloc( j,sizeof(double) );
@@ -202,7 +232,7 @@ double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
          index[3] = index[0] - stored_um_vars[var_index].nx; 
          index[4] = index[0] + stored_um_vars[var_index].nx; 
          buf[index[0]] = 0.0;
-         buf[index[0]] = 0.25*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]] ); 
+         buf[index[0]] = 0.25*factor*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]] ); 
      }
      }
 
