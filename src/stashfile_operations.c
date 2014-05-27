@@ -218,23 +218,18 @@ int read_stash_file( char *filename ) {
  ** Check for non-sensical values and apply defaults if necessary 
  **---------------------------------------------------------------------------*/
      for ( cnt=0; cnt<num_xml_vars; cnt++ ) {
-
-/*         if ( um_vars[cnt].code<0 ) {
-            printf( "ERROR: incorrect item code found in XML file (%d)\n", 
-                    um_vars[cnt].code );
-         } 
-         if ( um_vars[cnt].section<0 ) {
-            printf( "ERROR: incorrect section code found in XML file (%d)\n", 
-                    um_vars[cnt].section );
-         }*/
          if ( (um_vars[cnt].level_type!=1)&&(um_vars[cnt].level_type!=2) ) {
             um_vars[cnt].level_type = 2; 
          }
-         if ( (um_vars[cnt].scale<1e10-8)||(um_vars[cnt].scale>1e6) ) {
+         if ( (um_vars[cnt].scale<0.00000001)||(um_vars[cnt].scale>1000000) ) {
             um_vars[cnt].scale = 1.0;
          }
      }
 
+//     for ( cnt=0; cnt<num_xml_vars; cnt++ )
+//         printf( "%hu %f\n", um_vars[cnt].level_type, um_vars[cnt].scale );
+
+//     exit(1);
      return 1; 
 }
 

@@ -138,8 +138,8 @@ int main( int argc, char *argv[] ) {
   * Read in the run configuration XML file 
   *---------------------------------------------------------------------------*/ 
      if (run_config_filename==NULL ) {
-        printf( "WARNING: no run configuration file specified. Use the '-c' option to specify one.\n" );
-        printf( "         Default values to be used.\n\n" );
+        printf( "\n\nWARNING: no run configuration file specified. Use the '-c' option to specify one.\n" );
+        printf( "         Default values will be used.\n" );
         run_config.ps      = 0; 
         run_config.eps     = 0; 
         run_config.rose_id = 0; 

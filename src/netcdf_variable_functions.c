@@ -35,14 +35,8 @@ double *interp_do_nothing( double *val, int index );
 double *u_to_p_point_interp_c_grid( double *val, int index );
 double *v_to_p_point_interp_c_grid( double *val, int index );
 double *b_to_c_grid_interp_u_points( double *val, int index );
-float  *interp_do_nothing_float( double *val, int index );
-float  *u_to_p_point_interp_c_grid_float( double *val, int index );
-float  *v_to_p_point_interp_c_grid_float( double *val, int index );
-float  *b_to_c_grid_interp_u_points_float( double *val, int index );
-void endian_swap_4bytes( void *ptr, int nchunk );
-void wgdos_unpack( FILE *fh, unsigned short nx, unsigned short ny, double *buf,
-                   double mdi );
-void ieee_usage_message();
+void    endian_swap_4bytes( void *ptr, int nchunk );
+void    ieee_usage_message();
 
 
 /***

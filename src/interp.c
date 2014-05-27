@@ -39,7 +39,7 @@
 
 double *interp_do_nothing(  double *val, int var_index ) {
 
-       int    loc, n, cnt;
+       int    loc, n, cnt, chunk=100;
        double factor;
 
    /** Get the scaling factor **/
@@ -50,8 +50,12 @@ double *interp_do_nothing(  double *val, int var_index ) {
    /** Apply the scaling factor **/
 
        cnt = (int )( stored_um_vars[var_index].nx*stored_um_vars[var_index].ny );
+#pragma omp parallel shared(factor,val,cnt) private(n)
+   {
+   #pragma omp for schedule(dynamic,chunk)
        for ( n=0; n<cnt; n++ )
            val[n] = factor*val[n]; 
+   }
 
        return val;
 }
@@ -75,7 +79,7 @@ double *interp_do_nothing(  double *val, int var_index ) {
 
 double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index[3], y_limit, ind[3], loc;
+       int     i, j, index[3], y_limit, ind[3], loc, chunk=100;
        double *buf, factor;
 
    /** Get the scaling factor **/
@@ -93,6 +97,9 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
    /** Take the average of the U points above & below the desired P-point **/
 
+#pragma omp parallel default(shared) private(i,j,ind,index)
+   {
+   #pragma omp for schedule(dynamic,chunk) 
        for ( j=1; j<y_limit-1; j++ ) {
            ind[0] = stored_um_vars[var_index].nx*j;
            ind[1] = ind[0] - (int ) stored_um_vars[var_index].nx;
@@ -105,11 +112,13 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
            }
        }
 
+   #pragma omp for schedule(dynamic,chunk) 
        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) { 
            index[0] = stored_um_vars[var_index].nx + i;
            buf[i] = buf[index[0]]; 
        }
 
+   #pragma omp for schedule(dynamic,chunk) 
        for ( j=y_limit-1; j<int_constants[6]; j++ ) {
        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
            index[0] = i + stored_um_vars[var_index].nx*j;
@@ -117,6 +126,8 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
            buf[index[0]] = buf[index[1]]; 
        }
        }
+   
+   }
 
    /** Deallocate the memory holding the uninterpolated data. Reassign pointer. **/
 
@@ -143,7 +154,7 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
 
 double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
-       int     i, j, index[2], y_limit, loc;
+       int     i, j, index[2], y_limit, loc, chunk=100;
        double *buf, factor;
 
    /** Get the scaling factor **/
@@ -161,6 +172,9 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
  /** Take the average of the V points to the left & right of the desired P-point **/
 
+#pragma omp parallel default(shared) private(i,j,index)
+   {
+   #pragma omp for schedule(dynamic,chunk) 
        for ( j=0; j<y_limit; j++ ) {
        for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
            index[0] = j*stored_um_vars[var_index].nx + i;
@@ -169,6 +183,7 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
        }
        }
 
+   #pragma omp for schedule(dynamic,chunk) 
        for ( j=y_limit-1; j<int_constants[6]; j++ ) {
        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
            index[0] = i + stored_um_vars[var_index].nx*j;
@@ -177,13 +192,15 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
        }
        }
 
+   #pragma omp for schedule(dynamic,chunk) 
        for ( j=0; j<int_constants[6]; j++ ) {
            index[0] = j*stored_um_vars[var_index].nx;
            buf[index[0]] = buf[index[0]+1];
            index[1] = (j+1)*stored_um_vars[var_index].nx - 1;
            buf[index[1]] = buf[index[1]-1];
        }
-
+   
+   }
        free( val );
        return buf;
 }
@@ -206,7 +223,7 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
 
 double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
 
-     int     i, j, index[5], y_limit, loc;
+     int     i, j, index[5], y_limit, loc, chunk=100;
      double *buf, factor;
 
    /** Get the scaling factor **/
@@ -224,6 +241,9 @@ double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
 
   /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
   
+#pragma omp parallel default(shared) private(i,j,index)
+   {
+   #pragma omp for schedule(dynamic,chunk) 
      for ( j=1; j<y_limit-1; j++ ) {
      for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
          index[0] = j*stored_um_vars[var_index].nx + i; 
@@ -238,11 +258,13 @@ double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
 
   /** Fill the missing rows [0 and NY-1 -> INT_CONSTANTS(6)] **/
 
+   #pragma omp for schedule(dynamic,chunk) 
      for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
          index[0] = i + stored_um_vars[var_index].nx;
          buf[i] = buf[index[0]];
      } 
 
+   #pragma omp for schedule(dynamic,chunk) 
      for ( j=y_limit-1; j<int_constants[6]; j++ ) {
      for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
          index[0] = i + stored_um_vars[var_index].nx*j;
@@ -253,6 +275,7 @@ double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
 
   /** Fill the missing columns [0 and NX-1] **/
 
+   #pragma omp for schedule(dynamic,chunk) 
      for ( j=0; j<int_constants[6]; j++ ) {
          index[0] = j*stored_um_vars[var_index].nx;
          index[1] = index[0] + 1;
@@ -261,6 +284,8 @@ double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
          index[3] = index[2] - 1;
          buf[index[2]] = buf[index[3]];
      }
+   
+   }
 
      free( val );
      return buf;
