@@ -1,0 +1,1896 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- we should point to a schema here so that the file can be validated etc -->
+<!-- MJU 19-May-2014	Use on any non convection-resolving model           -->
+<stash2cf>
+  <model model_id="1">
+    <section section_id="0">
+	<!-- Section 0, item 1 is not defined in the current STASHmaster file... remove (MJU 20140519)
+      <item>
+        <stash_code>1</stash_code>
+        <varname>sfc_air_press</varname>
+        <longname>air pressure at model surface</longname>
+        <standardname>air_pressure</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000</validmax>
+        <validmin>60000.000000</validmin>
+        <umgrid>0</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.0</scalefact>
+      </item> -->
+      <item>
+        <stash_code>2</stash_code>
+        <varname>model_u</varname>
+        <longname>zonal wind after timestep (on model rho levels)</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000</validmax>
+        <validmin>-300.000000</validmin>
+        <umgrid>18</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>3</stash_code>
+        <varname>model_v</varname>
+        <longname>meridional wind after timestep (on model rho levels)</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000</validmax>
+        <validmin>-300.000000</validmin>
+        <umgrid>19</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>4</stash_code>
+        <varname>model_pot_temp</varname>
+        <longname>potential temperature after timestep (on model theta levels)</longname>
+        <standardname>air_potential_temperature</standardname>
+        <units>K</units>
+        <validmax>8000.000000</validmax>
+        <validmin>260.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>10</stash_code>
+        <varname>spec_hum</varname>
+        <longname>specific humidity (on model theta levels)</longname>
+        <standardname>specific_humidity</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>12</stash_code>
+        <varname>spec_cloud_ice</varname>
+        <longname>specific cloud ice content</longname>
+        <standardname>atmosphere_cloud_ice_content</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>23</stash_code>
+        <varname>sfc_snow_amount</varname>
+        <longname>sum of convective and largescale snow amount on surface</longname>
+        <standardname>surface_snow_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>100000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>24</stash_code>
+        <varname>skin_temp</varname>
+        <longname>surface skin temperature</longname>
+        <standardname>surface_temperature</standardname>
+        <units>K</units>
+        <validmax>333.000000</validmax>
+        <validmin>230.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>25</stash_code>
+        <varname>blayer_depth</varname>
+        <longname>atmospheric boundary layer depth</longname>
+        <standardname>atmospheric_boundary_layer_thickness</standardname>
+        <units>m</units>
+        <validmax>2000.000000f</validmax>
+        <validmin>0.000000f</validmin>
+        <level_type>2</level_type>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>26</stash_code>
+        <varname>sfc_ruff_l</varname>
+        <longname>surface roughness length in the boundary layer</longname>
+        <standardname>surface_roughness_length</standardname>
+        <units>m</units>
+        <validmax> 999999.9</validmax>
+        <validmin> 0.0</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>31</stash_code>
+        <varname>sea_ice_fraction</varname>
+        <longname>fraction of cell covered with sea ice</longname>
+        <standardname>sea_ice_area_fraction</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>3</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>32</stash_code>
+        <varname>ice_thickness</varname>
+        <longname>sea ice thickness (mean over ice)</longname>
+        <standardname>sea_ice_thickness</standardname>
+        <units>m</units>
+        <validmax>10.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>3</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>33</stash_code>
+        <varname>orog_model</varname>
+        <longname>altitude of model orography</longname>
+        <standardname>surface_altitude</standardname>
+        <units>m</units>
+        <validmax>4000.000000</validmax>
+        <validmin>-150.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>60</stash_code>
+        <varname>ozone</varname>
+        <longname>ozone mixing ratio (kg/kg)</longname>
+        <standardname>mass_fraction_of_ozone_in_air</standardname>
+        <units>kg kg-1</units>
+        <validmax>0.000100</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>22</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>150</stash_code>
+        <varname>model_w</varname>
+        <longname>w wind component on model theta levels</longname>
+        <standardname>upward_air_velocity</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>220</stash_code>
+        <varname>soil_albedo</varname>
+        <longname>albedo of the soil surface in the absence of snow</longname>
+        <standardname>soil_albedo</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>21</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+	  <item>
+        <stash_code>241</stash_code>
+        <varname>canopy_snow_capacity</varname>
+        <longname>canopy snow capacity - no known cf name</longname>
+        <standardname>canopy_snow_capacity</standardname>
+        <units>kg m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>21</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+     <item>
+        <stash_code>253</stash_code>
+        <varname>density_rr</varname>
+        <longname>density*r*r after timestep</longname>
+        <standardname>density_R**2</standardname>
+        <units></units>
+        <validmax>-999.989990</validmax>
+        <validmin>-999.989990</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>254</stash_code>
+        <varname>model_qcl</varname>
+        <longname>cloud liquid water ratio on model theta levels</longname>
+        <standardname>cloud_liquid_water_mixing_ratio</standardname>
+        <units>1</units>
+        <validmax>1.000000f</validmax>
+        <validmin>0.000000f</validmin>
+        <level_type>2</level_type>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.0</scalefact>
+      </item>
+	  <item>
+        <stash_code>255</stash_code>
+        <varname>exner_press</varname>
+        <longname>external pressure (rho) after timestep</longname>
+        <standardname>external_pressure</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000</validmax>
+        <validmin>0.100000</validmin>
+        <level_type>1</level_type>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.0</scalefact>
+      </item>
+	  <item>
+        <stash_code>256</stash_code>
+        <varname>adv_u_wind</varname>
+        <longname>advected u component of wind</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000f</validmax>
+        <validmin>-300.000000f</validmin>
+        <umgrid>18</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>257</stash_code>
+        <varname>adv_v_wind</varname>
+        <longname>advected v component of wind</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000f</validmax>
+        <validmin>-300.000000f</validmin>
+        <umgrid>19</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+	  <item>
+        <stash_code>258</stash_code>
+        <varname>adv_w_wind</varname>
+        <longname>advected w component of wind</longname>
+        <standardname>upward_air_velocity</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000f</validmax>
+        <validmin>-100.000000f</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>321</stash_code>
+        <varname>OH_conc</varname>
+        <longname>GAMeS OH concentration</longname>
+        <standardname>OH_concentration</standardname>
+        <units>molec cm-3</units>
+        <validmax>-999.989990</validmax>
+        <validmin>-999.989990</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>407</stash_code>
+        <varname>air_press</varname>
+        <longname>pressure at model rho levels</longname>
+        <standardname>air_pressure</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000</validmax>
+        <validmin>1.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>408</stash_code>
+        <varname>model_press</varname>
+        <longname>pressure at model theta levels</longname>
+        <standardname>air_pressure</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000</validmax>
+        <validmin>1.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>409</stash_code>
+        <varname>sfc_air_press</varname>
+        <longname>surface pressure at model surface</longname>
+        <standardname>air_pressure</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000</validmax>
+        <validmin>60000.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="1">
+      <item>
+        <stash_code>204</stash_code>
+        <varname>sfc_net_dn_sw_flux_below690</varname>
+        <longname>net downward surface sw flux below 690nm</longname>
+        <standardname>surface_downwelling_shortwave_flux_in_air_less_than_690nm</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>      
+      <item>
+        <stash_code>205</stash_code>
+        <varname>toa_out_sw_flux</varname>
+        <longname>outgoing shortwave flux at TOA</longname>
+        <standardname>toa_outgoing_shortwave_flux</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>208</stash_code>
+        <varname>outgoing_sw_flux_toa</varname>
+        <longname>outgoing SW rad flux (TOA)</longname>
+        <standardname>toa_outgoing_shortwave_flux</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>209</stash_code>
+        <varname>outgoing_sw_flux_toa_clear_sky</varname>
+        <longname>outgoing SW rad flux (TOA) assuming clear sky</longname>
+        <standardname>toa_outgoing_shortwave_flux_assuming_clear_sky</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>210</stash_code>
+        <varname>clear_sky_sfc_net_dn_sw_flux</varname>
+        <longname>net downward surface sw flux assuming clear sky</longname>
+        <standardname>surface_downwelling_shortwave_flux_in_air_assuming_clear_sky</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>211</stash_code>
+        <varname>sfc_up_swf_in_air_clear_sky</varname>
+        <longname>upwelling surface shortwave flux assuming clear sky</longname>
+        <standardname>surface_upwelling_shortwave_flux_in_air_assuming_clear_sky</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>235</stash_code>
+        <varname>sfc_dn_swf_in_air</varname>
+        <longname>downwelling shortwave radiation flux (diffuse and direct) at the surface</longname>
+        <standardname>surface_downwelling_shortwave_flux_in_air</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>259</stash_code>
+        <varname>sfc_net_dn_sw_solid_flux_below690</varname>
+        <longname>net downward surface sw solid flux below 690nm</longname>
+        <standardname>surface_downwelling_shortwave_flux_in_air_less_than_690nm</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="2">
+      <item>
+        <stash_code>201</stash_code>
+        <varname>sfc_net_downward_lw_flux</varname>
+        <longname>net downward LW flux at the surface</longname>
+        <standardname>surface_net_downward_longwave_flux</standardname>
+        <units>W m-2</units>
+        <validmax>1000.0</validmax>
+        <validmin>-1000.0</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>205</stash_code>
+        <varname>toa_out_lw_flux</varname>
+        <longname>outgoing longwave flux (TOA)</longname>
+        <standardname>toa_net_upward_longwave_flux</standardname>
+        <units>W m-2</units>
+        <validmax>1000.0</validmax>
+        <validmin>0.</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>206</stash_code>
+        <varname>outgoing_lw_flux_toa_clear_sky</varname>
+        <longname>outgoing LW flux (TOA) assuming clear sky</longname>
+        <standardname>toa_outgoing_longwave_flux_assuming_clear_sky</standardname>
+        <units>W m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>207</stash_code>
+        <varname>sfc_dn_lwf_in_air</varname>
+        <longname>downwelling longwave radiation flux (irradiance) at the surface</longname>
+        <standardname>surface_downwelling_longwave_flux_in_air</standardname>
+        <units>W m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>208</stash_code>
+        <varname>sfc_dn_lw_flux_clear_sky</varname>
+        <longname>downward surface LW flux assuming clear sky</longname>
+        <standardname>surface_downwelling_longwave_flux_in_air_assuming_clear_sky</standardname>
+        <units>W m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="3">
+      <item>
+        <stash_code>202</stash_code>
+        <varname>dnw_hf_in_soil</varname>
+        <longname>downward heat flux from surface to deep soil</longname>
+        <standardname>downward_heat_flux_in_soil</standardname>
+        <units>W m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>-1000.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>209</stash_code>
+        <varname>sfc_zonal_wind</varname>
+        <longname>true eastward (zonal) wind at 10m</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>18</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>210</stash_code>
+        <varname>sfc_merid_wind</varname>
+        <longname>true northward (meridional) wind at 10m</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>19</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>217</stash_code>
+        <varname>sfc_sens_heat_flux</varname> <!-- Not clear if this is really Up or Down -->
+        <longname>upward sensible heat flux from the surface</longname>
+        <standardname>surface_upward_sensible_heat_flux</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>-2000.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>223</stash_code>
+        <varname>sfc_dnw_wf</varname>
+        <longname>surface downward water flux including precip and evap</longname>
+        <standardname>surface_downward_water_flux</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>200.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>225</stash_code>
+        <varname>sfc_zonal_wind</varname>
+        <longname>true eastward (zonal) wind at 10m</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>226</stash_code>
+        <varname>sfc_merid_wind</varname>
+        <longname>true northward (meridional) wind at 10m</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>227</stash_code>
+        <varname>sfc_wind_speed</varname>
+        <longname>wind speed at 10m</longname>
+        <standardname>wind_speed</standardname>
+        <units>m s-1</units>
+        <validmax>150.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>229</stash_code>
+        <varname>water_evap</varname>
+        <longname>water (all phases) evaporation to vapour</longname>
+        <standardname>water_evaporation_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>231</stash_code>
+        <varname>sfc_sublim</varname>
+        <longname>surface sublimation flux (GBM)</longname>
+        <standardname>water_sublimation_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>234</stash_code>
+        <varname>sfc_latent_heat_flux_up</varname>
+        <longname>upward latent heat flux from the surface</longname>
+        <standardname>surface_upward_latent_heat_flux</standardname>
+        <units>W m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>-1000.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>236</stash_code>
+        <varname>sfc_temp</varname>
+        <longname>air temperature at 1.5m</longname>
+        <standardname>air_temperature</standardname>
+        <units>K</units>
+        <validmax>333.000000</validmax>
+        <validmin>230.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>238</stash_code>
+        <varname>deep_soil_temp</varname>
+        <longname>temperature of soil</longname>
+        <standardname>soil_temperature</standardname>
+        <units>K</units>
+        <validmax>333.000000</validmax>
+        <validmin>230.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>245</stash_code>
+        <varname>sfc_rh</varname>
+        <longname>relative humidity at 1.5m</longname>
+        <standardname>relative_humidity</standardname>
+        <units>1</units>
+        <scalefact>0.01</scalefact>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>247</stash_code>
+        <varname>sfc_visibility</varname>
+        <longname>surface visibility at 1.5m</longname>
+        <standardname>visibility_in_air</standardname>
+        <units>m</units>
+        <validmax>100000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>248</stash_code>
+        <varname>sfc_fog</varname>
+        <longname>fog fraction at 1.5m</longname>
+        <standardname>cloud_area_fraction</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>259</stash_code>
+        <varname>canopy_cond</varname>
+        <longname>canopy conductance</longname>
+        <standardname>canopy_conductance</standardname>
+        <units>m s-1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>281</stash_code>
+        <varname>sfc_visibility</varname>
+        <longname>surface visibility at 1.5m including precipitation</longname>
+        <standardname>visibility_in_air</standardname>
+        <units>m</units>
+        <validmax>100000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>282</stash_code>
+        <varname>sfc_vis_lt_1km</varname>
+        <longname>probability of visibility less than 1 km including rain</longname>
+        <standardname>visibility_in_air_less_than_1km_probability</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>283</stash_code>
+        <varname>sfc_vis_lt5</varname>
+        <longname>probability of visibility less than 5 km (1.5m)</longname>
+        <standardname>visibility_in_air_less_than_5km_probability</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>290</stash_code>
+        <varname>sfc_upw_shf</varname>
+        <longname>surface upward sensible heat flux (on tiles)</longname>
+        <standardname>surface_upward_sensible_heat_flux</standardname>
+        <units>W m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>-1000.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>296</stash_code>
+        <varname>water_evap_from_soil</varname>
+        <longname>evaporation flux of water (all phases) from soil</longname>
+        <standardname>water_evaporation_flux_from_soil</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>1000.000000</validmax>
+        <validmin>-1000.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>297</stash_code>
+        <varname>water_evapf_from_canopy</varname>
+        <longname>evaporation flux of water (all phases) from canopy</longname>
+        <standardname>water_evaporation_flux_from_canopy</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>1000.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>298</stash_code>
+        <varname>water_sublf</varname>
+        <longname>sublimination flux (rate) of solid water at surface</longname>
+        <standardname>water_sublimination_flux</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>1000.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>317</stash_code>
+        <varname>surface_tile_fraction</varname>
+        <longname>JULES surface tile fraction</longname>
+        <standardname>surface_tile_fraction</standardname>
+        <units></units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>332</stash_code>
+        <varname>lwr_toa</varname>
+        <longname>TOA outgoing lw radiation after b. layer</longname>
+        <standardname>toa_outgoing_longwave_flux</standardname>
+        <units>W m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>335</stash_code>
+        <varname>sfc_pot_evap</varname>
+        <longname>JULES water potential evaporation on tiles</longname>
+        <standardname>water_potential_evaporation_flux</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>1000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>463</stash_code>
+        <varname>sfc_wind_gust</varname>
+        <longname>maximum 10m gust wind speed</longname>
+        <standardname>wind_speed_of_gust</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>476</stash_code>
+        <varname>bl_type</varname>
+        <longname>combined boundary layer type</longname>
+        <standardname>boundary_layer_type</standardname>
+        <units></units>
+        <validmax>7</validmax>
+        <validmin>1</validmin>
+        <umgrid>1</umgrid>
+        <level_type>2</level_type>
+        <accum_field>0</accum_field>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="4">
+      <item>
+        <stash_code>201</stash_code>
+        <varname>lges_rain</varname>
+        <longname>large scale rain amount</longname>
+        <standardname>large_scale_rainfall_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>200.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>202</stash_code>
+        <varname>lges_snow</varname>
+        <longname>large scale snow amount</longname>
+        <standardname>large_scale_snowfall_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>200.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>203</stash_code>
+        <varname>lges_rain_rate</varname>
+        <longname>mean large scale rain rate</longname>
+        <standardname>large_scale_rainfall_rate</standardname>
+        <units>m s-1</units>
+        <validmax>0.100000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>204</stash_code>
+        <varname>lges_snow_rate</varname>
+        <longname>mean large scale snow rate</longname>
+        <standardname>large_scale_snowfall_rate</standardname>
+        <units>m s-1</units>
+        <validmax>0.100000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="5">
+      <item>
+        <stash_code>201</stash_code>
+        <varname>conv_rain</varname>
+        <longname>convective rain amount</longname>
+        <standardname>convective_rainfall_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>200.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>202</stash_code>
+        <varname>conv_snow</varname>
+        <longname>convective snow amount</longname>
+        <standardname>convective_snowfall_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>200.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>205</stash_code>
+        <varname>conv_rain_rate</varname>
+        <longname>mean convective rain rate</longname>
+        <standardname>convective_rainfall_rate</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>0.100000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>206</stash_code>
+        <varname>conv_snow_rate</varname>
+        <longname>mean convective snow rate</longname>
+        <standardname>convective_snowfall_rate</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>0.100000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>214</stash_code>
+        <varname>total_rain_rate</varname>
+        <longname>sum of convective and large scale rain rates</longname>
+        <standardname>rainfall_rate</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>0.100000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>215</stash_code>
+        <varname>snowfall_rate</varname>
+        <longname>liquid water equivalent of sum of convective and large scale snowfall rates</longname>
+        <standardname>lwe_snowfall_rate</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>0.010000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>216</stash_code>
+        <varname>total_precip_rate</varname>
+        <longname>total liquid water equivalent precipitation rate</longname>
+        <standardname>lwe_precipitation_rate</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>0.100000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>226</stash_code>
+        <varname>total_precip</varname>
+        <longname>sum of convective and large scale rain amount</longname>
+        <standardname>precipitation_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>400.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="6">
+      <item>
+        <stash_code>203</stash_code>
+        <varname>orog_stddev_model</varname>
+        <longname>standard deviation of model orography</longname>
+        <standardname>surface_altitude</standardname>
+        <units>m</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="8">
+      <item>
+        <stash_code>201</stash_code>
+        <varname>sfc_snow_melt</varname>
+        <longname>land surface snow melt amount</longname>
+        <standardname>surface_snow_melt_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>20.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>202</stash_code>
+        <varname>sfc_snow_melt_hf</varname>
+        <longname>snow melt heat flux (latent heat)</longname>
+        <standardname>surface_snow_melt_heat_flux</standardname>
+        <units>W m-2</units>
+        <validmax>2000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>204</stash_code>
+        <varname>sfc_runoff</varname>
+        <longname>surface liquid water runoff amount</longname>
+        <standardname>surface_runoff_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>200.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>205</stash_code>
+        <varname>ssfc_runoff</varname>
+        <longname>sum of surface and subsurface runoff</longname>
+        <standardname>subsurface_runoff_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>200.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>1</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>209</stash_code>
+        <varname>canopy_water</varname>
+        <longname>canopy water amount (all phases)</longname>
+        <standardname>canopy_water_amount</standardname>
+        <units>kg m-2</units>
+        <validmax>100.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>223</stash_code>
+        <varname>soil_moisture</varname>
+        <longname>total soil moisture content</longname>
+        <standardname>soil_moisture_content</standardname>
+        <units>kg m-2</units>
+        <validmax>1500.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>225</stash_code>
+        <varname>soil_temp</varname>
+        <longname>jules layer deep soil temperature</longname>
+        <standardname>soil_temperature</standardname>
+        <units>K</units>
+        <validmax>333.000000</validmax>
+        <validmin>230.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>229</stash_code>
+        <varname>mf_unfrozwater_in_soil_moisture</varname>
+        <longname>fraction of liquid and vapour water in soil moisture</longname>
+        <standardname>mass_fraction_of_unfrozen_water_in_soil_moisture</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>230</stash_code>
+        <varname>mf_frozwater_in_soil_moisture</varname>
+        <longname>fraction of frozen water in soil moisture</longname>
+        <standardname>mass_fraction_of_frozen_water_in_soil_moisture</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>234</stash_code>
+        <varname>sfc_runoff</varname>
+        <longname>surface runoff rate</longname>
+        <standardname>surface_runoff_flux</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <level_type>1</level_type>
+        <accum_field>2</accum_field>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>235</stash_code>
+        <varname>sub_sfc_runoff</varname>
+        <longname>sub-surface runoff rate</longname>
+        <standardname>subsurface_runoff_flux</standardname>
+        <units>kg m-2 s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>2</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="9">
+      <item>
+        <stash_code>202</stash_code>
+        <varname>very_low_cloud</varname>
+        <longname>very low level cloud (>1000hPa) fraction</longname>
+        <standardname>cloud_area_fraction_in_atmospheric_layer</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>203</stash_code>
+        <varname>low_cloud</varname>
+        <longname>low level cloud (1000 to 800 hPa) fraction</longname>
+        <standardname>cloud_area_fraction_in_atmospheric_layer</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>204</stash_code>
+        <varname>mid_cloud</varname>
+        <longname>mid level cloud (800 to 500 hPa) fraction</longname>
+        <standardname>cloud_area_fraction_in_atmospheric_layer</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>205</stash_code>
+        <varname>high_cloud</varname>
+        <longname>high level cloud (500 to 150 hPa) fraction</longname>
+        <standardname>cloud_area_fraction_in_atmospheric_layer</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>216</stash_code>
+        <varname>total_cloud</varname>
+        <longname>total level cloud fraction</longname>
+        <standardname>cloud_area_fraction_in_atmospheric_layer</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>217</stash_code>
+        <varname>total_cloud_max_rnd_ovrlap</varname>
+        <longname>total cloud (1100 to 150 hPa) fraction (max/random overlap)</longname>
+        <standardname>cloud_area_fraction_in_atmospheric_layer</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>218</stash_code>
+        <varname>ccloud_lt_1000ft</varname>
+        <longname>cloud fraction below 1000 ft above sea level</longname>
+        <standardname>cloud_area_fraction_in_atmospheric_layer</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>219</stash_code>
+        <varname>low_cld_base</varname>
+        <longname>low cloud base height above sea level</longname>
+        <standardname>cloud_base_height</standardname>
+        <units>m</units>
+        <validmax>20000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>220</stash_code>
+        <varname>low_cld_top</varname>
+        <longname>low cloud top height above sea level</longname>
+        <standardname>cloud_top_height</standardname>
+        <units>m</units>
+        <validmax>20000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.0</scalefact>
+        <level_type>2</level_type>
+      </item>
+      <item>
+        <stash_code>221</stash_code>
+        <varname>freeze_lev</varname>
+        <longname>wet bulb freezing level height</longname>
+        <standardname>freezing_level_altitude</standardname>
+        <units>m</units>
+        <validmax>20000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.0</scalefact>
+      </item>
+    </section>
+    <section section_id="15">
+      <item>
+        <stash_code>2</stash_code>
+        <varname>model_u_bgrid</varname>
+        <longname>u wind component on model levels</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000f</validmax>
+        <validmin>-300.000000f</validmin>
+        <level_type>1</level_type>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>3</stash_code>
+        <varname>model_v_bgrid</varname>
+        <longname>v wind component on model levels</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000f</validmax>
+        <validmin>-300.000000f</validmin>
+        <level_type>1</level_type>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.0</scalefact>
+      </item>
+      <item>
+        <stash_code>101</stash_code>
+        <varname>altitude_theta</varname>
+        <longname>altitude of model theta levels above sea level</longname>
+        <standardname>altitude</standardname>
+        <units>m</units>
+        <validmax>800000.0f</validmax>
+        <validmin>-150.0f</validmin>
+        <level_type>2</level_type>
+        <positive></positive>
+        <taxis>1</taxis>
+        <zaxis>1</zaxis>
+        <yaxis>1</yaxis>
+        <xaxis>1</xaxis>
+        <coordinates></coordinates>
+        <umgrid>0</umgrid>
+        <scalefact>1.000000</scalefact>
+        <accum_field>0</accum_field>
+      </item>
+      <item>
+        <stash_code>102</stash_code>
+        <varname>altitude_rho</varname>
+        <longname>altitude of model rho levels above sea level</longname>
+        <standardname>altitude</standardname>
+        <units>m</units>
+        <validmax>80000.0f</validmax>
+        <validmin>-150.0f</validmin>
+	<level_type>1</level_type>
+        <positive></positive>
+        <taxis>1</taxis>
+        <zaxis>1</zaxis>
+        <yaxis>1</yaxis>
+        <xaxis>1</xaxis>
+        <coordinates></coordinates>
+        <umgrid>0</umgrid>
+        <scalefact>1.000000</scalefact>
+        <accum_field>0</accum_field>
+      </item>
+      <item>
+        <stash_code>108</stash_code>
+        <varname>geometric_press</varname>
+        <longname>air pressure on geometric height levels</longname>
+        <standardname>air_pressure</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000f</validmax>
+        <validmin>0.000000f</validmin>
+        <level_type>2</level_type>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>142</stash_code>
+        <varname>geometric_w</varname>
+        <longname>w wind component on geometric height levels</longname>
+        <standardname>upward_air_velocity</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000f</validmax>
+        <validmin>-100.000000f</validmin>
+        <level_type>2</level_type>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>143</stash_code>
+        <varname>geometric_u</varname>
+        <longname>u wind component on geometric height levels</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000f</validmax>
+        <validmin>-300.000000f</validmin>
+        <level_type>2</level_type>
+        <umgrid>18</umgrid>
+        <accum_field>0</accum_field>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>144</stash_code>
+        <varname>geometric_v</varname>
+        <longname>v wind component on geometric height levels</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000f</validmax>
+        <validmin>-300.000000f</validmin>
+        <umgrid>19</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>201</stash_code>
+        <varname>std_lev_u</varname>
+        <longname>true eastward (zonal) wind on fixed pressure levels</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000</validmax>
+        <validmin>-300.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>202</stash_code>
+        <varname>std_lev_v</varname>
+        <longname>true northward (meridional) wind on fixed pressure levels</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>300.000000</validmax>
+        <validmin>-300.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>  
+      <item>
+        <stash_code>212</stash_code>
+        <varname>sfc_zonal_wind_50m</varname>
+        <longname>true eastward (zonal) wind at 50m</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>213</stash_code>
+        <varname>sfc_merid_wind_50m</varname>
+        <longname>true northward (meridional) wind at 50m</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>214</stash_code>
+        <varname>epv_t</varname>
+        <longname>ertel potential vorticity on theta surfaces</longname>
+        <standardname>ertel_potential_vorticity</standardname>
+        <units>K m2 kg-1 s-1</units>
+        <validmax>0.000010</validmax>
+        <validmin>-0.000010</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>218</stash_code>
+        <varname>pv</varname>
+        <longname>potential vorticity on theta levels</longname>
+        <standardname>potential_vorticity</standardname>
+        <units>K m2 kg-1 s-1</units>
+        <validmax>0.000300f</validmax>
+        <validmin>-0.000400f</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>229</stash_code>
+        <varname>epv</varname>
+        <longname>ertel potential vorticity on pressure levels</longname>
+        <standardname>ertel_potential_vorticity</standardname>
+        <units>K m2 kg-1 s-1</units>
+        <validmax>0.000010</validmax>
+        <validmin>-0.000010</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>242</stash_code>
+        <varname>std_lev_w</varname>
+        <longname>w wind component on standard levels</longname>
+        <standardname>upward_air_velocity</standardname>
+        <units>m s-1</units>
+        <validmax>100.000000</validmax>
+        <validmin>-100.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>243</stash_code>
+        <varname>std_lev_u</varname>
+        <longname>u wind component on standard levels</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>200.000000</validmax>
+        <validmin>-200.000000</validmin>
+        <umgrid>18</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>244</stash_code>
+        <varname>std_lev_v</varname>
+        <longname>v wind component on standard levels</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>200.000000</validmax>
+        <validmin>-200.000000</validmin>
+        <umgrid>19</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>271</stash_code>
+        <varname>air_density</varname>
+        <longname>true unscaled air density on theta levels</longname>
+        <standardname>air_density</standardname>
+        <units>kg m-3</units>
+        <validmax>1500.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+    </section>
+    <section section_id="16">
+      <item>
+        <stash_code>4</stash_code>
+        <varname>theta_lev_temp</varname>
+        <longname>air temperature on theta levels</longname>
+        <standardname>air_temperature</standardname>
+        <units>K</units>
+        <validmax>340.000000</validmax>
+        <validmin>180.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+	  <item>
+        <stash_code>201</stash_code>
+        <varname>theta_lev_geoph</varname>
+        <longname>geopotential height on theta levels</longname>
+        <standardname>geopotential_height</standardname>
+        <units>m</units>
+        <validmax>70000.000000f</validmax>
+        <validmin>0.000000f</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>202</stash_code>
+        <varname>std_lev_geoph</varname>
+        <longname>geopotential height on standard levels</longname>
+        <standardname>geopotential_height</standardname>
+        <units>m</units>
+        <validmax>30000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>203</stash_code>
+        <varname>std_lev_temp</varname>
+        <longname>air temperature on standard levels</longname>
+        <standardname>air_temperature</standardname>
+        <units>K</units>
+        <validmax>340.000000</validmax>
+        <validmin>180.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>204</stash_code>
+        <varname>std_lev_rh_wrt_ice</varname>
+        <longname>relative humidity with respect to ice on standard levels</longname>
+        <standardname>relative_humidity</standardname>
+        <units>1</units>
+        <scalefact>0.01</scalefact>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+	  <item>
+        <stash_code>205</stash_code>
+        <varname>wet_bulb_pot_temp</varname>
+        <longname>wet bulb potential temperature</longname>
+        <standardname>wet_bulb_potential_temperature</standardname>
+        <units>K</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>222</stash_code>
+        <varname>mslp</varname>
+        <longname>air pressure at mean sea level</longname>
+        <standardname>air_pressure_at_sea_level</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000</validmax>
+        <validmin>80000.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>255</stash_code>
+        <varname>geoph_rlev</varname>
+        <longname>geopotential height on rho levels</longname>
+        <standardname>geopotential_height</standardname>
+        <units>m</units>
+        <validmax>30000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>256</stash_code>
+        <varname>std_lev_rh</varname>
+        <longname>relative humidity with respect to water on standard levels</longname>
+        <standardname>relative_humidity</standardname>
+        <units>1</units>
+        <scalefact>0.01</scalefact>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+      </item>
+      <item>
+        <stash_code>257</stash_code>
+        <varname>std_lev_O3</varname>
+        <longname>ozone mixing ratio</longname>
+        <standardname>mole_fraction_of_ozone_in_air</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+    </section>
+    <section section_id="20">
+      <item>
+        <stash_code>5</stash_code>
+        <varname>divergence</varname>
+        <longname>divergence of wind on pressure levels</longname>
+        <standardname>divergence_of_wind</standardname>
+        <units>s-1</units>
+        <validmax>0.0001</validmax>
+        <validmin>0.00000001</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+    </section>
+    <section section_id="26">
+      <item>
+        <stash_code>1</stash_code>
+        <varname>river_storage</varname>
+        <longname>river water storage</longname>
+        <standardname></standardname>
+        <units>m2</units>
+        <validmax>-999.989990</validmax>
+        <validmin>-999.989990</validmin>
+        <umgrid>0</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+    </section>
+    <section section_id="30">
+      <item>
+        <stash_code>4</stash_code>
+        <varname>temp</varname>
+        <longname>temperature (on model rho levels)</longname>
+        <standardname>air_temperature</standardname>
+        <units>K</units>
+        <validmax>330.000000</validmax>
+        <validmin>200.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>5</stash_code>
+        <varname>spec_hum</varname>
+        <longname>specific humidity (on model rho levels)</longname>
+        <standardname>specific_humidity</standardname>
+        <units>1</units>
+        <validmax>1.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>104</stash_code>
+        <varname>temp_mass_wgt_rho</varname>
+        <longname>t mass weighted rho grid</longname>
+        <standardname></standardname>
+        <units>kg K m-2</units>
+        <validmax>1000.000000</validmax>
+        <validmin>200.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>105</stash_code>
+        <varname>temp_mass_wgt_rho</varname>
+        <longname>q mass weighted rho grid</longname>
+        <standardname></standardname>
+        <units>kg m-2</units>
+        <validmax>100.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>1</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>201</stash_code>
+        <varname>u_plev</varname>
+        <longname>u wind component on pressure levels</longname>
+        <standardname>eastward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>200.000000</validmax>
+        <validmin>-200.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>202</stash_code>
+        <varname>v_plev</varname>
+        <longname>v wind component on pressure levels</longname>
+        <standardname>northward_wind</standardname>
+        <units>m s-1</units>
+        <validmax>200.000000</validmax>
+        <validmin>-200.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>207</stash_code>
+        <varname>geoph_plev</varname>
+        <longname>geopotential height on pressure levels</longname>
+        <standardname>geopotential_height</standardname>
+        <units>m</units>
+        <validmax>30000.000000</validmax>
+        <validmin>0.000000</validmin>
+        <umgrid>11</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+      <item>
+        <stash_code>417</stash_code>
+        <varname>sfc_air_press</varname>
+        <longname>air pressure at model surface (p grid)</longname>
+        <standardname>air_pressure</standardname>
+        <units>Pa</units>
+        <validmax>110000.000000</validmax>
+        <validmin>60000.000000</validmin>
+        <umgrid>1</umgrid>
+        <accum_field>0</accum_field>
+        <level_type>2</level_type>
+        <scalefact>1.000000</scalefact>
+      </item>
+    </section>
+  </model>
+</stash2cf>
