@@ -140,6 +140,7 @@ typedef struct new_um_variable {
         float **time_bnds;         /* difference between start & end times for accummulation during */
                                    /* each stored timestep of the variable */
         float space_bnds[2];       /* start & end points for either spatial accumulation done in the variable */
+        float scale_factor;
         um_dataslice **slices;
         nc_type        vartype;    /* datatype of the UM variable (float/double/int/long) */     
 } new_um_variable;

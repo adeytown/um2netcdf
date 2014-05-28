@@ -59,7 +59,7 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
      int     n, i, j=0, k, kk, ndim, cnt, varid;
      size_t *count, *offset;
-     double *buf;
+     double *buf=NULL;
      float  *fbuf=NULL;
      char    name[45];
 
@@ -67,6 +67,7 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
          strcpy( name, stored_um_vars[n].name );
          i = nc_inq_varid( ncid, name, &varid );
+
 
        /** Determine # of dimensions for current UM variable **/
          ndim = 3;
@@ -84,6 +85,8 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
        /*** Count the number of elements to be read for a single 2D data slice ***/
 
          cnt = stored_um_vars[n].nx*stored_um_vars[n].ny;
+         buf = (double *) malloc( cnt*sizeof(double) );
+         if ( rflag==1 ) { fbuf = (float *) malloc( count[ndim-1]*count[ndim-2]*sizeof(float) ); }
 
        /*** Initialize function pointer to proper interpolation function ***/
 
@@ -117,7 +120,6 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                for ( k=0; k<stored_um_vars[n].nt; k++ ) {
 
                /* Read in a 2D data slice. Apply appropriate endian swap on the data */
-                   buf = (double *) malloc( cnt*sizeof(double) );
                    fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
                    fread( buf, wordsize, cnt, fid );
                    endian_swap( buf, cnt );
@@ -128,14 +130,10 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                /* Write interpolated 2D slice to hard disk */
                    if ( rflag==0 ) { 
                       i = nc_put_vara_double( ncid, varid, offset, count, buf ); 
-                      free( buf );
                    } else {
                       i = int_constants[6]*((int ) stored_um_vars[n].nx);
-                      fbuf = (float *) malloc( i*sizeof(float) );
                       for ( j=0; j<i; j++ ) { fbuf[j] = (float ) buf[j]; }
                       i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
-                      free( fbuf );
-                      free( buf );
                    }
 
                /* Update the time counter for this UM variable */
@@ -155,7 +153,6 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                   for ( j=0; j<stored_um_vars[n].nz; j++ ) {
 
                /* Read in a 2D data slice. Apply appropriate endian swap on the data */
-                      buf = (double *) malloc( cnt*sizeof(double) );
                       fseek( fid, stored_um_vars[n].slices[k][j].location*wordsize, SEEK_SET );
                       fread( buf, wordsize, cnt, fid );
                       endian_swap( buf, cnt );
@@ -166,14 +163,10 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                /* Write interpolated 2D slice to hard disk */
                       if ( rflag==0 ) { 
                          i = nc_put_vara_double( ncid, varid, offset, count, buf ); 
-                         free( buf );
                       } else {
                          i = int_constants[6]*((int ) stored_um_vars[n].nx);
-                         fbuf = (float *) malloc( i*sizeof(float) );
                          for ( kk=0; kk<i; kk++ ) { fbuf[kk] = (float ) buf[kk]; }
                          i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
-                         free( buf );
-                         free( fbuf );
                       }
                /* Update the level counter for this UM variable */
                       offset[1]++;
@@ -187,6 +180,9 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
          free( offset );
 
      }  // End of FOR LOOP
+                      
+     free( buf );
+     if ( rflag==1 ) { free( fbuf ); }
 
      return;
 }
@@ -200,8 +196,6 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
  ***
  ***  INPUT:  ncid -> ID of the newly created NetCDF file 
  ***           fid -> file pointer to the UM fields file
- ***         rflag -> denotes whether 32 or 64-bit output is desired
- ***                  (0->64 bit, 1->32 bit)
  ***          
  ***   Mark Cheeseman, NIWA
  ***   May 19, 2014
@@ -209,10 +203,10 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
 void write_uninterpolated_fields( int ncid, FILE *fid ) {
 
-     int     n, i, j=0, k, kk, cnt, varid, loc;
+     int     n, i, j=0, k, kk, cnt, varid;
      size_t  offset_3d[3], count_3d[3], offset_4d[4], count_4d[4];
-     double *buf, factor;
-     char    name[45];
+     double *buf;
+     char    name[45], factor;
 
      for ( n=0; n<3; n++ ) {
          offset_3d[n] = 0;
@@ -242,14 +236,11 @@ void write_uninterpolated_fields( int ncid, FILE *fid ) {
          cnt = (int ) stored_um_vars[n].nx*stored_um_vars[n].ny;
          buf = (double *) malloc( cnt*sizeof(double) );
 
-       /*** Get scaling factor for this UM variable ***/
-     
-         loc = stored_um_vars[n].xml_index;
-         factor = (double ) um_vars[loc].scale;
-
        /*** For a 3D UM variable [NX,NY,NT], read in a single 2D data slice per data time   ***/
        /*** valid for this UM variable.  Then apply the appropriate interpolation and write ***/
        /*** the final field to hard disk.                                                   ***/
+
+         factor = (double ) stored_um_vars[n].scale_factor;
 
          if ( stored_um_vars[n].nz<2 ) {
                offset_3d[0] = 0;
@@ -291,10 +282,10 @@ void write_uninterpolated_fields( int ncid, FILE *fid ) {
 
 void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
 
-     int     n, i, j=0, k, kk, cnt, varid, loc;
+     int     n, i, j=0, k, kk, cnt, varid;
      size_t offset_3d[3], count_3d[3], offset_4d[4], count_4d[4];
      double *buf;
-     float  *fbuf=NULL, factor;
+     float  *fbuf=NULL;
      char    name[45];
 
      for ( n=0; n<3; n++ ) {
@@ -326,11 +317,6 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
          buf = (double *) malloc( cnt*sizeof(double) );
          fbuf = (float *) malloc( cnt*sizeof(float) ); 
 
-       /*** Get scaling factor for this UM variable ***/
-
-         loc = stored_um_vars[n].xml_index;
-         factor = um_vars[loc].scale;
-
        /*** For a 3D UM variable [NX,NY,NT], read in a single 2D data slice per data time   ***/
        /*** valid for this UM variable.  Then apply the appropriate interpolation and write ***/
        /*** the final field to hard disk.                                                   ***/
@@ -341,7 +327,7 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
                    fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
                    fread( buf, wordsize, cnt, fid );
                    endian_swap( buf, cnt );
-                   for ( j=0; j<cnt; j++ ) { fbuf[j] = factor * ((float ) buf[j]); }
+                   for ( j=0; j<cnt; j++ ) { fbuf[j] = stored_um_vars[n].scale_factor * ((float ) buf[j]); }
                    i = nc_put_vara_float( ncid, varid, offset_3d, count_3d, fbuf );
                    offset_3d[0]++;
                }
@@ -359,7 +345,7 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
                        fseek( fid, stored_um_vars[n].slices[k][kk].location*wordsize, SEEK_SET );
                        fread( buf, wordsize, cnt, fid );
                        endian_swap( buf, cnt );
-                       for ( j=0; j<cnt; j++ ) { fbuf[j] = factor * ((float ) buf[j]); }
+                       for ( j=0; j<cnt; j++ ) { fbuf[j] = stored_um_vars[n].scale_factor * ((float ) buf[j]); }
                        i = nc_put_vara_float( ncid, varid, offset_4d, count_4d, fbuf );
                        offset_4d[0]++;
                    }
@@ -378,8 +364,7 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
 
 int output_um_fields( int ncid, FILE *fid, int iflag, int rflag ) {
 
-     int    ierr, n, varid; //, i,j,k;
-     char   name[45];
+     int    ierr, n, varid, flag; //, i,j,k;
      size_t dimlen;
      float  *buf;
 
@@ -400,18 +385,21 @@ int output_um_fields( int ncid, FILE *fid, int iflag, int rflag ) {
      printf( "  Stash_Code        Variable_Name        Dimensions [NX,NY,NZ]\n" );
      printf( "--------------------------------------------------------------\n" );
 
+     flag = 0;
      for ( n=0; n<num_stored_um_fields; n++ ) {
-         strcpy( name, stored_um_vars[n].name ); 
          printf( "     %5d %25s", stored_um_vars[n].stash_code, stored_um_vars[n].name );
-         if ( (iflag==1)&&(stored_um_vars[n].ny!=int_constants[6]) ) { printf( "*" ); }
-         else { printf( " " ); }
+         if ( (stored_um_vars[n].grid_type==11)||(stored_um_vars[n].grid_type==18)||(stored_um_vars[n].grid_type==19) ) { 
+            printf( "*" );
+            flag = 1; 
+         } else { printf( " " ); }
          printf( "    [%4d x %4d", stored_um_vars[n].nx, stored_um_vars[n].ny ); 
          if ( stored_um_vars[n].nz>1 ) { printf( " x %d", stored_um_vars[n].nz ); } 
          printf( "]\n" );
      }
      printf( "--------------------------------------------------------------\n\n" );
-     if ( iflag==1 ) {
-        printf( "  * denotes that field is to be interpolated onto a P grid.\n\n" );
+     if ( (flag==1) && (iflag==1) ) {
+        printf( "  * denotes that field is interpolated onto the P-points of \n" );
+        printf( "    an Arakawa C grid.\n\n" );
      }
 
   /*

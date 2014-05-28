@@ -221,15 +221,22 @@ int read_stash_file( char *filename ) {
          if ( (um_vars[cnt].level_type!=1)&&(um_vars[cnt].level_type!=2) ) {
             um_vars[cnt].level_type = 2; 
          }
-         if ( (um_vars[cnt].scale<0.00000001)||(um_vars[cnt].scale>1000000) ) {
+         if ( (um_vars[cnt].scale<0.00000001)||(um_vars[cnt].scale>1000000.0) ) {
             um_vars[cnt].scale = 1.0;
          }
      }
 
-//     for ( cnt=0; cnt<num_xml_vars; cnt++ )
-//         printf( "%hu %f\n", um_vars[cnt].level_type, um_vars[cnt].scale );
+/*==============================================================================
+  START OF SANITY CHECK
+ *==============================================================================*
+    for ( cnt=0; cnt<num_xml_vars; cnt++ )
+        printf( "%s %hu %f\n", um_vars[cnt].varname, um_vars[cnt].level_type, um_vars[cnt].scale );
 
-//     exit(1);
+    exit(1);
+ *==============================================================================
+  END OF SANITY CHECK
+*==============================================================================*/
+
      return 1; 
 }
 

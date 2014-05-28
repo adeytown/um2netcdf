@@ -52,6 +52,7 @@ void construct_um_variables( int ncid, int iflag ) {
 
      int     i, ierr, *dim_ids, ndim, varID, loc;
      size_t *chunksize; 
+     float   tmp;
 
      for ( i=0; i<num_stored_um_fields; i++ ) {
 
@@ -110,21 +111,37 @@ void construct_um_variables( int ncid, int iflag ) {
         }
 
 /** Add the appropriate attributes **/
-         loc = stored_um_vars[i].xml_index; 
-         ierr = nc_put_att_int( ncid, varID,   "stash_model", NC_INT, 1, &
-                                um_vars[loc].model );
-         ierr = nc_put_att_int( ncid, varID, "stash_section", NC_INT, 1, &
-                                um_vars[loc].section );
-         ierr = nc_put_att_int( ncid, varID,    "stash_item", NC_INT, 1, &
-                                um_vars[loc].code );
-         ierr = nc_put_att_float( ncid, varID, "valid_max", NC_FLOAT, 1, &
-                                  um_vars[loc].validmax );
-         ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &
-                                  um_vars[loc].validmin );
-         ierr = nc_put_att_text( ncid, varID, "long_name", 100, um_vars[loc].longname );
-         ierr = nc_put_att_text( ncid, varID, "standard_name", 75, um_vars[loc].stdname );
-         ierr = nc_put_att_text( ncid, varID, "units", 25, um_vars[loc].units );
-         
+        if ( stored_um_vars[i].xml_index!=9999 ) {
+           loc = stored_um_vars[i].xml_index; 
+           ierr = nc_put_att_int( ncid, varID,   "stash_model", NC_INT, 1, &
+                                  um_vars[loc].model );
+           ierr = nc_put_att_int( ncid, varID, "stash_section", NC_INT, 1, &
+                                  um_vars[loc].section );
+           ierr = nc_put_att_int( ncid, varID,    "stash_item", NC_INT, 1, &
+                                  um_vars[loc].code );
+           ierr = nc_put_att_float( ncid, varID, "valid_max", NC_FLOAT, 1, &
+                                    um_vars[loc].validmax );
+           ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &
+                                    um_vars[loc].validmin );
+           ierr = nc_put_att_text( ncid, varID, "long_name", 100, um_vars[loc].longname );
+           ierr = nc_put_att_text( ncid, varID, "standard_name", 75, um_vars[loc].stdname );
+           ierr = nc_put_att_text( ncid, varID, "units", 25, um_vars[loc].units );
+        } else {
+           i = 1;
+           ierr = nc_put_att_int( ncid, varID,   "stash_model", NC_INT, 1, &i );
+           i = (int ) (stored_um_vars[i].stash_code/1000);
+           ierr = nc_put_att_int( ncid, varID, "stash_section", NC_INT, 1, &i );
+           i = (int ) (stored_um_vars[i].stash_code - i);
+           ierr = nc_put_att_int( ncid, varID,    "stash_item", NC_INT, 1, &i );
+           tmp = 100.0;
+           ierr = nc_put_att_float( ncid, varID, "valid_max", NC_FLOAT, 1, &tmp ); 
+           tmp = 0.0;
+           ierr = nc_put_att_float( ncid, varID, "valid_min", NC_FLOAT, 1, &tmp ); 
+           ierr = nc_put_att_text( ncid, varID,     "long_name", 16, "unknown UM field" );
+           ierr = nc_put_att_text( ncid, varID, "standard_name", 16, "unknown_UM_field" );
+           ierr = nc_put_att_text( ncid, varID,         "units",  7, "unknown" );
+        }         
+
      }
 
    /*** Create the ETA arrays -used to store the coefficients needed to determine ***

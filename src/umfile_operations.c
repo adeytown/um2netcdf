@@ -540,6 +540,20 @@ int check_um_file( char *filename, int rflag ) {
          }
      }
      }
+/**
+ ** Set some default values for metadata fields that should be found in the 
+ ** user-supplied XML stash file 
+ **---------------------------------------------------------------------------*/
+     cnt = 0;
+     for ( i=0; i<num_stored_um_fields; i++ ) {
+         stored_um_vars[i].xml_index = 9999;
+         sprintf( stored_um_vars[i].name, "unknown_%d", cnt );
+         if ( stored_um_vars[i].ny==int_constants[6] ) { stored_um_vars[i].grid_type = 1; }
+         else                                          { stored_um_vars[i].grid_type = 11; }
+         stored_um_vars[i].accum       = 0;
+         stored_um_vars[i].level_type  = 2;
+         stored_um_vars[i].scale_factor= 1.0;
+     }
 
 /**
  ** Locate the index of the XML file where each unique UM variable is given
@@ -553,6 +567,7 @@ int check_um_file( char *filename, int rflag ) {
             stored_um_vars[i].grid_type   = (unsigned short ) um_vars[j].umgrid;
             stored_um_vars[i].accum       = (unsigned short ) um_vars[j].accum;
             stored_um_vars[i].level_type  = (unsigned short ) um_vars[j].level_type;
+            stored_um_vars[i].scale_factor= um_vars[j].scale;
             break;
          }
      }
@@ -610,15 +625,16 @@ int check_um_file( char *filename, int rflag ) {
          printf( "%s %hu [%hu, %hu %hu, %hu]\n", stored_um_vars[i].name, stored_um_vars[i].stash_code,
                                                stored_um_vars[i].nx, stored_um_vars[i].ny, stored_um_vars[i].nz,
                                                stored_um_vars[i].nt );
+         printf( "%f\n", stored_um_vars[i].scale_factor );
         printf( "TIMES: " );
         for ( j=0; j<stored_um_vars[i].nt; j++ ) { printf( "%f ", stored_um_vars[i].times[j] ); }
         printf( "\n" );
-        printf( "SLICES: " );
-        for ( j=0; j<stored_um_vars[i].nt; j++ ) { 
-        for ( k=0; k<stored_um_vars[i].nz; k++ ) {
-            printf( "%hu ", stored_um_vars[i].slices[j][k].id ); 
-        }
-        }
+//        printf( "SLICES: " );
+//        for ( j=0; j<stored_um_vars[i].nt; j++ ) { 
+//        for ( k=0; k<stored_um_vars[i].nz; k++ ) {
+//            printf( "%hu ", stored_um_vars[i].slices[j][k].id ); 
+//        }
+//        }
         printf( "\n" );
      }
      exit(1);
