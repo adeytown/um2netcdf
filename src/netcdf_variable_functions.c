@@ -31,10 +31,10 @@
 
 /** Function prototypes **/
 
-double *interp_do_nothing( double *val, int index );
-double *u_to_p_point_interp_c_grid( double *val, int index );
-double *v_to_p_point_interp_c_grid( double *val, int index );
-double *b_to_c_grid_interp_u_points( double *val, int index );
+void interp_do_nothing( double *val, float *fval, int index, int rflag );
+void u_to_p_point_interp_c_grid( double *val, float *fval, int index, int rflag );
+void v_to_p_point_interp_c_grid( double *val, float *fval, int index, int rflag );
+void b_to_c_grid_interp_u_points( double *val, float *fval, int index, int rflag );
 void    endian_swap_4bytes( void *ptr, int nchunk );
 void    ieee_usage_message();
 
@@ -57,7 +57,7 @@ void    ieee_usage_message();
 
 void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
 
-     int     n, i, j=0, k, kk, ndim, cnt, varid;
+     int     n, i, j=0, k, ndim, cnt, varid;
      size_t *count, *offset;
      double *buf=NULL;
      float  *fbuf=NULL;
@@ -125,21 +125,22 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                    endian_swap( buf, cnt );
 
                /* Apply appropriate interpolation on values */
-                   buf = field_interpolation( buf, n );
+                   field_interpolation( buf, fbuf, n, rflag );
 
                /* Write interpolated 2D slice to hard disk */
-                   if ( rflag==0 ) { 
+                   if ( rflag==1 ) { i = nc_put_vara_float( ncid, varid, offset, count, fbuf ); }
+                   else { 
                       i = nc_put_vara_double( ncid, varid, offset, count, buf ); 
-                   } else {
-                      i = int_constants[6]*((int ) stored_um_vars[n].nx);
-                      for ( j=0; j<i; j++ ) { fbuf[j] = (float ) buf[j]; }
-                      i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                  /* Re-size the data buffer (if necessary) */
+                      if ( int_constants[6]!=stored_um_vars[n].ny ) {
+                         buf  = (double *) realloc( buf, cnt*sizeof(double) );
+                      }
                    }
 
                /* Update the time counter for this UM variable */
                    offset[0]++;
-               }
 
+               }
          } 
 
        /*** For a 4D UM variable [NX,NY,NZ,NT], read in a single 2D data slice per level and ***/
@@ -158,16 +159,18 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                       endian_swap( buf, cnt );
 
                /* Apply appropriate interpolation on values */
-                      buf = field_interpolation( buf, n ); 
+                      field_interpolation( buf, fbuf, n, rflag );
 
                /* Write interpolated 2D slice to hard disk */
-                      if ( rflag==0 ) { 
+                      if ( rflag==1 ) { i = nc_put_vara_float( ncid, varid, offset, count, fbuf ); }
+                      else { 
                          i = nc_put_vara_double( ncid, varid, offset, count, buf ); 
-                      } else {
-                         i = int_constants[6]*((int ) stored_um_vars[n].nx);
-                         for ( kk=0; kk<i; kk++ ) { fbuf[kk] = (float ) buf[kk]; }
-                         i = nc_put_vara_float( ncid, varid, offset, count, fbuf );
+                     /* Re-size the data buffer (if necessary) */
+                         if ( int_constants[6]!=stored_um_vars[n].ny ) {
+                            buf  = (double *) realloc( buf, cnt*sizeof(double) );
+                         }
                       }
+                      
                /* Update the level counter for this UM variable */
                       offset[1]++;
                   }

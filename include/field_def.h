@@ -53,7 +53,8 @@ unsigned short int blacklist_cnt;
  *  FUNCTION POINTERS                                                        *
  *---------------------------------------------------------------------------*/
 
-double *(*field_interpolation)( double*, int );  /* ptr to appropriate interpolation procedure */
+// double *(*field_interpolation)( double*, float*, int, int );  /* ptr to appropriate interpolation procedure */
+void (*field_interpolation)( double*, float*, int, int );  /* ptr to appropriate interpolation procedure */
 void    (*endian_swap)( void*, int );         /* ptr to appropriate endian swap procedure   */
 
 

@@ -42,22 +42,23 @@
  ***   May 28, 2014
  ***/ 
 
-double *interp_do_nothing(  double *val, int var_index ) {
+void interp_do_nothing(  double *val, float *fval, int var_index, int rflag ) {
 
        int    n, cnt;
        double factor;
 
-   /** Get the scaling factor **/
-
-       factor = (double ) stored_um_vars[var_index].scale_factor; 
-
-   /** Apply the scaling factor **/
-
        cnt = (int )( stored_um_vars[var_index].nx*stored_um_vars[var_index].ny );
-       for ( n=0; n<cnt; n++ )
-           val[n] = factor*val[n]; 
 
-       return val;
+       if ( rflag==1 ) {
+          for ( n=0; n<cnt; n++ )
+              fval[n] = stored_um_vars[var_index].scale_factor*((float ) val[n]); 
+       } else {
+          factor = (double ) stored_um_vars[var_index].scale_factor; 
+          for ( n=0; n<cnt; n++ )
+              val[n] = factor*val[n]; 
+       }
+
+       return;
 }
 
 
@@ -77,52 +78,82 @@ double *interp_do_nothing(  double *val, int var_index ) {
  ***   May 28, 2014
  ***/
 
-double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
+void v_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rflag ) {
 
-       int     i, j, index[3], y_limit, ind[3];
-       double *buf, factor;
+       int    NY, i, j, index, index2, index3;
+       double factor, tmp, ghost_val;
 
-   /** Get the scaling factor **/
+       NY = (int ) stored_um_vars[var_index].ny;
+       if ( int_constants[6]<NY ) { NY = int_constants[6]; }
+       factor = 0.5*((double )stored_um_vars[var_index].scale_factor);
 
-       factor = (double ) stored_um_vars[var_index].scale_factor; 
+       if ( rflag==1 ) {
 
-       j = stored_um_vars[var_index].nx*int_constants[6];
-       buf = (double *) calloc( j,sizeof(double) );
+       /** Interpolate in the Y direction from rows 1 to NY-2 **/
+          for ( j=1; j<NY-1; j++ ) {
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              index = i + j*stored_um_vars[var_index].nx;
+              index2= index - stored_um_vars[var_index].nx;
+              index3= index + stored_um_vars[var_index].nx;
+              tmp = factor*( val[index2] + val[index3] );
+              fval[index3] = (float ) tmp;
+          }
+          }
 
-   /** Find the appropriate Lat end limit for the interpolation calculations **/
+       /** Copy contents of Row 1 into Row 0 **/
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              index = i + stored_um_vars[var_index].nx;
+              fval[i] = fval[index];
+          }
 
-       y_limit = int_constants[6];
-       if ( int_constants[6]>stored_um_vars[var_index].ny ) { y_limit=stored_um_vars[var_index].ny; }
+       /** Copy contents of Row NY-2 into Rows NY to INT_CONSTANTS[6]-1 **/
+          for ( j=NY; j<int_constants[6]; j++ ) {
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              index = i + (NY-1)*stored_um_vars[var_index].nx;
+              index2= i + j*stored_um_vars[var_index].nx;
+              fval[index2] = fval[index];
+          }
+          }
 
-       for ( j=1; j<y_limit-1; j++ ) {
-           ind[0] = stored_um_vars[var_index].nx*j;
-           ind[1] = ind[0] - (int ) stored_um_vars[var_index].nx;
-           ind[2] = ind[0] + (int ) stored_um_vars[var_index].nx;
-           for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-               index[0] = i + ind[0];
-               index[1] = i + ind[1];
-               index[2] = i + ind[2];
-               buf[index[0]] = 0.5*factor*( val[index[1]] + val[index[2]] );
-           }
+       } else {
+
+       /** Interpolate in the Y direction from rows 1 to NY-2 **/
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              ghost_val = val[i];
+              for ( j=1; j<NY-1; j++ ) {
+                  index = i + j*stored_um_vars[var_index].nx;
+                  index2= index - stored_um_vars[var_index].nx;
+                  index3= index + stored_um_vars[var_index].nx;
+                  tmp = val[index2];
+                  val[index3] = factor*( ghost_val + val[index3] );
+                  ghost_val = tmp;
+             }
+          }
+
+       /** Copy contents of Row 1 into Row 0 **/
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              index = i + stored_um_vars[var_index].nx;
+              val[i] = val[index];
+          }
+
+       /** Re-size buffer (if NY<INT_CONSTANTS[6]) **/
+          if ( stored_um_vars[var_index].ny<int_constants[6] ) {
+             i = (int )( int_constants[6]*stored_um_vars[var_index].nx );
+             val = (double *) realloc( val, i*sizeof(double) );
+          }
+
+       /** Copy contents of Row NY-2 into Rows NY-1 to INT_CONSTANTS[6]-1 **/
+          for ( j=NY-1; j<int_constants[6]; j++ ) {
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              index = i + (NY-1)*stored_um_vars[var_index].nx;
+              index2= i + j*stored_um_vars[var_index].nx;
+              val[index2] = val[index];
+          }
+          }
+
        }
 
-       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) { 
-           index[0] = stored_um_vars[var_index].nx + i;
-           buf[i] = buf[index[0]]; 
-       }
-
-       for ( j=y_limit-1; j<int_constants[6]; j++ ) {
-       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-           index[0] = i + stored_um_vars[var_index].nx*j;
-           index[1] = i + stored_um_vars[var_index].nx*(j-1);
-           buf[index[0]] = buf[index[1]]; 
-       }
-       }
-   
-   /** Deallocate the memory holding the uninterpolated data. Reassign pointer. **/
-
-       free( val );
-       return buf;
+       return;
 }
 
 
@@ -139,53 +170,81 @@ double *v_to_p_point_interp_c_grid( double *val, int var_index ) {
  ***                    of stored UM variables
  ***
  ***   Mark Cheeseman, NIWA
- ***   May 28, 2014
+ ***   May 29, 2014
  ***/
 
-double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
+void u_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rflag ) {
 
-       int     i, j, index[2], y_limit;
-       double *buf, factor;
+       int    i, j, index, index2, NY;
+       double factor, tmp, ghost_val;
 
-   /** Get the scaling factor **/
+       NY = (int ) stored_um_vars[var_index].ny;
+       if ( int_constants[6]<NY ) { NY = int_constants[6]; }
+       factor = 0.5*((double )stored_um_vars[var_index].scale_factor);
 
-       factor = (double ) stored_um_vars[var_index].scale_factor; 
+       if ( rflag==1 ) {
 
-       j = int_constants[6]*stored_um_vars[var_index].nx;
-       buf = (double *) calloc( j,sizeof(double) );
+       /** Interpolate in the X direction from rows 1 to NY-2 **/
+          for ( j=0; j<NY; j++ ) {
+          for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+              index = i + j*stored_um_vars[var_index].nx;
+              tmp = factor*(val[index-1] + fval[index+1]);
+              fval[index] = (float ) tmp;
+          }
+          }
+ 
+          for ( j=0; j<NY; j++ ) {
+              index = j*stored_um_vars[var_index].nx;
+              fval[index] = fval[index+1];
+              index += stored_um_vars[var_index].nx-1;
+              fval[index] = fval[index-1];
+          }
 
-   /** Find the appropriate Lat end limit for the interpolation calculations **/
+          for ( j=NY; j<int_constants[6]; j++ ) {
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              index = i + (NY-1)*stored_um_vars[var_index].nx;
+              index2= i + j*stored_um_vars[var_index].nx;
+              fval[index2] = fval[index];
+          }
+          }
 
-       if ( int_constants[6]<=stored_um_vars[var_index].ny ) { y_limit=int_constants[6]; }
-       else { y_limit = stored_um_vars[var_index].ny; }
+       } else {
 
- /** Take the average of the U points to the left & right of the desired P-point **/
+          for ( j=0; j<NY; j++ ) {
+              index = j*stored_um_vars[var_index].nx;
+              ghost_val = val[index];
+              for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+                  index = i + j*stored_um_vars[var_index].nx;
+                  tmp = val[index];
+                  val[index] = factor*(ghost_val + fval[index+1]);
+                  ghost_val = tmp;
+              }
+          }
 
-       for ( j=0; j<y_limit; j++ ) {
-       for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
-           index[0] = j*stored_um_vars[var_index].nx + i;
-           buf[index[0]] = 0.0;
-           buf[index[0]] = 0.5*factor*( val[index[0]+1] + val[index[0]-1] );
+          for ( j=0; j<NY; j++ ) {
+              index = j*stored_um_vars[var_index].nx;
+              val[index] = val[index+1];
+              index += stored_um_vars[var_index].nx-1;
+              val[index] = val[index-1];
+          }
+
+       /** Re-size buffer (if NY<INT_CONSTANTS[6]) **/
+          if ( stored_um_vars[var_index].ny<int_constants[6] ) {
+             i = (int )( int_constants[6]*stored_um_vars[var_index].nx );
+             val = (double *) realloc( val, i*sizeof(double) );
+          }
+
+          for ( j=NY; j<int_constants[6]; j++ ) {
+          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+              index = i + (NY-1)*stored_um_vars[var_index].nx;
+              index2= i + j*stored_um_vars[var_index].nx;
+              val[index2] = val[index];
+          }
+          }
+
        }
-       }
 
-       for ( j=y_limit-1; j<int_constants[6]; j++ ) {
-       for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-           index[0] = i + stored_um_vars[var_index].nx*j;
-           index[1] = i + stored_um_vars[var_index].nx*(j-1);
-           buf[index[0]] = buf[index[1]]; 
-       }
-       }
-
-       for ( j=0; j<int_constants[6]; j++ ) {
-           index[0] = j*stored_um_vars[var_index].nx;
-           buf[index[0]] = buf[index[0]+1];
-           index[1] = (j+1)*stored_um_vars[var_index].nx - 1;
-           buf[index[1]] = buf[index[1]-1];
-       }
-   
-       free( val );
-       return buf;
+       return;
 }
 
 
@@ -204,63 +263,121 @@ double *u_to_p_point_interp_c_grid( double *val, int var_index ) {
  ***   January 6, 2013
  ***/
 
-double *b_to_c_grid_interp_u_points( double *val, int var_index ) {
+void b_to_c_grid_interp_u_points( double *val, float *fval, int var_index, int rflag ) {
 
-     int     i, j, index[5], y_limit;
-     double *buf, factor;
+     int     NY, i, j, index[5];
+     double  factor, tmp, *ghost_val, *tmp_val, ghost;
 
-   /** Get the scaling factor **/
+     NY = (int ) stored_um_vars[var_index].ny;
+     if ( int_constants[6]<NY ) { NY = int_constants[6]; }
+     factor = (double ) (0.25*stored_um_vars[var_index].scale_factor); 
 
-     factor = (double ) stored_um_vars[var_index].scale_factor; 
+     if ( rflag==1 ) {
 
-     j = int_constants[6]*stored_um_vars[var_index].nx; 
-     buf = (double *) calloc( j,sizeof(double) );
+     /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
+        for ( j=1; j<NY-1; j++ ) {
+        for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+            index[0] = j*stored_um_vars[var_index].nx + i; 
+            index[1] = index[0] - 1; 
+            index[2] = index[0] + 1; 
+            index[3] = index[0] - stored_um_vars[var_index].nx; 
+            index[4] = index[0] + stored_um_vars[var_index].nx; 
+            tmp = factor*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]] ); 
+            fval[index[0]] = (float ) tmp; 
+        }
+        }
 
-   /** Find the appropriate Lat end limit for the interpolation calculations **/
+     /** Fill the missing columns [0 and NX-1] **/
+        for ( j=1; j<NY-1; j++ ) {
+            index[0] = j*stored_um_vars[var_index].nx;
+            index[1] = index[0] + 1;
+            fval[index[0]] = fval[index[1]];
+            index[0] += stored_um_vars[var_index].nx-1;
+            index[1] = index[0] - 1;
+            fval[index[0]] = fval[index[1]];
+        }
 
-       if ( int_constants[6]<=stored_um_vars[var_index].ny ) { y_limit=int_constants[6]; }
-       else { y_limit = stored_um_vars[var_index].ny; }
+     /** Copy contents of row 1 into row 0 **/
+        for ( i=0; i<stored_um_vars[var_index].nx-1; i++ ) {
+            index[0] = i + stored_um_vars[var_index].nx;
+            fval[i] = fval[index[0]];
+        } 
 
-  /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
-  
-     for ( j=1; j<y_limit-1; j++ ) {
-     for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
-         index[0] = j*stored_um_vars[var_index].nx + i; 
-         index[1] = index[0] - 1; 
-         index[2] = index[0] + 1; 
-         index[3] = index[0] - stored_um_vars[var_index].nx; 
-         index[4] = index[0] + stored_um_vars[var_index].nx; 
-         buf[index[0]] = 0.25*factor*( val[index[0]] + val[index[1]] + val[index[2]] + val[index[3]] ); 
+     /** Copy contents of row NY-2 into rows NY-1 to INT_CONSTANTS[6] **/
+        for ( j=NY-1; j<int_constants[6]; j++ ) {
+        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+            index[0] = i + stored_um_vars[var_index].nx*(NY-2);
+            index[1] = i + stored_um_vars[var_index].nx*j;
+            fval[index[1]] = fval[index[0]]; 
+        }
+        }
+
+     } else {
+
+     /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
+        ghost_val = (double *) malloc( (int )stored_um_vars[var_index].nx*sizeof(double) );
+        for ( i=0; i<stored_um_vars[var_index].nx; i++ )
+            ghost_val[i] = val[i];
+
+        tmp_val = (double *) malloc( (int )stored_um_vars[var_index].nx*sizeof(double) );
+        for ( j=1; j<NY-1; j++ ) {
+ 
+            for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+                index[0] = i + j*stored_um_vars[var_index].nx;
+                tmp_val[i] = val[index[0]];
+            }
+
+            index[0] = j*stored_um_vars[var_index].nx;
+            ghost = val[index[0]];
+            for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
+                index[0] = j*stored_um_vars[var_index].nx + i; 
+                index[1] = index[0] + 1; 
+                index[2] = index[0] + stored_um_vars[var_index].nx;
+                tmp = val[index[0]]; 
+                val[index[0]] = factor*( ghost + val[index[1]] + ghost_val[i] + val[index[2]] ); 
+                ghost = tmp;
+            }
+ 
+            for ( i=0; i<stored_um_vars[var_index].nx; i++ ) 
+                ghost_val[i] = tmp_val[i];
+
+        }
+        free( ghost_val );
+        free( tmp_val );
+
+     /** Fill the missing columns [0 and NX-1] **/
+        for ( j=1; j<NY-1; j++ ) {
+            index[0] = j*stored_um_vars[var_index].nx;
+            index[1] = index[0] + 1;
+            val[index[0]] = val[index[1]];
+            index[0] += stored_um_vars[var_index].nx-1;
+            index[1] = index[0] - 1;
+            val[index[0]] = val[index[1]];
+        }
+
+     /** Copy contents of row 1 into row 0 **/
+        for ( i=0; i<stored_um_vars[var_index].nx-1; i++ ) {
+            index[0] = i + stored_um_vars[var_index].nx;
+            val[i] = val[index[0]];
+        } 
+
+       /** Re-size buffer (if NY<INT_CONSTANTS[6]) **/
+        if ( stored_um_vars[var_index].ny<int_constants[6] ) {
+           i = (int )( int_constants[6]*stored_um_vars[var_index].nx );
+           val = (double *) realloc( val, i*sizeof(double) );
+        }
+
+     /** Copy contents of row NY-2 into rows NY-1 to INT_CONSTANTS[6] **/
+        for ( j=NY-1; j<int_constants[6]; j++ ) {
+        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
+            index[0] = i + stored_um_vars[var_index].nx*(NY-2);
+            index[1] = i + stored_um_vars[var_index].nx*j;
+            val[index[1]] = val[index[0]]; 
+        }
+        }
+
      }
-     }
 
-  /** Fill the missing rows [0 and NY-1 -> INT_CONSTANTS(6)] **/
-
-     for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
-         index[0] = i + stored_um_vars[var_index].nx;
-         buf[i] = buf[index[0]];
-     } 
-
-     for ( j=y_limit-1; j<int_constants[6]; j++ ) {
-     for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
-         index[0] = i + stored_um_vars[var_index].nx*j;
-         index[1] = i + stored_um_vars[var_index].nx*(j-1);
-         buf[index[0]] = buf[index[1]]; 
-     }
-     }
-
-  /** Fill the missing columns [0 and NX-1] **/
-
-     for ( j=0; j<int_constants[6]; j++ ) {
-         index[0] = j*stored_um_vars[var_index].nx;
-         index[1] = index[0] + 1;
-         buf[index[0]] = buf[index[1]];
-         index[2] = (j+1)*stored_um_vars[var_index].nx - 1;
-         index[3] = index[2] - 1;
-         buf[index[2]] = buf[index[3]];
-     }
-   
-     free( val );
-     return buf;
+     return;
 }
 

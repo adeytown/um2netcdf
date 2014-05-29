@@ -544,10 +544,9 @@ int check_um_file( char *filename, int rflag ) {
  ** Set some default values for metadata fields that should be found in the 
  ** user-supplied XML stash file 
  **---------------------------------------------------------------------------*/
-     cnt = 0;
      for ( i=0; i<num_stored_um_fields; i++ ) {
          stored_um_vars[i].xml_index = 9999;
-         sprintf( stored_um_vars[i].name, "unknown_%d", cnt );
+         sprintf( stored_um_vars[i].name, "unknown_%d", i );
          if ( stored_um_vars[i].ny==int_constants[6] ) { stored_um_vars[i].grid_type = 1; }
          else                                          { stored_um_vars[i].grid_type = 11; }
          stored_um_vars[i].accum       = 0;
