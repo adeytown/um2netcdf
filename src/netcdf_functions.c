@@ -99,9 +99,9 @@ void construct_um_variables( int ncid, int iflag ) {
  /*** Determine if any post-processing was performed on the data-field.  If so, ***/
  /*** indicate the operation performed.***/
         if ( stored_um_vars[i].lbproc>0 ) { 
-           if ( (stored_um_vars[i].lbproc==8)||(stored_um_vars[i].lbproc==64) ) {  
-              ierr = nc_put_att_text( ncid, varID, "cell_method", 11, "space:zonal" );
-           }
+           if ( stored_um_vars[i].lbproc==8 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 20, "longitude:derivative" ); }
+           else if ( stored_um_vars[i].lbproc==16 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 19, "latitude:derivative" ); }
+           else if ( stored_um_vars[i].lbproc==64 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 14, "longitude:mean" ); }
            else if ( stored_um_vars[i].lbproc==128 )  { 
                 if ( stored_um_vars[i].accum==0 ) { ierr = nc_put_att_text( ncid, varID, "cell_method", 9, "time:mean" ); }
                 else                              { ierr = nc_put_att_text( ncid, varID, "cell_method", 8, "time:sum" ); }
