@@ -60,14 +60,13 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
      int     n, i, j=0, k, ndim, cnt, varid;
      size_t *count, *offset;
      double *buf=NULL;
-     float  *fbuf=NULL;
+     float  *fbuf=NULL, tmp;
      char    name[45];
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
 
          strcpy( name, stored_um_vars[n].name );
          i = nc_inq_varid( ncid, name, &varid );
-
 
        /** Determine # of dimensions for current UM variable **/
          ndim = 3;
@@ -108,6 +107,14 @@ void write_interpolated_fields( int ncid, FILE *fid, int rflag ) {
                            exit(1);
                         }
                         break;
+         }
+
+         if ( rflag==0 ) {  
+            i = nc_put_att_double( ncid, varid, "missing_value", NC_DOUBLE, 1, 
+                                  &stored_um_vars[n].slices[0][0].mdi ); 
+         } else {
+            tmp = (float ) stored_um_vars[n].slices[0][0].mdi;
+            i = nc_put_att_float( ncid, varid, "missing_value", NC_FLOAT, 1, &tmp ); 
          }
 
        /*** For a 3D UM variable [NX,NY,NT], read in a single 2D data slice per data time   ***/
@@ -239,6 +246,9 @@ void write_uninterpolated_fields( int ncid, FILE *fid ) {
          cnt = (int ) stored_um_vars[n].nx*stored_um_vars[n].ny;
          buf = (double *) malloc( cnt*sizeof(double) );
 
+         i = nc_put_att_double( ncid, varid, "missing_value", NC_DOUBLE, 1, 
+                               &stored_um_vars[n].slices[0][0].mdi ); 
+
        /*** For a 3D UM variable [NX,NY,NT], read in a single 2D data slice per data time   ***/
        /*** valid for this UM variable.  Then apply the appropriate interpolation and write ***/
        /*** the final field to hard disk.                                                   ***/
@@ -288,7 +298,7 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
      int     n, i, j=0, k, kk, cnt, varid;
      size_t offset_3d[3], count_3d[3], offset_4d[4], count_4d[4];
      double *buf;
-     float  *fbuf=NULL;
+     float  *fbuf=NULL, tmp;
      char    name[45];
 
      for ( n=0; n<3; n++ ) {
@@ -300,6 +310,8 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
      count_3d[0] = 1;   
      count_4d[0] = 1;   
      count_4d[1] = 1;   
+     count_3d[2] = (size_t ) stored_um_vars[0].nx;
+     count_4d[3] = count_3d[2];
  
      for ( n=0; n<num_stored_um_fields; n++ ) {
 
@@ -310,15 +322,16 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
        /*** Remember that COUNT = COUNT[NT,NZ,NY,NX]                  ***/
 
          count_3d[1] = (size_t ) stored_um_vars[n].ny;
-         count_3d[2] = (size_t ) stored_um_vars[n].nx;
-         count_4d[2] = (size_t ) stored_um_vars[n].ny;
-         count_4d[3] = (size_t ) stored_um_vars[n].nx;
+         count_4d[2] = count_3d[1];
 
        /*** Count the number of elements to be read for a single 2D data slice ***/
 
          cnt = (int ) stored_um_vars[n].nx*stored_um_vars[n].ny;
          buf = (double *) malloc( cnt*sizeof(double) );
          fbuf = (float *) malloc( cnt*sizeof(float) ); 
+
+         tmp = (float ) stored_um_vars[n].slices[0][0].mdi;
+         i = nc_put_att_float( ncid, varid, "missing_value", NC_FLOAT, 1, &tmp ); 
 
        /*** For a 3D UM variable [NX,NY,NT], read in a single 2D data slice per data time   ***/
        /*** valid for this UM variable.  Then apply the appropriate interpolation and write ***/
@@ -330,7 +343,7 @@ void write_uninterpolated_fields_flt( int ncid, FILE *fid ) {
                    fseek( fid, stored_um_vars[n].slices[k][0].location*wordsize, SEEK_SET );
                    fread( buf, wordsize, cnt, fid );
                    endian_swap( buf, cnt );
-                   for ( j=0; j<cnt; j++ ) { fbuf[j] = stored_um_vars[n].scale_factor * ((float ) buf[j]); }
+                   for ( j=0; j<cnt; j++ ) { fbuf[j] = stored_um_vars[n].scale_factor * ((float ) buf[j]);  }
                    i = nc_put_vara_float( ncid, varid, offset_3d, count_3d, fbuf );
                    offset_3d[0]++;
                }

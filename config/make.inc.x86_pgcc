@@ -12,7 +12,7 @@
 
 CC = pgcc 
 RANLIB = ranlib 
-OPT_FLAGS = -O3 -g -fastsse -mp
+OPT_FLAGS = -O3 -g -fastsse 
 
 
 ##-----------------------------------------------------------------------------

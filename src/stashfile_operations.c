@@ -45,6 +45,7 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              fd[cnt].code = atoi((const char *) str);
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"varname"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) {
@@ -52,6 +53,7 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
                 strcpy( fd[cnt].varname,(const char *)str );
              }
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"longname"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { 
@@ -59,6 +61,7 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
                 strcpy( fd[cnt].longname,(const char *)str ); 
              }
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"standardname"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { 
@@ -66,6 +69,7 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
                 strcpy( fd[cnt].stdname,(const char *)str ); 
              }
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"units"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { 
@@ -73,32 +77,39 @@ void parse_item( xmlDocPtr doc, xmlNodePtr cur, um_field_metadata *fd, int cnt )
                 strcpy( fd[cnt].units,(const char *)str ); 
              }
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"validmax"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { fd[cnt].validmax = atof((const char *)str); }
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"validmin"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { fd[cnt].validmin = atof((const char *)str); }
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"scalefact"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { fd[cnt].scale = atof((const char *)str); }
              else             { fd[cnt].scale = 1.0; }
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"umgrid"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              fd[cnt].umgrid = atoi((const char *) str);
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"accum_field"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              fd[cnt].accum = atoi((const char *) str);
              xmlFree( str );
+             str=NULL;
           } else if ((!xmlStrcmp(cur->name, (const xmlChar *)"level_type"))) {
              str = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
              if ( str!=NULL ) { fd[cnt].level_type = atoi((const char *) str); } 
              else             { fd[cnt].level_type = 2; } 
              xmlFree( str );
+             str=NULL;
           }
           cur = cur->next;
      }

@@ -50,7 +50,7 @@ void interp_do_nothing(  double *val, float *fval, int var_index, int rflag ) {
        cnt = (int )( stored_um_vars[var_index].nx*stored_um_vars[var_index].ny );
 
        if ( rflag==1 ) {
-          for ( n=0; n<cnt; n++ )
+          for ( n=0; n<cnt; n++ ) 
               fval[n] = stored_um_vars[var_index].scale_factor*((float ) val[n]); 
        } else {
           factor = (double ) stored_um_vars[var_index].scale_factor; 

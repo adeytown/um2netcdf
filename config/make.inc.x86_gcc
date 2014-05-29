@@ -12,7 +12,7 @@
 
 CC = gcc 
 RANLIB = ranlib 
-OPT_FLAGS = -O3 -g -Wall -fopenmp
+OPT_FLAGS = -O3 -g -Wall 
 
 
 ##-----------------------------------------------------------------------------

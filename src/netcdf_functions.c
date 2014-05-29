@@ -173,7 +173,7 @@ void construct_um_variables( int ncid, int iflag ) {
 
 int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filename ) {
      
-     int    ncid, ierr, pos;
+     int    ncid, ierr, pos, *oldmode;
      size_t slen;
      char   forecast_ref_time[40], netcdf_filename[50], *str, *dest, creation_time[25];
      char   mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
@@ -214,6 +214,8 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      ierr = nc_set_chunk_cache( 129600000, 101, 0.75 );
      ierr = nc_create( netcdf_filename, NC_NETCDF4, &ncid ); 
      if ( ierr != NC_NOERR ) { return 999; }
+
+     ierr = nc_set_fill( ncid, NC_NOFILL, oldmode );
 
      printf( "Output NetCDF File\n" );
      printf( "--------------------------------------------------------------\n" );
