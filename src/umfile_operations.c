@@ -615,21 +615,21 @@ int check_um_file( char *filename, int rflag ) {
 
 /*==============================================================================
  * START OF SANITY CHECK
- *==============================================================================*
+ *==============================================================================* 
       for ( i=0; i<num_stored_um_fields; i++ ) {
          printf( "%s %hu [%hu, %hu %hu, %hu]\n", stored_um_vars[i].name, stored_um_vars[i].stash_code,
                                                stored_um_vars[i].nx, stored_um_vars[i].ny, stored_um_vars[i].nz,
                                                stored_um_vars[i].nt );
-         printf( "%f\n", stored_um_vars[i].scale_factor );
+//         printf( "%f\n", stored_um_vars[i].scale_factor );
         printf( "TIMES: " );
         for ( j=0; j<stored_um_vars[i].nt; j++ ) { printf( "%f ", stored_um_vars[i].times[j] ); }
         printf( "\n" );
-//        printf( "SLICES: " );
-//        for ( j=0; j<stored_um_vars[i].nt; j++ ) { 
-//        for ( k=0; k<stored_um_vars[i].nz; k++ ) {
-//            printf( "%hu ", stored_um_vars[i].slices[j][k].id ); 
-//        }
-//        }
+        printf( "SLICES: " );
+        for ( j=0; j<stored_um_vars[i].nt; j++ ) { 
+        for ( k=0; k<stored_um_vars[i].nz; k++ ) {
+            printf( "%hu ", stored_um_vars[i].slices[j][k].id ); 
+        }
+        }
         printf( "\n" );
      }
      exit(1);

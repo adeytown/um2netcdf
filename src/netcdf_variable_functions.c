@@ -35,8 +35,8 @@ void interp_do_nothing( double *val, float *fval, int index, int rflag );
 void u_to_p_point_interp_c_grid( double *val, float *fval, int index, int rflag );
 void v_to_p_point_interp_c_grid( double *val, float *fval, int index, int rflag );
 void b_to_c_grid_interp_u_points( double *val, float *fval, int index, int rflag );
-void    endian_swap_4bytes( void *ptr, int nchunk );
-void    ieee_usage_message();
+void endian_swap_4bytes( void *ptr, int nchunk );
+void ieee_usage_message();
 
 
 /***

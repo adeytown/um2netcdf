@@ -215,8 +215,6 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      ierr = nc_create( netcdf_filename, NC_NETCDF4, &ncid ); 
      if ( ierr != NC_NOERR ) { return 999; }
 
-     ierr = nc_set_fill( ncid, NC_NOFILL, oldmode );
-
      printf( "Output NetCDF File\n" );
      printf( "--------------------------------------------------------------\n" );
      printf( "   Filename  : %s\n", netcdf_filename );

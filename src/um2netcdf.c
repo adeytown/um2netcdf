@@ -180,7 +180,7 @@ int main( int argc, char *argv[] ) {
      printf( "   Wordsize  : %d\n\n", wordsize );
      
      ncid = create_netcdf_file( argv[argc-2], iflag, rflag, netcdf_filename );  
-
+ 
  /*
   * Write the UM data into the NetCDF file 
   *---------------------------------------------------------------------------*/ 
