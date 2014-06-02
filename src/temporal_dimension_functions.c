@@ -107,29 +107,35 @@ void create_time_dim( int ncid, int var_index, int time_dim_cnt ) {
      else                { sprintf( calendar, "360_day" ); }
      ierr = nc_put_att_text( ncid, varID, "calendar", 9, calendar );
 
-     j = stored_um_vars[var_index].slices[0][0].datatime.tm_mon;
+//     j = stored_um_vars[var_index].slices[0][0].datatime.tm_mon;
+     j = (int ) header[21];
      if ( j<10 ) { snprintf( mth_str, sizeof mth_str, "0%d", j ); }
      else        { snprintf( mth_str, sizeof mth_str,  "%d", j ); }
 
-     j = stored_um_vars[var_index].slices[0][0].datatime.tm_mday;
+//     j = stored_um_vars[var_index].slices[0][0].datatime.tm_mday;
+     j = (int ) header[22];
      if ( j<10 ) { snprintf( day_str, sizeof day_str, "0%d", j ); }
      else        { snprintf( day_str, sizeof day_str,  "%d", j ); }
 
-     j = stored_um_vars[var_index].slices[0][0].datatime.tm_hour;
+//     j = stored_um_vars[var_index].slices[0][0].datatime.tm_hour;
+     j = (int ) header[23];
      if ( j<10 ) { snprintf( hr_str, sizeof hr_str, "0%d", j ); }
      else        { snprintf( hr_str, sizeof hr_str,  "%d", j ); }
 
-     j = stored_um_vars[var_index].slices[0][0].datatime.tm_min;
+//     j = stored_um_vars[var_index].slices[0][0].datatime.tm_min;
+     j = (int ) header[24];
      if ( j<10 ) { snprintf( min_str, sizeof min_str, "0%d", j ); }
      else        { snprintf( min_str, sizeof min_str,  "%d", j ); }
 
-     j = stored_um_vars[var_index].slices[0][0].datatime.tm_sec;
+//     j = stored_um_vars[var_index].slices[0][0].datatime.tm_sec;
+     j = (int ) header[25];
      if ( j<10 ) { snprintf( sec_str, sizeof sec_str, "0%d", j ); }
      else        { snprintf( sec_str, sizeof sec_str,  "%d", j ); }
 
-     sprintf( time_des, "hours since %d-%s-%s %s:%s:%s",
-              stored_um_vars[var_index].slices[0][0].datatime.tm_year,
+     sprintf( time_des, "hours since %ld-%s-%s %s:%s:%s", header[20],
               mth_str, day_str, hr_str, min_str, sec_str );
+//              stored_um_vars[var_index].slices[0][0].datatime.tm_year,
+//              mth_str, day_str, hr_str, min_str, sec_str );
      time_des[31] = '\0';
      ierr = nc_put_att_text( ncid, varID, "units", 31, time_des );
 

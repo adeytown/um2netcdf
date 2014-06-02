@@ -524,12 +524,21 @@ int check_um_file( char *filename, int rflag ) {
                    stored_um_vars[j].slices[kk][k].lbproc    = lookup[i][24];
                    stored_um_vars[j].slices[kk][k].lbpack    = (unsigned short ) lookup[i][20];
                    stored_um_vars[j].slices[kk][k].mdi       = (double ) lookup[i][62];
-                   stored_um_vars[j].slices[kk][k].datatime.tm_year = (int ) lookup[i][0];
-                   stored_um_vars[j].slices[kk][k].datatime.tm_mon  = (int ) lookup[i][1];
-                   stored_um_vars[j].slices[kk][k].datatime.tm_mday = (int ) lookup[i][2];
-                   stored_um_vars[j].slices[kk][k].datatime.tm_hour = (int ) lookup[i][3];
-                   stored_um_vars[j].slices[kk][k].datatime.tm_min  = (int ) lookup[i][4];
-                   stored_um_vars[j].slices[kk][k].datatime.tm_sec  = (int ) lookup[i][5];
+                   if ( stored_um_vars[j].lbproc!=0 ) {
+                      stored_um_vars[j].slices[kk][k].datatime.tm_year = (int ) header[20];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_mon  = (int ) header[21];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_mday = (int ) header[22];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_hour = (int ) header[23];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_min  = (int ) header[24];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_sec  = (int ) header[25];
+                   } else {
+                      stored_um_vars[j].slices[kk][k].datatime.tm_year = (int ) lookup[i][0];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_mon  = (int ) lookup[i][1];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_mday = (int ) lookup[i][2];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_hour = (int ) lookup[i][3];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_min  = (int ) lookup[i][4];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_sec  = (int ) lookup[i][5];
+                   }
                 }
             }
             }

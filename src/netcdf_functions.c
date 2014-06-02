@@ -221,6 +221,9 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      if ( rflag==1 ) { printf( "   Wordsize  : 4\n\n" ); }
      else            { printf( "   Wordsize  : 8\n\n" ); }
  
+     printf( "Forecast Details\n" );
+     printf( "--------------------------------------------------------------\n" );
+
  /**=========================================================================**
   ** STEP 1:  DIMENSIONS                                                     **
   **=========================================================================**/ 
@@ -264,10 +267,11 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      if ( header[25]>10 ) { snprintf( sec_str, sizeof sec_str,  "%ld", header[25] ); }
      else                 { snprintf( sec_str, sizeof sec_str, "0%ld", header[25] ); }
      snprintf( forecast_ref_time, sizeof forecast_ref_time, "%ld-%s-%s %s:%s:%s", 
-               header[27], mth_str, day_str, hr_str, min_str, sec_str );
+               header[20], mth_str, day_str, hr_str, min_str, sec_str );
      forecast_ref_time[21] = '\0'; 
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "forecast_reference_time", 20, 
                              forecast_ref_time ); 
+     printf( " Ref DateTime: %s\n", forecast_ref_time );
 
  /*
   * Add other global attributes to output NetCDF file 
@@ -278,6 +282,7 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "input_uri", strlen(um_file), um_file ); 
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "conventions", 6, "CF-v25" ); 
      ierr = nc_put_att_long( ncid, NC_GLOBAL, "um_version_number", NC_LONG, 1, &header[11] );
+     printf( "   UM Verson : %ld\n\n", header[11] );
      if ( header[3]>100 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 26, "rotated_latitude_longitude" ); }
      else                 { ierr = nc_put_att_text( ncid, NC_GLOBAL, "grid_mapping_name", 18, "latitude_longitude" ); } 
      if ( header[11]<=804 ) { ierr = nc_put_att_text( ncid, NC_GLOBAL, "dynamical_core", 12, "new_dynamics" ); }
