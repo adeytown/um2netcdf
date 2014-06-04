@@ -90,9 +90,8 @@ void set_time_bnd( int ncid, int var_index ) {
 
 void create_time_dim( int ncid, int var_index, int time_dim_cnt ) {
 
-     int  dimID[1], j, ierr, varID;
-     char time_des[40], dim_name[6], calendar[9], mth_str[3], day_str[3],
-          hr_str[3], min_str[3], sec_str[3];
+     int  dimID[1], ierr, varID;
+     char time_des[40], dim_name[6], calendar[9];
 
    /** Construct an appropriate name for the time dimension **/
      sprintf( dim_name, "time%i", time_dim_cnt );

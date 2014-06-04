@@ -38,7 +38,6 @@ void b_to_c_grid_interp_u_points( double *val, float *fval, int index, int rflag
 void endian_swap_4bytes( void *ptr, int nchunk );
 void ieee_usage_message();
 
-
 /***
  *** WRITE_INTERPOLATED_FIELDS 
  ***

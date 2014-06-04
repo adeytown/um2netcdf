@@ -533,7 +533,7 @@ int check_um_file( char *filename, int rflag ) {
 
             if ( stored_um_vars[j].slices[0][0].lbproc==0 ) {
                forecast_reference.tm_year = (int ) lookup[i][6] - 1900;
-               forecast_reference.tm_mon  = (int ) lookup[i][7]; 
+               forecast_reference.tm_mon  = (int ) lookup[i][7] - 1; 
                forecast_reference.tm_mday = (int ) lookup[i][8];
                forecast_reference.tm_hour = (int ) lookup[i][9];
                forecast_reference.tm_min  = (int ) lookup[i][10]; 
