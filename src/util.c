@@ -27,6 +27,7 @@
 #include <stdint.h>
 #include <math.h>
 
+
 /***
  *** STATUS_CHECK 
  ***
@@ -104,34 +105,3 @@ void ieee_usage_message() {
      printf( "        /oper/admin/um_fcm/um/vn8.4/ibm/utils/ieee -64e <input_filename> <output_filename>\n\n" );
 }
  
-
-/***
- *** IBM_IEEE_FLOAT_CONVERSION 
- ***
- *** Subroutine that converts an array of floats from IBM float32 to IEEE float32 format.
- *** For reference, the 2 formats differ in bit structure in the following way:
- ***
- ***                IBM Float              IEEE Float 
- ***  Sign           bit 0                   bit 0
- ***  Exponent       bit 1-7   [7 total]     bit 1-8 [8 total]
- ***  Mantissa       bit 8-31  [24 total]    bit 9-31  [23 total]
- ***
- *** INPUT:  val -> ptr to array of input values
- ***           N -> number of input values to be converted
- *** 
- ***   Mark Cheeseman, NIWA
- ***   January 23, 2014
- ***/
-
-float ibm_ieee_float_conversion( uint32_t ibm_val ) {
-
-     uint32_t mantissa, exponent, sign_bit;     
-
-     if ( ibm_val==0 ) { return 0.0; }
-
-     sign_bit = ibm_val >> 31 & 0x01;
-     exponent = ibm_val >> 24 & 0x7f;
-     mantissa = (ibm_val & 0x00ffffff) / ((float ) pow(2,24) );
-     return (1 -2*sign_bit)*mantissa*pow(16,exponent-64); 
-
-}

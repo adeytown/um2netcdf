@@ -28,6 +28,7 @@
 #include <netinet/in.h>
 #include "field_def.h"
 
+
 /***
  *** ENDIAN_SWAP_#BYTES 
  ***
@@ -71,18 +72,6 @@ void endian_swap_4bytes( void *ptr, int nchunk ) {
      return;
 }
 
-void endian_swap_2bytes( void *ptr, int nchunk ) {
-
-     int i;
-     char *p, t;
-
-     for ( i=0; i<nchunk; i++ ) {
-         p = (char*) ptr + 2*i;
-         t=p[1]; p[1]=p[0]; p[0]=t;
-     }
-     return;
-}
-
 void no_endian_swap( void *ptr, int nchunk ) { return; }
 
 
@@ -112,12 +101,10 @@ int get_file_endianness_wordsize( FILE *fh ) {
 
     if ( (header[1]==1)&&(header[150]==64) ) {
        endian_swap = &no_endian_swap;
-//       printf( "No swapping: %ld %ld\n", header[1], header[150] );
        return word_size;
     } else {
        endian_swap = &endian_swap_8bytes;
        endian_swap( header, 256 );
-//       printf( "Big Endian swapping: %ld %ld\n", header[1], header[150] );
        if ( (header[1]==1)&&(header[150]==64) ) {
           return word_size;
        }
@@ -134,12 +121,10 @@ int get_file_endianness_wordsize( FILE *fh ) {
 
     if ( (header[1]==1)&&(header[150]==64) ) {
        endian_swap = &no_endian_swap;
-//       printf( "No swapping: %ld %ld\n", header[1], header[150] );
        return word_size;
     } else {
        endian_swap = &endian_swap_4bytes;
        endian_swap( header, 256 );
-//       printf( "Little Endian swapping: %ld %ld\n", header[1], header[150] );
        if ( (header[1]==1)&&(header[150]==64) ) {
           return word_size;
        }
@@ -162,6 +147,8 @@ int get_file_endianness_wordsize( FILE *fh ) {
  ***/
 
 int check_um_file( char *filename, int rflag ) {
+
+     const int MAX_NUM_FIELDS=250;  /** Max # of UM variables that can be defined **/
 
      unsigned short *temp, num_lbproc, *temp_id=NULL, ntmp;
      int    i, j, k, kk, ind, flag, cnt, nrec, *lbprocs;
@@ -240,8 +227,8 @@ int check_um_file( char *filename, int rflag ) {
 
 /**
  ** Gather all the valid lookup entries into a condensed array (called LOOKUP)) 
- ** Only take the first 45 entires per UM field as there is a variable change
- ** from long to double at that point.
+ ** Only take the first 45 entires per UM field as there is a datatype change
+ ** from long to double after that point.
  **---------------------------------------------------------------------------*/
      lookup = (long **) malloc( cnt*sizeof(long *) );
 
@@ -265,7 +252,7 @@ int check_um_file( char *filename, int rflag ) {
  ** UM variables found in the input UM fields file 
  **---------------------------------------------------------------------------*/
      if ( num_stored_um_fields==0) {
-        temp = (unsigned short *) malloc( 250*sizeof(unsigned short) );
+        temp = (unsigned short *) malloc( MAX_NUM_FIELDS*sizeof(unsigned short) );
 
         flag = 0;
         for ( j=0; j<num_um_vars; j++ ) {
@@ -318,8 +305,8 @@ int check_um_file( char *filename, int rflag ) {
      }
 
 /**
- ** Asign the 2D data slices found in the input UM data file to the appropriate
- ** UM data structure. 
+ ** Assign the 2D data slices found in the input UM data file to the 
+ ** appropriate UM data structure. 
  **---------------------------------------------------------------------------*/
      modified_num_stored_um_fields = num_stored_um_fields;
      for ( j=0; j<num_stored_um_fields; j++ ) {
@@ -358,7 +345,8 @@ int check_um_file( char *filename, int rflag ) {
 
          /*** Accumulated fields record only a relative time offset to a reference ***/
          /*** value stored elsewhere in the lookup array.                          ***/
-             if ( tdiff[i]<0.0 ) { tdiff[i] = (float ) lookup[temp_id[i]][13] - tdiff[i]; }
+         //MPCH - commented out    if ( tdiff[i]<0.0 ) { tdiff[i] = (float ) lookup[temp_id[i]][13] - tdiff[i]; }
+             if ( tdiff[i]<0.0 ) { tdiff[i] = (float ) lookup[temp_id[i]][13]; }
          }
 
          for ( i=0; i<stored_um_vars[j].nz; i++ ) {
@@ -525,15 +513,15 @@ int check_um_file( char *filename, int rflag ) {
                    stored_um_vars[j].slices[kk][k].lbpack    = (unsigned short ) lookup[i][20];
                    stored_um_vars[j].slices[kk][k].mdi       = (double ) lookup[i][62];
                    if ( stored_um_vars[j].lbproc!=0 ) {
-                      stored_um_vars[j].slices[kk][k].datatime.tm_year = (int ) header[20];
-                      stored_um_vars[j].slices[kk][k].datatime.tm_mon  = (int ) header[21];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_year = (int ) header[20] - 1900;
+                      stored_um_vars[j].slices[kk][k].datatime.tm_mon  = (int ) header[21] - 1;
                       stored_um_vars[j].slices[kk][k].datatime.tm_mday = (int ) header[22];
                       stored_um_vars[j].slices[kk][k].datatime.tm_hour = (int ) header[23];
                       stored_um_vars[j].slices[kk][k].datatime.tm_min  = (int ) header[24];
                       stored_um_vars[j].slices[kk][k].datatime.tm_sec  = (int ) header[25];
                    } else {
-                      stored_um_vars[j].slices[kk][k].datatime.tm_year = (int ) lookup[i][0];
-                      stored_um_vars[j].slices[kk][k].datatime.tm_mon  = (int ) lookup[i][1];
+                      stored_um_vars[j].slices[kk][k].datatime.tm_year = (int ) lookup[i][0] - 1900;
+                      stored_um_vars[j].slices[kk][k].datatime.tm_mon  = (int ) lookup[i][1] - 1;
                       stored_um_vars[j].slices[kk][k].datatime.tm_mday = (int ) lookup[i][2];
                       stored_um_vars[j].slices[kk][k].datatime.tm_hour = (int ) lookup[i][3];
                       stored_um_vars[j].slices[kk][k].datatime.tm_min  = (int ) lookup[i][4];
@@ -542,6 +530,16 @@ int check_um_file( char *filename, int rflag ) {
                 }
             }
             }
+
+            if ( stored_um_vars[j].slices[0][0].lbproc==0 ) {
+               forecast_reference.tm_year = (int ) lookup[i][6] - 1900;
+               forecast_reference.tm_mon  = (int ) lookup[i][7]; 
+               forecast_reference.tm_mday = (int ) lookup[i][8];
+               forecast_reference.tm_hour = (int ) lookup[i][9];
+               forecast_reference.tm_min  = (int ) lookup[i][10]; 
+               forecast_reference.tm_sec  = (int ) lookup[i][11];
+            }
+
          }
      }
      }

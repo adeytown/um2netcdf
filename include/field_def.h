@@ -49,6 +49,8 @@ double   real_constants[6]; /* input UM fields files's real_constants array */
 unsigned short int blacklist[10]; /* STASH CODES of UM variables to be avoided */
 unsigned short int blacklist_cnt;
 
+struct tm forecast_reference;
+
 /*---------------------------------------------------------------------------*
  *  FUNCTION POINTERS                                                        *
  *---------------------------------------------------------------------------*/
@@ -94,7 +96,6 @@ typedef struct um_field_metadata {
 
 um_field_metadata *um_vars;
 
-
 /**
  ** UM_dataslice - Struct that contains unique information about a 2D slice of an 
  **                UM variable stored in input UM fields file.
@@ -126,6 +127,7 @@ typedef struct new_um_variable {
         unsigned short nz;
         unsigned short nx, ny;     /* # of points in the x (lon) and y (lat) directions */
         unsigned short lbvc;       /* indicates the vertical coordinate system used */
+        unsigned short lbpack;     /* packing method used: 0 -> no packing, 1 -> WGDOS packing used */
         unsigned short accum;      /* indicates if field is a product of some sort of accummulation process */
         unsigned short coordinates;
         unsigned short grid_type;  /* used for interpolation; indicates the Arakawa grid used for the data */

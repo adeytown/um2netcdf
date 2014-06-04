@@ -173,10 +173,10 @@ void construct_um_variables( int ncid, int iflag ) {
 
 int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filename ) {
      
-     int    ncid, ierr, pos, *oldmode;
+     int    ncid, ierr, pos;
      size_t slen;
-     char   forecast_ref_time[40], netcdf_filename[50], *str, *dest, creation_time[25];
-     char   mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
+     char   forecast_ref_time[22], netcdf_filename[50], *str, *dest, creation_time[25];
+//     char   mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
      FILE  *fid;
      time_t rawtime;
      struct tm * timeinfo;
@@ -256,7 +256,7 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
  /*
   * Construct a properly formatted forecast reference string 
   *--------------------------------------------------------------------------*/
-     if ( header[21]>10 ) { snprintf( mth_str, sizeof mth_str,  "%ld", header[21] ); }
+  /*   if ( header[21]>10 ) { snprintf( mth_str, sizeof mth_str,  "%ld", header[21] ); }
      else                 { snprintf( mth_str, sizeof mth_str, "0%ld", header[21] ); }
      if ( header[22]>10 ) { snprintf( day_str, sizeof day_str,  "%ld", header[22] ); }
      else                 { snprintf( day_str, sizeof day_str, "0%ld", header[22] ); }
@@ -268,8 +268,9 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      else                 { snprintf( sec_str, sizeof sec_str, "0%ld", header[25] ); }
      snprintf( forecast_ref_time, sizeof forecast_ref_time, "%ld-%s-%s %s:%s:%s", 
                header[20], mth_str, day_str, hr_str, min_str, sec_str );
-     forecast_ref_time[21] = '\0'; 
-     ierr = nc_put_att_text( ncid, NC_GLOBAL, "forecast_reference_time", 20, 
+     forecast_ref_time[21] = '\0'; */
+     strftime( forecast_ref_time, 21, "%Y-%m-%d %H:%M:%S", &forecast_reference );
+     ierr = nc_put_att_text( ncid, NC_GLOBAL, "forecast_reference_time", 21, 
                              forecast_ref_time ); 
      printf( " Ref DateTime: %s\n", forecast_ref_time );
 
