@@ -85,7 +85,7 @@ void construct_um_variables( int ncid, int iflag ) {
          free( chunksize );
 
  /** Set the data compression attribute for this variable **/
-         ierr = nc_def_var_deflate( ncid, varID, NC_NOSHUFFLE, 1, 4 );
+         ierr = nc_def_var_deflate( ncid, varID, NC_SHUFFLE, 1, 3 );
 
  /*** Output details about the coordinate system used to describe field ***/
          if ( stored_um_vars[i].coordinates==101 ) {
