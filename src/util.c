@@ -26,7 +26,14 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <math.h>
+#include <sys/types.h>
+#include <netinet/in.h>
 
+#define   expon   0x7F000000
+#define   sign  0x80000000
+#define   tiss  0x00FFFFFF
+#define   etis  0x007FFFFF
+#define   nrm   0x00F00000
 
 /***
  *** STATUS_CHECK 
@@ -47,6 +54,69 @@ void status_check( int status, char *message ) {
 
 }
 
+
+/***
+ *** IBM2IEEE 
+ ***
+ *** Subroutine that converts IBM 32-bit float data into IEEE 32-bit float
+ *** data.
+ ***
+ *** INPUT:    n -> # of values to be converted
+ ***         ibm -> character pointer to IBM float32 data
+ ***        ieee -> 
+ ***
+ ***   Mark Cheeseman, NIWA
+ ***   January 17, 2014
+ ***/
+  
+int ibm2ieee( uint32_t ibm[], float ieee[], int n )
+{
+  int      status = 0;
+  int32_t  ibe, it;
+  uint32_t ibs, ibt;
+  int      j, k;
+  union { uint32_t i; float r; } u, res;
+
+  for(j=0; j<n; j++) {
+    ibs = ibm[j] & sign;
+    ibe = ibm[j] & expon;
+    ibt = ibm[j] & tiss;
+#ifndef IBM_POWER
+    if (ibt == 0) {
+      ibe = 0 ;
+    } else {
+      if ( (ibe != 0) && (ibt & nrm) == 0 ) {
+        u.i = ibm[j] ;
+        u.r = u.r + 0e0 ;
+        ibe = u.i & expon ;
+        ibt = u.i & tiss ;
+      }
+      /* mantissa */
+      it = ibt << 8;
+      for (k = 0; (k < 5) && (it >= 0); k++ ) {
+        it = it << 1;
+      }
+      if ( k < 4 ) {
+        ibt = (it >> 8) & etis;
+        ibe = (ibe >> 22) - 256 + 127 - k - 1;
+        if (ibe < 0) {
+          ibe = ibt = 0;
+        }
+        if (ibe >= 255) {
+         ibe = 255; ibt = 0;
+        }
+        ibe = ibe << 23;
+       }
+    }
+#endif
+    res.i = ibs | ibe | ibt;
+    ieee[j] = res.r;
+    if (ibe == 255<<23) {
+      status = -1;
+    }
+  }
+  return status;
+}
 
 /***
  *** USAGE

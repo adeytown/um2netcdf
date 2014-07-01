@@ -21,14 +21,16 @@ TABLE OF CONTENTS
 UM2NetCDF is an utility program that can convert a binary fieldsfile from the
 UK MetOffice's Unified Model into a NetCDF file.  Effort has been made to 
 ensure that the output NetCDF file is [almost fully** ] compliant with the current 
-CF rules (as of January 24, 2014).
+CF rules (as of June 30, 2014).
 
 UM2NetCDF offers the following features:
 
- -> users can output the entire contents of a UM fields file or select a 
-    sub-set of files by entering a list of UM stash codes on the commandline
+ -> the utility can be used on UM fields or dump files.
 
- -> users can select the output UM fields by written with 32 or 64 bit 
+ -> users can output the entire contents of an input UM input file or select a 
+    sub-set of variables by entering a list of UM stash codes on the commandline
+
+ -> users can select the output UM fields be written with 32 or 64 bit 
     precision
 
  -> ZLIB compression is utilized in the output NetCDF file offering substantial
@@ -42,7 +44,10 @@ UM2NetCDF offers the following features:
     is non-zero) will have an appropriate prefix added to its name.
     For example, a field collecting maximum wind gusts would be named 'max_wind_gust'.
 
-UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
+ -> the utility can extract and process UM variables that are unpacked or are
+    WGDOS packed for x86-Linux architecture. Feature not functional for big endian
+    architectures (such as IBM Power6/7)
+
 
 
 2.  BUILDING UM2NETCDF
@@ -56,7 +61,7 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
     - XML2 library (versions 2.9.0 and 2.9.1 have been tested and are 
                     recommended)
     - NetCDF with the netcdf-4 option selected during its build (this means 
-      that it was build with a version of HDF5) (Versions 4.3.0 and 4.3.1
+      that it was build with a version of HDF5) (Versions 4.3.0-4.3.2
       have been tested and are recommended) Note that this should be a serial
       NetCDF implementation (eg. no MPI-IO support).
 
@@ -83,7 +88,7 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
     XXXX represents the platform on which you are building UM2NetCDF. This
     can only be set to 'x86' or 'pwr6' currently.  YYYY represents the compiler
     you wish to use for the compliation and linking of the binary.  Currently,
-    this can be set to 'gcc', 'pgcc' or 'xlc_r'.
+    this can be set to 'gcc', 'pgcc' or 'xlc'.
 
     Notes:
     A) The Makefile will try to include/read the appropriate machine file
@@ -100,6 +105,9 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
     B) It is assumed that you are assuming GNU make for the build.  The IBM
        make that comes by default with AIX will not work. Use the 'gmake'
        command instead of 'make' in the above instructions.
+
+    C) Building the executable on a big-endian architecture, such as IBM Power6/7
+       requires the inclusion of a CPP flag (-DIBM_POWER). 
 
  
 3.  RUNNING UM2NETCDF 
@@ -175,18 +183,12 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
        structure of the file when adding/modifying fields.
 
 
+
 4.  IMPORTANT NOTES
 -------------------------------------------------------------------------------
 
- -> UM2NetCDF only works on UM fields files.  PP and other files are not
-    supported.
-
- -> No support for WGDOS-packed UM field files. The Unified Model comes with an
-    utility called IEEE that can convert a WGDOS-packed fields field into an
-    unpacked fields file.  On the IBM Power6 platform at NIWA, the appropriate
-    command would be:
-
-          ./ieee -64e <packed_UM_fields_filename> <unpacked_UM_fields_filename>
+ -> UM2NetCDF only works on UM fields and dump files.  PP and other files are 
+    not supported.
 
  -> UM2NetCDF uses a NetCDF-4 standard/version of that library. The resulting
     output NetCDF file may be compatible for some existing post-processing
@@ -196,3 +198,5 @@ UM2NetCDF cannot be used on WGDOS-packed UM fields files currently.
  -> The ZLIB compression can lead to longer execution times particularly on
     larger input UM fields files.  
 
+ -> WGDOS unpacking is only available for x86/Linux/little-endian machines
+    currently.  Also, not all bitmask options are fully operationally.

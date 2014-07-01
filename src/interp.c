@@ -34,7 +34,8 @@
  *** No interpolation is done to the field.  Only the scale factor is applied. 
  ***
  *** INPUT:
- ***      val       --> data array
+ ***      val       --> data array ( double precision )
+ ***      fval      --> data array ( single precision )
  ***      var_index --> index denoting the current variable in the global array
  ***                    of stored UM variables
  ***
@@ -42,21 +43,14 @@
  ***   May 28, 2014
  ***/ 
 
-void interp_do_nothing(  double *val, float *fval, int var_index, int rflag ) {
+void interp_do_nothing(  double *val, float *fval, int var_index ) {
 
-       int    n, cnt;
-       double factor;
+       int n, cnt;
 
        cnt = (int )( stored_um_vars[var_index].nx*stored_um_vars[var_index].ny );
 
-       if ( rflag==1 ) {
-          for ( n=0; n<cnt; n++ ) 
-              fval[n] = stored_um_vars[var_index].scale_factor*((float ) val[n]); 
-       } else {
-          factor = (double ) stored_um_vars[var_index].scale_factor; 
-          for ( n=0; n<cnt; n++ )
-              val[n] = factor*val[n]; 
-       }
+       for ( n=0; n<cnt; n++ ) 
+           fval[n] = stored_um_vars[var_index].scale_factor*((float ) val[n]); 
 
        return;
 }
@@ -78,16 +72,15 @@ void interp_do_nothing(  double *val, float *fval, int var_index, int rflag ) {
  ***   May 28, 2014
  ***/
 
-void v_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rflag ) {
+void v_to_p_point_interp_c_grid( double *val, float *fval, int var_index ) {
 
        int    NY, i, j, index, index2, index3;
-       double factor, tmp, ghost_val;
+       double factor, tmp;
 
        NY = (int ) stored_um_vars[var_index].ny;
        if ( int_constants[6]<NY ) { NY = int_constants[6]; }
        factor = 0.5*((double )stored_um_vars[var_index].scale_factor);
 
-       if ( rflag==1 ) {
 
        /** Interpolate in the Y direction from rows 1 to NY-2 **/
           for ( j=1; j<NY-1; j++ ) {
@@ -115,44 +108,6 @@ void v_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rf
           }
           }
 
-       } else {
-
-       /** Interpolate in the Y direction from rows 1 to NY-2 **/
-          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-              ghost_val = val[i];
-              for ( j=1; j<NY-1; j++ ) {
-                  index = i + j*stored_um_vars[var_index].nx;
-                  index2= index - stored_um_vars[var_index].nx;
-                  index3= index + stored_um_vars[var_index].nx;
-                  tmp = val[index2];
-                  val[index3] = factor*( ghost_val + val[index3] );
-                  ghost_val = tmp;
-             }
-          }
-
-       /** Copy contents of Row 1 into Row 0 **/
-          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-              index = i + stored_um_vars[var_index].nx;
-              val[i] = val[index];
-          }
-
-       /** Re-size buffer (if NY<INT_CONSTANTS[6]) **/
-          if ( stored_um_vars[var_index].ny<int_constants[6] ) {
-             i = (int )( int_constants[6]*stored_um_vars[var_index].nx );
-             val = (double *) realloc( val, i*sizeof(double) );
-          }
-
-       /** Copy contents of Row NY-2 into Rows NY-1 to INT_CONSTANTS[6]-1 **/
-          for ( j=NY-1; j<int_constants[6]; j++ ) {
-          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-              index = i + (NY-1)*stored_um_vars[var_index].nx;
-              index2= i + j*stored_um_vars[var_index].nx;
-              val[index2] = val[index];
-          }
-          }
-
-       }
-
        return;
 }
 
@@ -173,16 +128,15 @@ void v_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rf
  ***   May 29, 2014
  ***/
 
-void u_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rflag ) {
+void u_to_p_point_interp_c_grid( double *val, float *fval, int var_index ) {
 
        int    i, j, index, index2, NY;
-       double factor, tmp, ghost_val;
+       double factor, tmp;
 
        NY = (int ) stored_um_vars[var_index].ny;
        if ( int_constants[6]<NY ) { NY = int_constants[6]; }
        factor = 0.5*((double )stored_um_vars[var_index].scale_factor);
 
-       if ( rflag==1 ) {
 
        /** Interpolate in the X direction from rows 1 to NY-2 **/
           for ( j=0; j<NY; j++ ) {
@@ -208,42 +162,6 @@ void u_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rf
           }
           }
 
-       } else {
-
-          for ( j=0; j<NY; j++ ) {
-              index = j*stored_um_vars[var_index].nx;
-              ghost_val = val[index];
-              for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
-                  index = i + j*stored_um_vars[var_index].nx;
-                  tmp = val[index];
-                  val[index] = factor*(ghost_val + fval[index+1]);
-                  ghost_val = tmp;
-              }
-          }
-
-          for ( j=0; j<NY; j++ ) {
-              index = j*stored_um_vars[var_index].nx;
-              val[index] = val[index+1];
-              index += stored_um_vars[var_index].nx-1;
-              val[index] = val[index-1];
-          }
-
-       /** Re-size buffer (if NY<INT_CONSTANTS[6]) **/
-          if ( stored_um_vars[var_index].ny<int_constants[6] ) {
-             i = (int )( int_constants[6]*stored_um_vars[var_index].nx );
-             val = (double *) realloc( val, i*sizeof(double) );
-          }
-
-          for ( j=NY; j<int_constants[6]; j++ ) {
-          for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-              index = i + (NY-1)*stored_um_vars[var_index].nx;
-              index2= i + j*stored_um_vars[var_index].nx;
-              val[index2] = val[index];
-          }
-          }
-
-       }
-
        return;
 }
 
@@ -263,16 +181,15 @@ void u_to_p_point_interp_c_grid( double *val, float *fval, int var_index, int rf
  ***   January 6, 2013
  ***/
 
-void b_to_c_grid_interp_u_points( double *val, float *fval, int var_index, int rflag ) {
+void b_to_c_grid_interp_u_points( double *val, float *fval, int var_index ) {
 
      int     NY, i, j, index[5];
-     double  factor, tmp, *ghost_val, *tmp_val, ghost;
+     double  factor, tmp;
 
      NY = (int ) stored_um_vars[var_index].ny;
      if ( int_constants[6]<NY ) { NY = int_constants[6]; }
      factor = (double ) (0.25*stored_um_vars[var_index].scale_factor); 
 
-     if ( rflag==1 ) {
 
      /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
         for ( j=1; j<NY-1; j++ ) {
@@ -311,72 +228,6 @@ void b_to_c_grid_interp_u_points( double *val, float *fval, int var_index, int r
             fval[index[1]] = fval[index[0]]; 
         }
         }
-
-     } else {
-
-     /** Take the average of the 4 horizontal points surrounding the desired P-point location **/
-        ghost_val = (double *) malloc( (int )stored_um_vars[var_index].nx*sizeof(double) );
-        for ( i=0; i<stored_um_vars[var_index].nx; i++ )
-            ghost_val[i] = val[i];
-
-        tmp_val = (double *) malloc( (int )stored_um_vars[var_index].nx*sizeof(double) );
-        for ( j=1; j<NY-1; j++ ) {
- 
-            for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-                index[0] = i + j*stored_um_vars[var_index].nx;
-                tmp_val[i] = val[index[0]];
-            }
-
-            index[0] = j*stored_um_vars[var_index].nx;
-            ghost = val[index[0]];
-            for ( i=1; i<stored_um_vars[var_index].nx-1; i++ ) {
-                index[0] = j*stored_um_vars[var_index].nx + i; 
-                index[1] = index[0] + 1; 
-                index[2] = index[0] + stored_um_vars[var_index].nx;
-                tmp = val[index[0]]; 
-                val[index[0]] = factor*( ghost + val[index[1]] + ghost_val[i] + val[index[2]] ); 
-                ghost = tmp;
-            }
- 
-            for ( i=0; i<stored_um_vars[var_index].nx; i++ ) 
-                ghost_val[i] = tmp_val[i];
-
-        }
-        free( ghost_val );
-        free( tmp_val );
-
-     /** Fill the missing columns [0 and NX-1] **/
-        for ( j=1; j<NY-1; j++ ) {
-            index[0] = j*stored_um_vars[var_index].nx;
-            index[1] = index[0] + 1;
-            val[index[0]] = val[index[1]];
-            index[0] += stored_um_vars[var_index].nx-1;
-            index[1] = index[0] - 1;
-            val[index[0]] = val[index[1]];
-        }
-
-     /** Copy contents of row 1 into row 0 **/
-        for ( i=0; i<stored_um_vars[var_index].nx-1; i++ ) {
-            index[0] = i + stored_um_vars[var_index].nx;
-            val[i] = val[index[0]];
-        } 
-
-       /** Re-size buffer (if NY<INT_CONSTANTS[6]) **/
-        if ( stored_um_vars[var_index].ny<int_constants[6] ) {
-           i = (int )( int_constants[6]*stored_um_vars[var_index].nx );
-           val = (double *) realloc( val, i*sizeof(double) );
-        }
-
-     /** Copy contents of row NY-2 into rows NY-1 to INT_CONSTANTS[6] **/
-        for ( j=NY-1; j<int_constants[6]; j++ ) {
-        for ( i=0; i<stored_um_vars[var_index].nx; i++ ) {
-            index[0] = i + stored_um_vars[var_index].nx*(NY-2);
-            index[1] = i + stored_um_vars[var_index].nx*j;
-            val[index[1]] = val[index[0]]; 
-        }
-        }
-
-     }
 
      return;
 }

@@ -329,32 +329,39 @@ int check_um_file( char *filename, int rflag ) {
      /** belonging to this variable?                                                 **/
          tdiff = (double *) malloc( (int )stored_um_vars[j].nz*sizeof(double) );
          for ( i=0; i<stored_um_vars[j].nz; i++ ) {
+
+         /* Read in validity time */
              t1.tm_year = (int ) lookup[temp_id[i]][0];
-             t1.tm_mon  = (int ) lookup[temp_id[i]][1];
+             t1.tm_mon  = (int ) (lookup[temp_id[i]][1]-1);
              t1.tm_mday = (int ) lookup[temp_id[i]][2];
              t1.tm_hour = (int ) lookup[temp_id[i]][3];
              t1.tm_min  = (int ) lookup[temp_id[i]][4];
              t1.tm_sec  = (int ) lookup[temp_id[i]][5];
+
+         /* Read in time of the instanteous output */
              t2.tm_year = (int ) lookup[temp_id[i]][6];
-             t2.tm_mon  = (int ) lookup[temp_id[i]][7];
+             t2.tm_mon  = (int ) (lookup[temp_id[i]][7]-1);
              t2.tm_mday = (int ) lookup[temp_id[i]][8];
              t2.tm_hour = (int ) lookup[temp_id[i]][9];
              t2.tm_min  = (int ) lookup[temp_id[i]][10];
              t2.tm_sec  = (int ) lookup[temp_id[i]][11];
+
+         /* Find the difference between the instantaneous and validity times in hours */
              tdiff[i] = difftime ( mktime(&t1), mktime(&t2) )/3600.0; 
 
          /*** Accumulated fields record only a relative time offset to a reference ***/
          /*** value stored elsewhere in the lookup array.                          ***/
-         //MPCH - commented out    if ( tdiff[i]<0.0 ) { tdiff[i] = (float ) lookup[temp_id[i]][13] - tdiff[i]; }
-             if ( tdiff[i]<0.0 ) { tdiff[i] = (float ) lookup[temp_id[i]][13]; }
+             if ( tdiff[i]<0.0 ) { 
+                tdiff[i] = (float ) lookup[temp_id[i]][13]; 
+             } 
          }
 
          for ( i=0; i<stored_um_vars[j].nz; i++ ) {
              tol = (tdiff[i]-999999.0)*(tdiff[i]-999999.0);
-             if ( tol>0.0001 ) {
+             if ( tol>0.000001 ) {
                 for ( k=i+1; k<stored_um_vars[j].nz; k++ ) {
                     tol = (tdiff[k]-tdiff[i])*(tdiff[k]-tdiff[i]);
-                    if ( tol<0.0001 ) { tdiff[k]=999999.0; }
+                    if ( tol<0.000001 ) { tdiff[k]=999999.0; }
                 }
              } 
          }
@@ -362,7 +369,7 @@ int check_um_file( char *filename, int rflag ) {
      /** How many unique time offset values belong to this variable? **/
          for ( i=0; i<stored_um_vars[j].nz; i++ ) { 
              tol = (tdiff[i]-999999.0)*(tdiff[i]-999999.0);
-             if ( tol>0.0001 ) { stored_um_vars[j].nt++; }
+             if ( tol>0.000001 ) { stored_um_vars[j].nt++; }
          }
 
      /** Store the unique time offset values belonging to this variable **/
@@ -371,7 +378,7 @@ int check_um_file( char *filename, int rflag ) {
          k = 0;
          for ( i=0; i<stored_um_vars[j].nz; i++ ) { 
              tol = (tdiff[i]-999999.0)*(tdiff[i]-999999.0);
-             if ( tol>0.0001 ) { stored_um_vars[j].times[k]=tdiff[i]; k++; }
+             if ( tol>0.000001 ) { stored_um_vars[j].times[k]=tdiff[i]; k++; }
          }
 
      /** Does NT evenly divide into NZ? **/

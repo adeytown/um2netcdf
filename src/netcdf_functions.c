@@ -176,7 +176,6 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      int    ncid, ierr, pos;
      size_t slen;
      char   forecast_ref_time[22], netcdf_filename[50], *str, *dest, creation_time[25];
-//     char   mth_str[3], day_str[3], min_str[3], hr_str[3], sec_str[3];
      FILE  *fid;
      time_t rawtime;
      struct tm * timeinfo;
@@ -256,19 +255,6 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
  /*
   * Construct a properly formatted forecast reference string 
   *--------------------------------------------------------------------------*/
-  /*   if ( header[21]>10 ) { snprintf( mth_str, sizeof mth_str,  "%ld", header[21] ); }
-     else                 { snprintf( mth_str, sizeof mth_str, "0%ld", header[21] ); }
-     if ( header[22]>10 ) { snprintf( day_str, sizeof day_str,  "%ld", header[22] ); }
-     else                 { snprintf( day_str, sizeof day_str, "0%ld", header[22] ); }
-     if ( header[23]>10 ) { snprintf(  hr_str, sizeof hr_str,   "%ld", header[23] ); }
-     else                 { snprintf(  hr_str, sizeof hr_str,  "0%ld", header[23] ); }
-     if ( header[24]>10 ) { snprintf( min_str, sizeof min_str,  "%ld", header[24] ); }
-     else                 { snprintf( min_str, sizeof min_str, "0%ld", header[24] ); }
-     if ( header[25]>10 ) { snprintf( sec_str, sizeof sec_str,  "%ld", header[25] ); }
-     else                 { snprintf( sec_str, sizeof sec_str, "0%ld", header[25] ); }
-     snprintf( forecast_ref_time, sizeof forecast_ref_time, "%ld-%s-%s %s:%s:%s", 
-               header[20], mth_str, day_str, hr_str, min_str, sec_str );
-     forecast_ref_time[21] = '\0'; */
      strftime( forecast_ref_time, 21, "%Y-%m-%d %H:%M:%S", &forecast_reference );
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "forecast_reference_time", 21, 
                              forecast_ref_time ); 
@@ -314,7 +300,6 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
   *---------------------------------------------------------------------------*/
      time( &rawtime );
      timeinfo = localtime( &rawtime );
-   //  strftime( creation_time, 30, "%Y-%m-%d %H:%M:%S", timeinfo );
      strftime( creation_time, 30, "%c", timeinfo );
      ierr = nc_put_att_text( ncid, NC_GLOBAL, "file_creation_date", 25, creation_time ); 
 
@@ -351,7 +336,7 @@ int fill_netcdf_file( int ncid, char *filename, int iflag, int rflag ) {
  /*
   * Output the lon/lat data values 
   *-------------------------------------------------------------------------*/
-     construct_lat_lon_arrays( ncid );
+//     construct_lat_lon_arrays( ncid );
 
      i = output_um_fields( ncid, fid, iflag, rflag );
      if ( i==-1 ) { 

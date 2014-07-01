@@ -178,7 +178,7 @@ int main( int argc, char *argv[] ) {
      printf( "--------------------------------------------------------------\n" );
      printf( "   Filename  : %s\n", argv[argc-2] );
      printf( "   Wordsize  : %d\n\n", wordsize );
-     
+
      ncid = create_netcdf_file( argv[argc-2], iflag, rflag, netcdf_filename );  
  
  /*
