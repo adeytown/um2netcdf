@@ -46,21 +46,21 @@ include ../config/make.inc.$(ARCH)_$(CC)
 
 OBJS =	util.o stashfile_operations.o umfile_operations.o interp.o \
 	vertical_dimensions.o lat_lon_coordinates.o temporal_dimension_functions.o \
-	spatial_dimension_functions.o netcdf_variable_functions.o \
-        convert_float_ibm_to_ieee32.o netcdf_functions.o um2netcdf.o
+	spatial_dimension_functions.o wgdos.o netcdf_variable_functions.o \
+        netcdf_functions.o um2netcdf.o
 
 ##-----------------------------------------------------------------------------
 ## Define the name and location of the um2netcdf binary 
 ##-----------------------------------------------------------------------------
 
 BINARY=../test/um2netcdf.x
-#BINARY=/opt/niwa/um2netcdf/AIX/latest/um2netcdf.x
+#BINARY=/opt/niwa/um2netcdf/AIX/devel/um2netcdf.x
 
 ##-----------------------------------------------------------------------------
 ## Global Compile Rules
 ##-----------------------------------------------------------------------------
 
-INCS2 = $(INCS) -I../include
+INCS2 = $(INCS) -I../include 
 
 %.o: %.c
 	$(CC) $(OPT_FLAGS) $(CPPFLAGS) $(DEFS) $(INCS2) -c $<
@@ -69,7 +69,7 @@ exe_build: $(OBJS)
 	@echo " "
 	@echo " Linking..."
 	@echo "---------------------------------------------------------------"
-	$(CC) $(OPT_FLAGS) -o $(BINARY) $(OBJS) $(LIBS) -lm 
+	$(CC) $(INCS) $(OPT_FLAGS) -o $(BINARY) $(OBJS) $(LIBS) -lm 
 
 clean:
 	@rm -f *.o $(BINARY)
@@ -85,14 +85,14 @@ check:
 ##-----------------------------------------------------------------------------
 
 util.o:
-umfile_operations.o:
+umfile_operations.o: util.o
 interp.o:
 stashfile_operations.o:  
 lat_lon_coordinates.o:  
 vertical_dimensions.o:
-convert_float_ibm_to_ieee32.o:
 temporal_dimension_functions.o: 
+wgdos.o: util.o umfile_operations.o
 spatial_dimension_functions.o: lat_lon_coordinates.o vertical_dimensions.o
-netcdf_variable_functions.o: util.o interp.o umfile_operations.o  
+netcdf_variable_functions.o: util.o interp.o wgdos.o umfile_operations.o  
 netcdf_functions.o: interp.o lat_lon_coordinates.o spatial_dimension_functions.o vertical_dimensions.o temporal_dimension_functions.o netcdf_variable_functions.o
 um2netcdf.o: util.o stashfile_operations.o umfile_operations.o netcdf_functions.o

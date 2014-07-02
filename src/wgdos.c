@@ -21,7 +21,6 @@
     directory.  Alternatively, please see <http://www.gnu.org/licenses/>.
  **============================================================================*/
 
-
 #include <assert.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -31,49 +30,13 @@
 #include <math.h>
 #include "field_def.h"
 
-/** Function prototypes **/
+#define   exp   0x7F000000
+#define   sign  0x80000000
+#define   tiss  0x00FFFFFF
+#define   etis  0x007FFFFF
+#define   nrm   0x00F00000
 
-void endian_swap_4bytes( void *ptr, int nchunk );
-int ibm2ieee(uint32_t ibm[], float ieee[], int n);
-
-
-typedef union {
-   uint32_t w;
-   unsigned char b[4];
-} W32;
-
-typedef union {
-   uint16_t w;
-   unsigned char b[2];
-} W16;
-
-uint32_t byteswap32(unsigned char bytes[4])
-{
-   W32 in;
-   memcpy(&in.b, bytes, 4);
-#ifndef IBM_POWER
-   unsigned char tmp = in.b[0];
-   in.b[0] = in.b[3];
-   in.b[3] = tmp;
-   tmp = in.b[1];
-   in.b[1] = in.b[2];
-   in.b[2] = tmp;
-#endif
-   return in.w;
-}
-
-uint16_t byteswap16(unsigned char bytes[2])
-{
-   W16 in;
-   memcpy(&in.b, bytes, 2);
-
-#ifndef IBM_POWER
-   unsigned char tmp = in.b[0];
-   in.b[0] = in.b[1];
-   in.b[1] = tmp;
-#endif
-   return in.w;
-}
+double ibm2ieee( int32_t val );
 
 static inline
 uint32_t getbits(unsigned char* bp, int pos, int nbits)
@@ -93,6 +56,43 @@ uint32_t getbits(unsigned char* bp, int pos, int nbits)
    }
 
    return res;
+}
+
+typedef union {
+   uint32_t w;
+   unsigned char b[4];
+} W32;
+
+typedef union {
+   uint16_t w;
+   unsigned char b[2];
+} W16;
+
+uint32_t byteswap32(unsigned char bytes[4])
+{
+   W32 in;
+   memcpy(&in.b, bytes, 4);
+
+   unsigned char tmp = in.b[0];
+   in.b[0] = in.b[3];
+   in.b[3] = tmp;
+   tmp = in.b[1];
+   in.b[1] = in.b[2];
+   in.b[2] = tmp;
+
+   return in.w;
+}
+
+uint16_t byteswap16(unsigned char bytes[2])
+{
+   W16 in;
+   memcpy(&in.b, bytes, 2);
+
+   unsigned char tmp = in.b[0];
+   in.b[0] = in.b[1];
+   in.b[1] = tmp;
+
+   return in.w;
 }
 
 
@@ -115,46 +115,70 @@ uint32_t getbits(unsigned char* bp, int pos, int nbits)
  ***   June 26, 2014
  ***/ 
 
-int read_bitmasks( unsigned char* bp, uint16_t ncols, uint32_t *mdi_array, uint32_t *zero_array, 
-                   bool a, bool c ) {
+void readBitmap(unsigned char* bp, int start, int cols, bool reverse, float value, float data[], bool bmap[])
+{
+   int           i, pos;
+   unsigned char byte;
 
-     int     n, start_bit, num_words_read; 
-     uint8_t mask, val;
+   byte = *bp;
+   if (reverse) byte = ~byte;
+   byte <<= start;
+   pos = start;
+   for ( i=0; i < cols; ++i) {
+      if (byte & 0x80) {
+         data[i] = value;
+         bmap[i] = true;
+      }
+      if (pos < 7) {
+         byte <<= 1;
+         pos++;
+      } else {
+         byte = *++bp;
+         if (reverse) byte = ~byte;
+         pos = 0;
+      }
+   }
+}
 
-     start_bit = 0;
-     num_words_read = 0;
+float ibm2ieee2(uint32_t ibm)
+{
+   int32_t ibe, it;
+   uint32_t ibs, ibt;
+   int k;
+   union { uint32_t i; float r; } u, res;
 
- /*
-  * Extract & read MDI bitmask (if present)
-  *--------------------------------------------------------------------*/  
-     if ( c ) {
-        for ( n=0; n<ncols; n++ ) {
-            mask = 1 << start_bit;
-            val = *bp & mask;
-            if ( val==0 ) { mdi_array[n] = 1; }
-            start_bit++;
-            if ( start_bit>7 ) { bp++; start_bit=0; num_words_read++; }
-        }
-     }
-     if ( start_bit>0 ) { num_words_read++; }
-
- /*
-  * Extract & read ZEROS bitmask (if present)
-  *--------------------------------------------------------------------*/  
-     if ( a ) {
-        for ( n=0; n<ncols; n++ ) {
-            mask = 1 << start_bit;
-            val = *bp & mask;
-            if ( val>0 ) { zero_array[n] = 1; }
-            start_bit++;
-            if ( start_bit>7 ) { bp++; start_bit=0; num_words_read++; }
-        }
-     }
-
- /* Round up to the nearest word */
-     if ( start_bit>0 ) { num_words_read++; }
-
-     return num_words_read;
+   ibs = ibm & sign;
+   ibe = ibm & exp ;
+   ibt = ibm & tiss;
+   if (ibt == 0) {
+      ibe = 0 ;
+   }
+   else {
+      if ( (ibe != 0) && (ibt & nrm) == 0 ) {
+         u.i = ibm;
+         u.r = u.r + 0e0 ;
+         ibe = u.i & exp ;
+         ibt = u.i & tiss ;
+      }
+      /* mantissa */
+      it = ibt << 8;
+      for (k = 0; (k < 5) && (it >= 0); k++ ) {
+         it = it << 1;
+      }
+      if ( k < 4 ) {
+         ibt = (it >> 8) & etis;
+         ibe = (ibe >> 22) - 256 + 127 - k - 1;
+         if (ibe < 0) {
+            ibe = ibt = 0;
+         }
+         if (ibe >= 255) {
+            ibe = 255; ibt = 0;
+         }
+         ibe = ibe << 23;
+      }
+   }
+   res.i = ibs | ibe | ibt;
+   return res.r;
 }
 
 
@@ -176,116 +200,150 @@ int read_bitmasks( unsigned char* bp, uint16_t ncols, uint32_t *mdi_array, uint3
 
 void wgdos_unpack( FILE *fh, double *unpacked_data, double mdi ) {
 
-     int      i, j, nbits, pos, new_pos;
-     uint16_t ncol, nrow, n;
-     int32_t  prec;
-     uint32_t ibm, val, *zero_mask, *mdi_mask;
-   
-     float  base; 
-     double dval=0.0, scaling_factor; 
-     bool   a, c;
+     int            i, j, nbits, pos, new_pos;
+     uint16_t       cols, rows, n;
+     uint32_t       len;
+     int32_t        prec;
+     float          scale, base, *unpacked_row;
+     char           cba_nbit;
+     unsigned char  hdr[20], *buf, *bp;
+     bool           a, b, c, use_bmaps, *bmap;
 
-     char          cba_nbit; 
-     unsigned char buf[5258], *bp;
-       
- 
   /*
    * Read & decode field header
    *-------------------------------------------------------------------*/   
-     bp = buf;
-     fread(buf, 4, 5, fh);  
+     bp = hdr;
+     fread( hdr, 4, 5, fh );
+
+     len = byteswap32(bp);
      bp += 4;
      prec = byteswap32(bp);
-     scaling_factor = pow( 2.0, (double )prec );
+     scale = powf( 2.0, (float ) prec );
      bp += 4;
-     ncol = byteswap16(bp);
+     cols = byteswap16(bp);
      bp += 2;
-     nrow = byteswap16(bp);
+     rows = byteswap16(bp);
      bp += 2;
-#ifdef IBM_POWER
-     n = ncol;
-     ncol = nrow;
-     nrow = n;
-#endif
 
-/*     printf( "scaling factor: %f\n", scaling_factor );
-     printf( "# of rows: %d\n", nrow );
-     printf( "# of columns: %d\n", ncol ); */
+ /*    printf( "scaling factor: %d %f\n", prec, scale );
+     printf( "# of rows: %d\n", rows );
+     printf( "# of columns: %d\n\n", cols ); */
 
   /*
-   * Allocate memory to hold zero and MDI masks for 1 unpacked row 
+   * Allocate memory to hold unpacked data points in 1 row 
    *-------------------------------------------------------------------*/   
-     mdi_mask  = (uint32_t *) calloc( ncol,sizeof(uint32_t) );
-     zero_mask = (uint32_t *) calloc( ncol,sizeof(uint32_t) );
-
-     for ( j=0; j<nrow; ++j) {
+     unpacked_row = (float *) malloc( cols*sizeof(float) );
 
   /*
-   * Read & decode a row's header
+   * Allocate memory to hold bitmap mask for 1 unpacked row 
+   *-------------------------------------------------------------------*/   
+     bmap  = (bool *) malloc( cols*sizeof(bool) );
+
+  /*
+   * Allocate memory to hold entire packed row (+ up to 3 bitmaps) 
+   *-------------------------------------------------------------------*/   
+     pos = ((3*cols+7) / 8) + (cols*4) + 8;
+     buf = (unsigned char *) malloc( pos*sizeof(unsigned char) );
+
+     for ( j=0; j<rows; ++j) {
+
+  /*
+   * Decode a row's header
    *   BASE -> minimum value of all points in unpacked row
    *   NBITS-> # of bits used for each packed data point in this row
    *   N    -> # of 32 bit words used to hold all packed data points
    *           and bitmaps for this row
    *   C    -> boolean that denotes if zero bitmap is present
+   *   B    -> boolean that denotes if minimum value bitmap is present
    *   A    -> boolean that denotes if missing value bitmap is present
    *-------------------------------------------------------------------*/   
-         ibm = byteswap32(bp);
-         ibm2ieee( &ibm, &base, 1 );
+         base = ibm2ieee2( byteswap32(bp) );
          bp += 4;
 
-         cba_nbit = *(bp+1);          // want low byte only (big endian)
+         cba_nbit = *(bp+1);
          c = cba_nbit & 0x80;
-//         b = cba_nbit & 0x40;
+         b = cba_nbit & 0x40;
          a = cba_nbit & 0x20;
+         use_bmaps = (a || b || c);
          nbits = cba_nbit & 0x1F;
          bp += 2;
          n = byteswap16(bp);
 
-  /*
-   * Read in contents of packed row 
-   *-------------------------------------------------------------------*/   
-         if (fread(buf, 4, n+2, fh) < n+2) {      // row data + next row hdr
-            puts("end of file reached...");
-            break;
-         }
-      /*   printf( "base value: %f\n", base );
+  /*       printf( "base value: %f\n", base );
          printf( "nbit:       %d\n", nbits );
          if ( a ) { printf( "zeros bitmap present\n" ); }
          if ( b ) { printf( "min value bitmap present\n" ); }
-         if ( c ) { printf( "mdi bitmap present\n" ); }
-         exit(1);*/
+         if ( c ) { printf( "mdi bitmap present\n\n" ); }*/
 
-     /*
-      * Read & decode the masking bitmaps 
-      *-------------------------------------------------------------------*/   
+  /*
+   * Set all values in unpacked row to BASE initially.  If nbits==0,
+   * we leave the data points to this uniform value 
+   *-------------------------------------------------------------------*/   
+         for ( i=0; i<cols; i++ ) { unpacked_row[i] = base; }
+
+  /*
+   * Read in contents of packed row (data points + bitmaps) 
+   *-------------------------------------------------------------------*/   
+         if ( fread(buf, 4, n+2, fh)<n+2 ) { break; }
          bp = buf;
-         if ( a | c ) { pos = read_bitmasks( bp, ncol, mdi_mask, zero_mask, a, c ); bp += pos; }   
-//         if ( b )     { printf( "MINIUM VALUE mask needed\n" ); exit(1);         }
-
-     /*
-      * Decode the packed data points 
-      *-------------------------------------------------------------------*/   
          pos = 0;
-         for ( i=0; i<ncol; ++i) {
 
-             if ( zero_mask[i]==1 ) { dval = 0.0; }
-             if ( mdi_mask[i]==1 )  { dval = 1.0e-30; }
-             if ( mdi_mask[i]+zero_mask[i]==0 ) {
-                val = getbits( bp, pos, nbits );
-                dval = (double ) (base + scaling_factor*val);
-                new_pos = pos + nbits;
-                bp += (new_pos) / 8;
-                pos = (new_pos) % 8;
-             }
+  /*
+   * If required, extract the bitmap masks 
+   *-------------------------------------------------------------------*/   
+         if ( use_bmaps ) {
+            memset( bmap, 0, cols*sizeof(bool) );
 
-             unpacked_data[i+j*ncol] = dval;
-
+         /** Read in MISSING DATA VALUE bitmap (if pesent) **/
+            if (a) { 
+               readBitmap( bp, pos, cols, false, mdi, unpacked_row, bmap );
+               bp += cols / 8;
+               pos = cols % 8;
+            }
+         /** Read in MINIMUM DATA VALUE bitmap (if pesent) **/
+            if (b) { 
+               readBitmap(bp, pos, cols, false, base, unpacked_row, bmap);
+               bp += (pos + cols) / 8;
+               pos = (pos + cols) % 8;
+            }
+         /** Read in ZERO DATA VALUE bitmap (if pesent) **/
+            if (c) {  
+               readBitmap(bp, pos, cols, true, 0.0, unpacked_row, bmap);
+               bp += (pos + cols) / 8;
+               pos = (pos + cols) % 8;
+            }
+         /** Make sure data pointer is aligned with the next 32-bit word **/
+            if ( pos || (bp - buf) % 4 ) {
+               bp += 4 - ((bp - buf) % 4);
+               pos = 0;
+            }
          }
+
+  /*
+   * Extract the packed data points 
+   *-------------------------------------------------------------------*/   
+         if ( nbits>0 ) {
+            for ( i=0; i<cols; ++i) {
+                if ( !(use_bmaps && bmap[i]) ) { 
+                   unpacked_row[i] = base + scale*getbits( bp, pos, nbits );
+                   new_pos = pos + nbits;
+                   bp += (new_pos) / 8;
+                   pos = (new_pos) % 8;
+                }
+
+            }
+         }
+
+         for ( i=0; i<cols; ++i) 
+             unpacked_data[i+j*cols] = (double ) unpacked_row[i];
+
          bp = buf + n*4;
 
-     }
-     free( zero_mask );
-     free( mdi_mask );
+     } // End of NROWS for loop
+
+     free( bmap );
+     free( unpacked_row );
+     free( buf );
 
      return;
 }

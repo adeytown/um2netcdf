@@ -27,6 +27,7 @@
 
 #include <time.h>
 #include <netcdf.h>
+#include <stdint.h>
 
 /*---------------------------------------------------------------------------*
  *  VARIABLES                                                                *
@@ -55,10 +56,10 @@ struct tm forecast_reference;
  *  FUNCTION POINTERS                                                        *
  *---------------------------------------------------------------------------*/
 
-// double *(*field_interpolation)( double*, float*, int, int );  /* ptr to appropriate interpolation procedure */
-void (*field_interpolation)( double*, float*, int, int );  /* ptr to appropriate interpolation procedure */
-void    (*endian_swap)( void*, int );         /* ptr to appropriate endian swap procedure   */
-
+void   (*field_interpolation)( double*, float*, int ); /* ptr to appropriate interpolation procedure */
+void   (*endian_swap)( void*, int );                   /* ptr to appropriate endian swap procedure   */
+void   (*endian_swap_4b)( void*, int );                /* ptr to appropriate 4 byte endian swap procedure   */
+double (*ibm2ieee_convert)( uint32_t );                 /* ptr to appropriate IBM float to IEEE float function */
 
 /*---------------------------------------------------------------------------*
  *  STRUCTS                                                                  *

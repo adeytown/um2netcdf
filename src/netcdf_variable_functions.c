@@ -35,7 +35,6 @@ void interp_do_nothing( double *val, float *fval, int index );
 void u_to_p_point_interp_c_grid( double *val, float *fval, int index );
 void v_to_p_point_interp_c_grid( double *val, float *fval, int index );
 void b_to_c_grid_interp_u_points( double *val, float *fval, int index );
-void endian_swap_4bytes( void *ptr, int nchunk );
 void wgdos_unpack( FILE *fh, double *val, double mdi );
 
 /***

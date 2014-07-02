@@ -19,7 +19,7 @@ OPT_FLAGS = -qsuppress=1500-036 -O3 -g -q64 -qarch=pwr6 -qtune=pwr6
 ## Application definitions
 ##-----------------------------------------------------------------------------
 
-CPPFLAGS = 
+CPPFLAGS =
 
 ##-----------------------------------------------------------------------------
 ## External library definitions

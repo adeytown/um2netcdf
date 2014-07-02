@@ -28,6 +28,11 @@
 #include <netinet/in.h>
 #include "field_def.h"
 
+/** Function prototypes **/
+
+double ibm2ieee( uint32_t ibm );
+double ibm2ieee_do_nothing( uint32_t ibm );
+
 
 /***
  *** ENDIAN_SWAP_#BYTES 
@@ -101,10 +106,14 @@ int get_file_endianness_wordsize( FILE *fh ) {
 
     if ( (header[1]==1)&&(header[150]==64) ) {
        endian_swap = &no_endian_swap;
+       endian_swap_4b = &no_endian_swap;
+       ibm2ieee_convert = &ibm2ieee_do_nothing;
        return word_size;
     } else {
        endian_swap = &endian_swap_8bytes;
+       endian_swap_4b = &endian_swap_4bytes;
        endian_swap( header, 256 );
+       ibm2ieee_convert = &ibm2ieee;
        if ( (header[1]==1)&&(header[150]==64) ) {
           return word_size;
        }
@@ -121,9 +130,13 @@ int get_file_endianness_wordsize( FILE *fh ) {
 
     if ( (header[1]==1)&&(header[150]==64) ) {
        endian_swap = &no_endian_swap;
+       endian_swap_4b = &no_endian_swap;
+       ibm2ieee_convert = &ibm2ieee_do_nothing;
        return word_size;
     } else {
        endian_swap = &endian_swap_4bytes;
+       endian_swap_4b = &endian_swap_4bytes;
+       ibm2ieee_convert = &ibm2ieee;
        endian_swap( header, 256 );
        if ( (header[1]==1)&&(header[150]==64) ) {
           return word_size;

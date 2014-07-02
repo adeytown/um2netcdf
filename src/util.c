@@ -68,54 +68,109 @@ void status_check( int status, char *message ) {
  ***   Mark Cheeseman, NIWA
  ***   January 17, 2014
  ***/
-  
-int ibm2ieee( uint32_t ibm[], float ieee[], int n )
-{
-  int      status = 0;
-  int32_t  ibe, it;
-  uint32_t ibs, ibt;
-  int      j, k;
-  union { uint32_t i; float r; } u, res;
 
-  for(j=0; j<n; j++) {
-    ibs = ibm[j] & sign;
-    ibe = ibm[j] & expon;
-    ibt = ibm[j] & tiss;
-#ifndef IBM_POWER
-    if (ibt == 0) {
-      ibe = 0 ;
-    } else {
-      if ( (ibe != 0) && (ibt & nrm) == 0 ) {
-        u.i = ibm[j] ;
-        u.r = u.r + 0e0 ;
-        ibe = u.i & expon ;
-        ibt = u.i & tiss ;
-      }
-      /* mantissa */
-      it = ibt << 8;
-      for (k = 0; (k < 5) && (it >= 0); k++ ) {
-        it = it << 1;
-      }
-      if ( k < 4 ) {
-        ibt = (it >> 8) & etis;
-        ibe = (ibe >> 22) - 256 + 127 - k - 1;
-        if (ibe < 0) {
-          ibe = ibt = 0;
-        }
-        if (ibe >= 255) {
-         ibe = 255; ibt = 0;
-        }
-        ibe = ibe << 23;
+double ibm2ieee( uint32_t ibm ) {
+
+       float    ieee;
+       double   val;
+       int32_t  ibe, it;
+       uint32_t ibs, ibt;
+       int      k;
+
+       union { uint32_t i; float r; } u, res;
+
+       ibs = ibm & sign;
+       ibe = ibm & expon ;
+       ibt = ibm & tiss;
+       if (ibt == 0) {
+          ibe = 0 ;
+       } else {
+          if ( (ibe != 0) && (ibt & nrm) == 0 ) {
+             u.i = ibm ;
+             u.r = u.r + 0e0 ;
+             ibe = u.i & expon ;
+             ibt = u.i & tiss ;
+          }
+          /* mantissa */
+          it = ibt << 8;
+          for (k = 0; (k < 5) && (it >= 0); k++ ) {
+              it = it << 1;
+          }
+          if ( k < 4 ) {
+             ibt = (it >> 8) & etis;
+             ibe = (ibe >> 22) - 256 + 127 - k - 1;
+             if (ibe < 0) {
+                ibe = ibt = 0;
+             }
+             if (ibe >= 255) {
+                ibe = 255; ibt = 0;
+             }
+             ibe = ibe << 23;
+          }
        }
-    }
-#endif
-    res.i = ibs | ibe | ibt;
-    ieee[j] = res.r;
-    if (ibe == 255<<23) {
-      status = -1;
-    }
-  }
-  return status;
+
+       res.i = ibs | ibe | ibt;
+       ieee = res.r;
+       if (ibe == 255<<23) {
+          printf( "ERROR: numerical overflow in ibm2ieee\n" );
+          exit(1);
+       }
+
+       val = (double ) ieee;
+       return val;
+}
+
+
+double ibm2ieee_do_nothing( uint32_t ibm ) {
+
+       float    ieee;
+       double   val;
+       int32_t  ibe, it;
+       uint32_t ibs, ibt;
+       int      k;
+
+       union { uint32_t i; float r; } u, res;
+
+       ibs = ibm & sign;
+       ibe = ibm & expon ;
+       ibt = ibm & tiss;
+       if (ibt == 0) {
+          ibe = 0 ;
+       } else {
+          if ( (ibe != 0) && (ibt & nrm) == 0 ) {
+             u.i = ibm ;
+             u.r = u.r + 0e0 ;
+             ibe = u.i & expon ;
+             ibt = u.i & tiss ;
+          }
+          /* mantissa */
+          it = ibt << 8;
+          for (k = 0; (k < 5) && (it >= 0); k++ ) {
+              it = it << 1;
+          }
+          if ( k < 4 ) {
+             ibt = (it >> 8) & etis;
+             ibe = (ibe >> 22) - 256 + 127 - k - 1;
+             if (ibe < 0) {
+                ibe = ibt = 0;
+             }
+             if (ibe >= 255) {
+                ibe = 255; ibt = 0;
+             }
+             ibe = ibe << 23;
+          }
+       }
+
+       res.i = ibs | ibe | ibt;
+       ieee = res.r;
+       if (ibe == 255<<23) {
+          printf( "ERROR: numerical overflow in ibm2ieee\n" );
+          exit(1);
+       }
+
+       val = (double ) ieee;
+       return val;
+
 }
 
 /***

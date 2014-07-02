@@ -19,13 +19,13 @@ OPT_FLAGS = -O3 -g -fastsse
 ## Application definitions
 ##-----------------------------------------------------------------------------
 
-CPPFLAGS = -DSMALL_ENDIAN
+CPPFLAGS = 
 
 ##-----------------------------------------------------------------------------
 ## External library definitions
 ##-----------------------------------------------------------------------------
 
-NETCDF_ROOT=/opt/niwa/netcdf/Linux/PGI/4.3.1/serial
+NETCDF_ROOT=/opt/niwa/netcdf/Linux/PGI/4.3.2/serial
 NETCDF_INC=-I$(NETCDF_ROOT)/include
 NETCDF_LIB=-L$(NETCDF_ROOT)/lib -lnetcdf
 
