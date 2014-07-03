@@ -30,13 +30,11 @@
 #include <math.h>
 #include "field_def.h"
 
-#define   exp   0x7F000000
+#define   expon 0x7F000000
 #define   sign  0x80000000
 #define   tiss  0x00FFFFFF
 #define   etis  0x007FFFFF
 #define   nrm   0x00F00000
-
-double ibm2ieee( int32_t val );
 
 static inline
 uint32_t getbits(unsigned char* bp, int pos, int nbits)
@@ -140,6 +138,16 @@ void readBitmap(unsigned char* bp, int start, int cols, bool reverse, float valu
    }
 }
 
+#ifdef IBM_POWER
+float ibm2ieee2( uint32_t ibm ) {
+
+      union { uint32_t i; float r; } u;
+
+      u.i = ibm;
+      u.r = u.r + 0e0 ;
+      return u.r;
+}
+#else
 float ibm2ieee2(uint32_t ibm)
 {
    int32_t ibe, it;
@@ -148,7 +156,7 @@ float ibm2ieee2(uint32_t ibm)
    union { uint32_t i; float r; } u, res;
 
    ibs = ibm & sign;
-   ibe = ibm & exp ;
+   ibe = ibm & expon ;
    ibt = ibm & tiss;
    if (ibt == 0) {
       ibe = 0 ;
@@ -157,7 +165,7 @@ float ibm2ieee2(uint32_t ibm)
       if ( (ibe != 0) && (ibt & nrm) == 0 ) {
          u.i = ibm;
          u.r = u.r + 0e0 ;
-         ibe = u.i & exp ;
+         ibe = u.i & expon ;
          ibt = u.i & tiss ;
       }
       /* mantissa */
@@ -180,7 +188,7 @@ float ibm2ieee2(uint32_t ibm)
    res.i = ibs | ibe | ibt;
    return res.r;
 }
-
+#endif
 
 /***
  *** WGDOS UNPACK 
