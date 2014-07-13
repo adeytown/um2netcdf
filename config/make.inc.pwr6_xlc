@@ -19,13 +19,13 @@ OPT_FLAGS = -qsuppress=1500-036 -O3 -g -q64 -qarch=pwr6 -qtune=pwr6
 ## Application definitions
 ##-----------------------------------------------------------------------------
 
-CPPFLAGS =
+CPPFLAGS = -DIBM_POWER
 
 ##-----------------------------------------------------------------------------
 ## External library definitions
 ##-----------------------------------------------------------------------------
 
-NETCDF_ROOT=/opt/niwa/netcdf/AIX/4.3.1/serial
+NETCDF_ROOT=/opt/niwa/netcdf/AIX/4.3.2/serial
 NETCDF_INC=-I$(NETCDF_ROOT)/include
 NETCDF_LIB=-L$(NETCDF_ROOT)/lib -lnetcdf
 

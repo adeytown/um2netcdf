@@ -53,8 +53,8 @@ OBJS =	util.o stashfile_operations.o umfile_operations.o interp.o \
 ## Define the name and location of the um2netcdf binary 
 ##-----------------------------------------------------------------------------
 
-BINARY=../test/um2netcdf.x
-#BINARY=/opt/niwa/um2netcdf/AIX/devel/um2netcdf.x
+BINARY_DIR=/hpcf/working/cheesemanmp/um2netcdf/NZCSM_CHECK/surface
+#BINARY_DIR=/opt/niwa/um2netcdf/AIX/devel
 
 ##-----------------------------------------------------------------------------
 ## Global Compile Rules
@@ -69,7 +69,7 @@ exe_build: $(OBJS)
 	@echo " "
 	@echo " Linking..."
 	@echo "---------------------------------------------------------------"
-	$(CC) $(INCS) $(OPT_FLAGS) -o $(BINARY) $(OBJS) $(LIBS) -lm 
+	$(CC) $(INCS) $(OPT_FLAGS) -o $(BINARY_DIR)/um2netcdf.x $(OBJS) $(LIBS) -lm 
 
 clean:
 	@rm -f *.o $(BINARY)

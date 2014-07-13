@@ -66,6 +66,21 @@ typedef union {
    unsigned char b[2];
 } W16;
 
+#ifdef IBM_POWER
+uint32_t byteswap32(unsigned char bytes[4]) {
+
+         W32 in;
+         memcpy( &in.b, bytes, 4 );
+         return in.w;
+}
+
+uint16_t byteswap16(unsigned char bytes[2]) {
+         
+         W16 in;
+         memcpy( &in.b, bytes, 2 );
+         return in.w;
+}
+#else
 uint32_t byteswap32(unsigned char bytes[4])
 {
    W32 in;
@@ -92,6 +107,7 @@ uint16_t byteswap16(unsigned char bytes[2])
 
    return in.w;
 }
+#endif
 
 
 /***
@@ -138,16 +154,6 @@ void readBitmap(unsigned char* bp, int start, int cols, bool reverse, float valu
    }
 }
 
-#ifdef IBM_POWER
-float ibm2ieee2( uint32_t ibm ) {
-
-      union { uint32_t i; float r; } u;
-
-      u.i = ibm;
-      u.r = u.r + 0e0 ;
-      return u.r;
-}
-#else
 float ibm2ieee2(uint32_t ibm)
 {
    int32_t ibe, it;
@@ -188,7 +194,7 @@ float ibm2ieee2(uint32_t ibm)
    res.i = ibs | ibe | ibt;
    return res.r;
 }
-#endif
+
 
 /***
  *** WGDOS UNPACK 
@@ -233,7 +239,7 @@ void wgdos_unpack( FILE *fh, double *unpacked_data, double mdi ) {
      rows = byteswap16(bp);
      bp += 2;
 
- /*    printf( "scaling factor: %d %f\n", prec, scale );
+/*     printf( "scaling factor: %d %f\n", prec, scale );
      printf( "# of rows: %d\n", rows );
      printf( "# of columns: %d\n\n", cols ); */
 
@@ -277,7 +283,7 @@ void wgdos_unpack( FILE *fh, double *unpacked_data, double mdi ) {
          bp += 2;
          n = byteswap16(bp);
 
-  /*       printf( "base value: %f\n", base );
+     /*    printf( "base value: %f\n", base );
          printf( "nbit:       %d\n", nbits );
          if ( a ) { printf( "zeros bitmap present\n" ); }
          if ( b ) { printf( "min value bitmap present\n" ); }
