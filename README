@@ -45,8 +45,7 @@ UM2NetCDF offers the following features:
     For example, a field collecting maximum wind gusts would be named 'max_wind_gust'.
 
  -> the utility can extract and process UM variables that are unpacked or are
-    WGDOS packed for x86-Linux architecture. Feature not functional for big endian
-    architectures (such as IBM Power6/7)
+    WGDOS packed for x86-Linux and AIX_IBM Power architectures. 
 
 
 
@@ -198,5 +197,5 @@ UM2NetCDF offers the following features:
  -> The ZLIB compression can lead to longer execution times particularly on
     larger input UM fields files.  
 
- -> WGDOS unpacking is only available for x86/Linux/little-endian machines
-    currently.  Also, not all bitmask options are fully operationally.
+ -> WGDOS unpacking is available for little-endian [x86] and big-endian [IBM Power]
+    machines.
