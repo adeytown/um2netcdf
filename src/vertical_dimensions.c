@@ -217,10 +217,6 @@ int set_hybrid_levels( int ncid, int n, int id ) {
      ierr = nc_put_att_text( ncid, var_id,    "units",  6, "meters" );
      ierr = nc_put_att_text( ncid, var_id, "positive",  2, "up" );
      ierr = nc_put_att_text( ncid, var_id,     "axis",  1, "Z" );
-     ierr = nc_put_att_text( ncid, var_id,"long_name", 22, "height above sea level" );
-
-  /** Fill the new NetCDF variable **/
-     ierr = nc_enddef( ncid );
 
   /** Check if a level mesh type is et for this variable **/
     if ( (stored_um_vars[id].level_type!=1)&&(stored_um_vars[id].level_type!=2) ) {
@@ -231,18 +227,21 @@ int set_hybrid_levels( int ncid, int n, int id ) {
   /** Set the vertical spacing type: Theta or Rho-based mesh **/
      height = (float *) malloc( n*sizeof(float) );
      if ( stored_um_vars[id].level_type==1 )      { 
+        ierr = nc_put_att_text( ncid, var_id, "long_name", 40, "height above sea level (rho levels used)" );
         for ( i=0; i<n; i++ ) {
             z_level = (int ) stored_um_vars[id].slices[0][i].level - 1;
             height[i] = (float ) level_constants[6][z_level];
          }
      }
      else { 
+        ierr = nc_put_att_text( ncid, var_id, "long_name", 42, "height above sea level (theta levels used)" );
         for ( i=0; i<n; i++ ) {
             z_level = (int ) stored_um_vars[id].slices[0][i].level;
             height[i] = (float ) level_constants[4][z_level];
          }
      }
 
+     ierr = nc_enddef( ncid );
      ierr = nc_put_var_float( ncid, var_id, height );
      free( height );
 
