@@ -88,6 +88,8 @@ typedef struct um_field_metadata {
                            /*    accum=2  -> values are maximums */
        float validmax;     /* max valid value for the field */
        float validmin;     /* min valid value for the field */
+       float actualmax;    /* actual max value for the field */
+       float actualmin;    /* actual min value for the field */
        float scale;        /* scale factor applied to files added to the output NetCDF file */
        char varname[45];   /* name of field in UM output file */ 
        char longname[100]; /* full descriptive name of field */

@@ -60,7 +60,7 @@ void write_fields( int ncid, FILE *fid, int rflag, int iflag ) {
      int     n, i, j=0, k, ndim, cnt, varid;
      size_t *count, *offset;
      double *buf=NULL;
-     float  *fbuf=NULL;
+     float  *fbuf=NULL, actual[2];
      char    name[45];
 
      for ( n=0; n<num_stored_um_fields; n++ ) {
@@ -117,6 +117,9 @@ void write_fields( int ncid, FILE *fid, int rflag, int iflag ) {
        /*** valid for this UM variable.  Then apply the appropriate interpolation and write ***/
        /*** the final field to hard disk.                                                   ***/
 
+         actual[0] = um_vars[stored_um_vars[n].xml_index].validmin;
+         actual[1] = um_vars[stored_um_vars[n].xml_index].validmax;
+
          if ( ndim==3 ) {
 
                offset[0] = 0;
@@ -133,12 +136,18 @@ void write_fields( int ncid, FILE *fid, int rflag, int iflag ) {
                /* Apply appropriate interpolation on values */
                    field_interpolation( buf, fbuf, n );
 
+               /* Determine actual min & max values of 2D data slice */
+                   for ( i=0; i<count[ndim-1]*count[ndim-2]; i++ ) {
+                       actual[0] = fmax( actual[0], fbuf[i] );
+                       actual[1] = fmin( actual[1], fbuf[i] );
+                   }
+
                /* Write interpolated 2D slice to hard disk */
                    if ( rflag==1 ) { i = nc_put_vara_float( ncid, varid, offset, count, fbuf ); }
                    else {
                         free( buf );
                         buf = (double *) malloc( count[ndim-1]*count[ndim-2]*sizeof(double) ); 
-                        for ( i=0; i<int_constants[6]; i++ ) { buf[i] = (double ) fbuf[i]; }
+                        for ( i=0; i<count[ndim-1]*count[ndim-2]; i++ ) { buf[i] = (double ) fbuf[i]; }
 
                         i = nc_put_vara_double( ncid, varid, offset, count, buf ); 
                         free( buf );
@@ -149,6 +158,7 @@ void write_fields( int ncid, FILE *fid, int rflag, int iflag ) {
                    offset[0]++;
 
                }
+
          } 
 
        /*** For a 4D UM variable [NX,NY,NZ,NT], read in a single 2D data slice per level and ***/
@@ -171,12 +181,18 @@ void write_fields( int ncid, FILE *fid, int rflag, int iflag ) {
                /* Apply appropriate interpolation on values */
                       field_interpolation( buf, fbuf, n );
 
+               /* Determine actual min & max values of 2D data slice */
+                   for ( i=0; i<count[ndim-1]*count[ndim-2]; i++ ) {
+                       actual[0] = fmax( actual[0], fbuf[i] );
+                       actual[1] = fmin( actual[1], fbuf[i] );
+                   }
+
                /* Write interpolated 2D slice to hard disk */
                       if ( rflag==1 ) { i = nc_put_vara_float( ncid, varid, offset, count, fbuf ); }
                       else {
                            free( buf );
                            buf = (double *) malloc( count[ndim-1]*count[ndim-2]*sizeof(double) );
-                           for ( i=0; i<int_constants[6]; i++ ) { buf[i] = (double ) fbuf[i]; }
+                           for ( i=0; i<count[ndim-1]*count[ndim-2]; i++ ) { buf[i] = (double ) fbuf[i]; }
 
                            i = nc_put_vara_double( ncid, varid, offset, count, buf );
                            free( buf );
@@ -193,6 +209,11 @@ void write_fields( int ncid, FILE *fid, int rflag, int iflag ) {
 
          free( count );
          free( offset );
+             
+      /* Output actual min and max values of the UM variable */
+         actual[0] = fmax( actual[0], um_vars[stored_um_vars[n].xml_index].validmin );
+         actual[1] = fmin( actual[1], um_vars[stored_um_vars[n].xml_index].validmax );
+         j = nc_put_att_float( ncid, varid, "actual_range", NC_FLOAT, 2, &actual ); 
 
      }  // End of FOR LOOP
                       
