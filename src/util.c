@@ -194,6 +194,7 @@ void usage() {
      printf( "    -h used to display this help message\n" );
      printf( "    -i interpolates all fields onto the thermodynamic grid (eg. P-points on an Arakawa-C grid)\n" );
      printf( "    -r fields written in reduced precision (eg. INT/FLOAT instead of LONG/DOUBLE)\n" );
+     printf( "    -n output NetCDF file will not contain any NetCDF-4 features (chunking and/or compression)\n" );
      printf( "    -o <filename> \n");
      printf( "       used to specify a filename to the output NetCDF file\n" );
      printf( "    -s used to specify a set of stash codes of UM variables that can be selectively extracted\n" );

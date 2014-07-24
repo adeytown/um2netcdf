@@ -18,7 +18,7 @@
 
 /** FIELD_DEF
  ** 
- ** Header file contianing constants, variables and structs relating to the
+ ** Header file containing constants, variables and structs relating to the
  ** layout of data in the input UM fieldsfile.
  **
  **   Mark Cheeseman, NIWA

@@ -38,6 +38,7 @@
 #include <unistd.h>
 #include <netcdf.h>
 #include "field_def.h"
+#include "flag_def.h"
 
 /** Function prototypes **/
 
@@ -67,7 +68,8 @@ int main( int argc, char *argv[] ) {
      rflag = 0;
      num_stored_um_fields = 0;
      blacklist_cnt = 0;
-     while ( (c = getopt(argc,argv,"hirs:o:c:b:")) != EOF ) { 
+     netcdf3_flag = 0;
+     while ( (c = getopt(argc,argv,"hirs:o:c:b:n")) != EOF ) { 
            switch(c) {
                case 'h':
                        usage();
@@ -111,6 +113,9 @@ int main( int argc, char *argv[] ) {
                           }
                           optind++;
                        }
+                       break;
+               case 'n':
+                       netcdf3_flag = 1;
                        break;
            }
      }

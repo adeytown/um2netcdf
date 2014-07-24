@@ -106,7 +106,7 @@ void create_time_dim( int ncid, int var_index, int time_dim_cnt ) {
      else                { sprintf( calendar, "360_day" ); }
      ierr = nc_put_att_text( ncid, varID, "calendar", 9, calendar );
 
-     strftime( time_des, 31, "hours since %Y-%m-%d %H:%M:%S", &forecast_reference );
+     strftime( time_des, 33, "hours since %Y-%m-%d %H:%M:%S", &forecast_reference );
      ierr = nc_put_att_text( ncid, varID, "units", 31, time_des );
 
      ierr = nc_put_att_text( ncid, varID,          "axis",  1, "T" );

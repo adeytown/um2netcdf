@@ -211,9 +211,7 @@ void write_fields( int ncid, FILE *fid, int rflag, int iflag ) {
          free( offset );
              
       /* Output actual min and max values of the UM variable */
-         actual[0] = fmax( actual[0], um_vars[stored_um_vars[n].xml_index].validmin );
-         actual[1] = fmin( actual[1], um_vars[stored_um_vars[n].xml_index].validmax );
-         j = nc_put_att_float( ncid, varid, "actual_range", NC_FLOAT, 2, &actual ); 
+         j = nc_put_att_float( ncid, varid, "actual_range", NC_FLOAT, 2, actual ); 
 
      }  // End of FOR LOOP
                       

@@ -77,7 +77,7 @@ clean:
 check:
 	@echo " "
 	@echo " "
-	@if [ -a $(BINARY) ]; then echo "SUCCESS!"; echo "Binary located at $(BINARY)"; fi;
+	@if [ -a $(BINARY_DIR)/um2netcdf.x ]; then echo "SUCCESS!"; echo "Binary located at $(BINARY_DIR)"; fi;
 	@echo " "
 
 ##-----------------------------------------------------------------------------

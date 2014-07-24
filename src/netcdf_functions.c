@@ -26,6 +26,7 @@
 #include <string.h>
 #include <time.h>
 #include "field_def.h"
+#include "flag_def.h"
 
 /** Function prototypes **/
 
@@ -73,19 +74,20 @@ void construct_um_variables( int ncid, int iflag ) {
                             ndim, dim_ids, &varID );
          free( dim_ids );
 
- /** Set the chunking attribute for this variable **/
-         chunksize = (size_t* ) malloc( ndim*sizeof(size_t) );
-         chunksize[0] = 1;
-         chunksize[ndim-1] = stored_um_vars[i].nx;
-         if ( iflag==0 ) { chunksize[ndim-2] = stored_um_vars[i].ny; }
-         else            { chunksize[ndim-2] = int_constants[6]; }
-         if ( ndim==4 ) { chunksize[1] = 1; }
+ /** Set the chunking attribute for this variable (if requested by user) **/
+         if ( netcdf3_flag==0 ) {
+            chunksize = (size_t* ) malloc( ndim*sizeof(size_t) );
+            chunksize[0] = 1;
+            chunksize[ndim-1] = stored_um_vars[i].nx;
+            if ( iflag==0 ) { chunksize[ndim-2] = stored_um_vars[i].ny; }
+            else            { chunksize[ndim-2] = int_constants[6]; }
+            if ( ndim==4 ) { chunksize[1] = 1; }
+            ierr = nc_def_var_chunking( ncid, varID, NC_CHUNKED, chunksize ); 
+            free( chunksize );
 
-         ierr = nc_def_var_chunking( ncid, varID, NC_CHUNKED, chunksize );
-         free( chunksize );
-
- /** Set the data compression attribute for this variable **/
-         ierr = nc_def_var_deflate( ncid, varID, NC_SHUFFLE, 1, 3 );
+ /** Set the data compression attribute for this variable (if requested by user) **/
+            ierr = nc_def_var_deflate( ncid, varID, NC_SHUFFLE, 1, 3 ); 
+         }
 
  /*** Output details about the coordinate system used to describe field ***/
          if ( stored_um_vars[i].coordinates==101 ) {
@@ -217,8 +219,10 @@ int create_netcdf_file( char *um_file, int iflag, int rflag, char *output_filena
      printf( "Output NetCDF File\n" );
      printf( "--------------------------------------------------------------\n" );
      printf( "   Filename  : %s\n", netcdf_filename );
-     if ( rflag==1 ) { printf( "   Wordsize  : 4\n\n" ); }
-     else            { printf( "   Wordsize  : 8\n\n" ); }
+     if ( rflag==1 ) { printf( "   Wordsize  : 4\n" ); }
+     else            { printf( "   Wordsize  : 8\n" ); }
+     if ( netcdf3_flag==1 ) { printf( "   NetCDF3   : no chunking or compression\n\n" ); }
+     else                   { printf( "   NetCDF4   : chunking & compression enabled\n\n" ); }
  
      printf( "Forecast Details\n" );
      printf( "--------------------------------------------------------------\n" );
